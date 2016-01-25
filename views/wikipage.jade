@@ -1,0 +1,10 @@
+extends layout
+
+block main
+	div(class="row",data-ng-controller="wikiPageCtrl")
+		div(class="wrapper col-xs-12 col-md-10 col-md-offset-1")
+			div
+				- if (data.external.EXTRA.loggedIn)
+					h5(class="text-right")
+						a(href="javascript:void(0)",data-ng-click="functions.changePageState('view');editState=!editState") {{ (editState) ? "Hide Page Options" : "Edit Page" }}
+				include include_editpage.jade

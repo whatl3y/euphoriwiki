@@ -1,0 +1,58 @@
+div(data-ng-show="editState")
+	div(class="text-center padding-medium")
+		button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Save Changes
+		button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
+	div(class="padding-medium")
+		alert(type="danger",data-ng-show="saveError") {{ saveError }}
+	div
+		ul(class="nav nav-tabs")
+			li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
+				a(data-ng-href="#",data-ng-click="functions.changePageState('view')") Preview Page
+			li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
+				a(data-ng-href="#",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
+			//li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
+			//	a(data-ng-href="#",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
+			li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
+				a(data-ng-href="#",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
+div(class="separate-vert-large")
+	div(data-ng-show="pageState.view")
+		div(data-ng-show="!content.html && initcomplete")
+			div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
+				h3
+					alert {{ emptyPageError }}
+		div(data-ng-show="content.html")
+			div(data-ng-bind-html="functions.sanitizeHtml(content.html)")
+		div(class="col-xs-12")
+			small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ content.person.firstname + " " + content.person.lastname }}
+	div(data-ng-show="pageState.editHtml")
+		div(class="separate-vert-small")
+			alert(type="success")
+				span You can use Bootstrap 3 
+				a(href="http://getbootstrap.com/css/",target="_blank") CSS
+				span  classes/styles or 
+				a(href="http://getbootstrap.com/components/",target="_blank") Components
+				span  to add great-looking design to your pages!
+		div(class="separate-vert-small")
+			alert
+				span NOTE: Keep these things in mind while you're making page edits
+				ol
+					li
+						span Be sure to use the 
+						b  
+							a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
+						span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
+					li
+						span Click on the 
+						b  <> Source 
+						span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
+		textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
+	div(data-ng-show="pageState.editMarkup")
+		div(class="padding-small panel panel-default panel-danger")
+			div(class="panel-body") NOTE: Markup language does not have a 1-to-1 direct comparison to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.
+		textarea(class="form-control",data-ng-model="content.markdown",data-ng-change="functions.markdownToHtml(content.markdown)")
+	div(data-ng-show="pageState.olderVersions")
+		h2 Review older versions below
+		div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+			div(class="separate-vert-small")
+				alert(class="text-center",data-ng-show="!content.versions.length") There are no older versions of this page to review.
+				select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by '+version.updatedBy.firstname+' '+version.updatedBy.lastname for version in content.versions")

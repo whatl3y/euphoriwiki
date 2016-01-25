@@ -1,0 +1,242 @@
+html,
+body {
+	-webkit-text-size-adjust: none;		/* This is attempting to not have the text change on a mobile device */
+	min-width:100%;
+	/*
+	background-color:#F9F9F9;
+	background-image:url("images/squairs_icon_opaque.png");
+	background-attachment: fixed;
+	background-position:center center;
+	background-repeat:no-repeat;
+	*/
+}
+
+img,
+a {
+	border:none;
+    outline:none;
+}
+
+iframe {
+	border: none;
+}
+
+input[type="file"] {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.navbar {
+	min-height: initial !important;
+	margin-bottom: 0px !important;
+}
+
+.navbar-default {
+	background-color: initial !important;
+	border: none !important;
+}
+
+.ui-autocompleteselect a,
+.ui-autocompleteselect input {
+	vertical-align: middle;
+}
+
+.soft-text {
+	color: #D0D0D0;
+}
+
+.click {
+	cursor: pointer;
+}
+
+.vcenter {
+	display: inline-block;
+	vertical-align: middle;
+	float: none;
+}
+
+.active-button {
+	background: #44749D;
+	color: #FFFFFF;
+}
+
+.shadowsmall {
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+}
+
+.shadowsmall-red {
+	box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
+	-moz-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
+	-webkit-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
+}
+
+.shadowlarge {
+	box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+	-moz-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+	-webkit-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+}
+
+.radius-sm {
+	border-radius: 5px;
+}
+
+.radius-md {
+	border-radius: 10px;
+}
+
+.wrapper {
+	overflow: hidden;
+}
+
+.wrapper.dark {
+	background: #FF0000;
+	color: #FFFFFF;
+}
+
+.wrapper.light {
+	background: #C6D4E1;
+}
+
+.wrapper.light.gray {
+	background: #F5F5F5;
+}
+
+.wrapper.dark.gray {
+	background: #F5F5F5;
+	color: #FFFFFF;
+}
+
+.block-center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.divider {
+	height: 1px;
+    margin: 10px 0;
+    overflow: hidden;
+    background-color: #e5e5e5;
+}
+
+.divider.thick {
+	height: 3px;
+}
+
+.divider.smallgap {
+	margin: 5px 0;
+}
+
+.divider.largegap {
+	margin: 30px 0;
+}
+
+.header {
+
+}
+
+.panel-red {
+	border-color: #FF0000 !important;
+}
+
+.panel-danger {
+	background-color: rgba(255,0,0,0.3) !important;
+	color: white !important;
+}
+
+ul.nav > li {
+	cursor: pointer;
+	margin-right: 10px;
+}
+
+.navbar-default .navbar-nav > li > a {
+	color: inherit !important;
+}
+
+.mask {
+	position: fixed;
+	background: black;
+	top: -25px;
+	left: -25px;
+	height: 150%;
+	width: 150%;
+	opacity: 0.8;
+	z-index: 9;
+}
+
+.popupcontent {
+	box-sizing: content-box;
+	position: absolute;
+	padding: 20px;
+	text-align: center;
+	box-shadow: 0px 0px 0px black inset, 0px -2px 25px black, 0px 2px 5px rgba(0, 0, 0, 0.1), 0px 8px 10px rgba(0, 0, 0, 0.1);
+	z-index: 9;
+}
+
+.separate-vert-small {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.separate-vert-medium {
+	margin-top: 25px;
+	margin-bottom: 25px;
+}
+
+.separate-vert-large {
+	margin-top: 40px;
+	margin-bottom: 40px;
+}
+
+.padding-left-small {
+	padding-left: 5px;
+}
+
+.padding-left-medium {
+	padding-left: 15px;
+}
+
+.padding-small {
+	padding: 5px;
+}
+
+.padding-medium {
+	padding: 15px;
+}
+
+.padding-large {
+	padding: 30px;
+}
+
+.margin-left-small {
+	margin-left: 5px;
+}
+
+.margin-left-medium {
+	margin-left: 15px;
+}
+
+.max100 {
+	max-width: 100px !important;
+}
+
+.max200 {
+	max-width: 200px !important;
+}
+
+.max300 {
+	max-width: 300px !important;
+}
+
+.text-small {
+	font-size: 0.75em;
+}
+
+.text-red {
+	color: red !important;
+}
+
+.text-large {
+	font-size: 1.5em;
+}

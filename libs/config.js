@@ -1,0 +1,167 @@
+var crypto = require("crypto");
+var MDB = require('./MDB.js');
+var Object = require("../public/js/Object_prototypes.js");
+
+var self = module.exports = {
+	server: {
+		PORT: process.env.PORT || 8000,
+		CLUSTERING: process.env.CLUSTERING || false,
+		IS_PRODUCTION: process.env.IS_PRODUCTION || false
+	},
+	
+	view: {
+		NAVLINKS: [],				//placeholder where all links will be stored once we retrieve them from our persistent store
+		CLIENTSOCKETEVENTS : [],	//placeholder where all client socket event listeners will be stored and sent to the client on a request
+		send: function(req,opts) {
+			opts = opts || {};
+			var obj = opts.obj || {};
+			
+			var routeInfo = opts.routeInfo || {};
+			
+			var protocol = (req.secure) ? "https": "http";
+			var host= "";
+			var wshost=	"";
+			
+			return {
+				data: {
+					external: {
+						wshost:	wshost,
+						port: self.server.PORT,
+						socketEvents: this.CLIENTSOCKETEVENTS,
+						EXTRA: obj
+					},
+					host: host,
+					session: req.session,
+					nav: this.NAVLINKS
+				}
+			};
+		}
+	},
+	
+	socketio: {
+		DEFAULTNAMESPACE: '/',
+		DEFAULTROOM: 'DEFAULTROOM',
+		CACHE: {
+			events: [],
+			ios: {}
+		}
+	},
+	
+	session: {
+		sessionSecret: process.env.SESSION_SECRET,
+		sessionCookieKey: process.env.SESSION_COOKIE_KEY,
+		storeOptions: function() {
+			return {
+				url: self.mongodb.connectionString(),
+				ttl: 7 * 24 * 60 * 60					//expiration, 7 days
+			};
+		}
+	},
+	
+	mongodb: {
+		FULL_URI:	process.env.MONGODB_FULLURI || null,
+		PROTOCOL:	'mongodb',
+		HOST:		process.env.MONGODB_HOST || "localhost",
+		PORT:		Number(process.env.MONGODB_PORT || 27017),
+		USER:		process.env.MONGODB_USER,
+		PASSWORD:	process.env.MONGODB_PW,
+		TESTDB:		process.env.MONGODB_DB_DEV,
+		PRODDB:	 	process.env.MONGODB_DB,
+		MDB:		{},								//will be the instance of MDB we use to open a connection with the mongodb server
+		db:			{},								//the object we'll be using to create cursors and return/set data in mongoDB
+		
+		dbInfo:	function() {
+			var db= (self.server.IS_PRODUCTION) ? this.PRODDB : this.TESTDB;
+			
+			return {
+				full:	this.FULL_URI,
+				p:		this.PROTOCOL,
+				h:		this.HOST,
+				user:	this.USER,
+				pw:		this.PASSWORD,
+				port:	this.PORT,
+				db:		db
+			}
+		},
+		
+		connectionString: function() {
+			var dbInfo=this.dbInfo() || {};
+			
+			var protocol=dbInfo.p;
+			var host=dbInfo.h;
+			var user=dbInfo.user;
+			var password=dbInfo.pw;
+			var port=dbInfo.port;
+			var db=dbInfo.db;
+			
+			var auth = (user && password) ? user+":"+password+"@" : "";
+			
+			return dbInfo.full || protocol+'://'+auth+host+':'+port+'/'+db;
+		},
+					
+		initialize:	function(cb) {
+			var oSelf=this;
+			new MDB({config:self, callback:function(err,opts) {
+					oSelf.db=opts.db;
+					oSelf.MDB=opts.self;
+					
+					if (typeof cb==='function') cb(err,opts);
+				}
+			});
+		},
+		
+		REFERENCE: {								//shouldn't probably be using these values, just for reference
+			DEVFILES: 'data/wiki/dev',				//relative to the mongodb folder
+			PRODFILES: 'data/wiki/prod'
+		}
+	},
+	
+	ldap: {
+		protocol: process.env.LDAP_PROTOCOL,
+		url: process.env.LDAP_URL,
+		basedn: process.env.LDAP_BASEDN,
+		username: process.env.LDAP_USERNAME,
+		password: process.env.LDAP_PASSWORD
+	},
+	
+	cryptography: {
+		CONFIG: {
+			algorithm: "aes-256-ctr",
+			password: process.env.CRYPT_SECRET
+		},
+		
+		encrypt: function(text) {
+			var cipher = crypto.createCipher(this.CONFIG.algorithm,this.CONFIG.password)
+			var crypted = cipher.update(text,'utf8','hex')
+			crypted += cipher.final('hex');
+			return crypted;
+		},
+		
+		decrypt: function(text) {
+			var decipher = crypto.createDecipher(this.CONFIG.algorithm,this.CONFIG.password)
+			var dec = decipher.update(text,'hex','utf8')
+			dec += decipher.final('utf8');
+			return dec;
+		}
+	},
+	
+	logger: {
+		options: function(app) {
+			return {
+				name: app || "euphoriwiki",
+				level: process.env.LOGGING_LEVEL || "info",
+				stream: process.stdout
+				/*streams: [
+					{
+						level: process.env.LOGGING_LEVEL || "info",
+						path: __dirname + "\\..\\logs\\app.log"
+					},
+					{
+						level: "trace",
+						path: __dirname + "\\..\\logs\\app_trace.log"
+					}
+				],*/
+			}
+		}
+	}
+};

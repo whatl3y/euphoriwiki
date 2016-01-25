@@ -1,0 +1,7 @@
+# ignore
+/tests
+/logs
+/documentation
+/.env
+/.env_windows
+/.env_linux

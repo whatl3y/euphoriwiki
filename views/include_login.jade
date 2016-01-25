@@ -1,0 +1,48 @@
+div(class="loginwrapper padding-large text-center",data-ng-controller="loginCtrl")
+	div(class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4")
+			div(class="padding-medium")
+				div(class="panel panel-red shadowsmall-red wrapper")
+					div(class="panel-body")
+						h2(class="text-left")
+							span(class="glyphicon glyphicon-ok-sign")
+							span(class="padding-left-medium") Login
+						form(class="form-horizontal",data-ng-submit="handlers.loginSubmission(data)")
+							div(class="form-group",data-ng-class="functions.returnClassHasData(data.username)")
+								label(for="loginUsername")
+									div(class="col-xs-4 col-sm-3 control-label") Username
+									div(class="col-xs-8 col-sm-9")
+										div(class="input-group")
+											span(class="input-group-addon")
+												span(class="glyphicon glyphicon-user")
+											input(type="text",id="loginUsername",placeholder="Username...",class="form-control",data-ng-model="data.username")
+							div(class="form-group",data-ng-class="functions.returnClassHasData(data.password)")
+								label(for="loginPassword")
+									div(class="col-xs-4 col-sm-3 control-label") Password
+									div(class="col-xs-8 col-sm-9")
+										div(class="input-group")
+											span(class="input-group-addon")
+												span(class="glyphicon glyphicon-link")
+											input(type="password",id="loginPassword",placeholder="Password...",class="form-control",data-ng-model="data.password")
+							div(class="padding-medium",data-ng-if="error")
+								alert(type="danger") {{ error }}
+							div(class="padding-small form-group")
+								div pmgnet.dev domain
+							div(class="form-group")
+								button(type="submit",class="btn btn-danger") Login
+	div(class="text-left",data-ng-controller="mainHomeCtrl")
+		div(class="wrapper separate-vert-medium col-xs-12",data-ng-show="widgets.length")
+			h1 Common Pages
+			alert(type="danger",data-ng-show="error") {{ error }}
+			div(class="widget separate-vert-small col-xs-12 col-sm-6 col-md-4 col-lg-3",data-ng-show="widgets.length",data-ng-repeat="widget in widgets")
+				div(class="shadowsmall padding-medium")
+					div
+						div(class="text-center text-large widget-header") {{ widget.name }}
+						div(class="padding-medium",data-ng-show="!widget.items.length")
+							alert(class="text-center") There are no items that have been updated yet.
+						ul(class="list-unstyled",data-ng-show="widget.items.length")
+							li(data-ng-repeat="item in widget.items")
+								div(class="separate-vert-small")
+									div
+										a(data-ng-href="{{ item.path }}",target="_blank") {{ item.path }}
+									div
+										small(class="soft-text") Updated on {{ functions.formatDateTime(item.updated) }}
