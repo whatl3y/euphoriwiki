@@ -10,6 +10,7 @@ function mainHomeCtrl($scope,$http) {
 					$scope.widgets = ret.widgets;
 				}
 				
+				console.log(ret);
 				//angular.element( '#loader' ).remove();
 			})
 			.error(function(data,err) {

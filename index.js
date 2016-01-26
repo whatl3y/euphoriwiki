@@ -3,24 +3,31 @@ var fs = require("fs");
 var express = require("express");
 var app = express();
 var cluster = require("cluster");
+var sticky = require("sticky-session");
 var session = require("express-session");
 var formidable = require('express-formidable');
 var bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
+var mongo = require("mongodb");
 var mongoStore = require("connect-mongo")(session);
+var Grid = require('gridfs-stream');
 var path = require("path");
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var _ = require("underscore");
+var mammoth = require("mammoth");
 var IOHandler = require("./libs/IOHandler.js");
 var Auth = require("./libs/Authentication");
 var RouteHandler = require("./libs/RouteHandler.js");
 var config = require("./libs/config.js");
 var log = require("bunyan").createLogger(config.logger.options());
+var Object = require("./public/js/Object_prototypes.js");
 
 try {
 	if (config.server.CLUSTERING) {
-		if (cluster.isMaster) {
+		if (!sticky.listen(http,config.server.PORT)) {		//if (cluster.isMaster) {}
+			http.once("listening",function() {log.info("listening on *:"+config.server.PORT);});
+			
 			// Count CPUs
 			var cpuCount = os.cpus().length;
 			
@@ -35,12 +42,11 @@ try {
 				log.info("Worker " + worker.id + " died. Creating another worker...");
 				cluster.fork();
 			});
-			
 		} else {
 			main();
 		}
 	} else {
-		main();
+		main(true);
 	}
 	
 } catch (_err) {
@@ -49,7 +55,7 @@ try {
 
 
 //FUNCTIONS
-function main() {
+function main(notClustering) {
 	config.mongodb.initialize(function(err,options) {
 		if (err) {
 			log.error("Error connecting to mongodb: "+err);
@@ -60,8 +66,8 @@ function main() {
 		app.set("views", path.join(__dirname, "views"));
 		app.set("view engine", "jade");
 		
-		app.use(bodyParser.urlencoded({extended: true}));
-		app.use(bodyParser.json());
+		app.use(bodyParser.urlencoded({extended:true, limit:"50mb"}));
+		app.use(bodyParser.json({limit:"50mb"}));
 		app.use(formidable.parse());
 		app.use(cookieParser(config.session.sessionSecret));
 		
@@ -107,11 +113,19 @@ function main() {
 					});
 					
 					//starts the web server listening on specified port
-					http.listen(config.server.PORT, function() {
-						log.info("listening on *:"+config.server.PORT);
-					});
+					//if we're not using clustering
+					if (notClustering) {
+						http.listen(config.server.PORT, function(){
+							log.info("listening on *:"+config.server.PORT);
+						});
+					}
 				});
 			});
 		});
+		
+		//handle if the process suddenly stops
+		//process.on("exit",config.mongodb.MDB.close);
+		//process.on("SIGINT",config.mongodb.MDB.close);
+		//process.on("SIGTERM",config.mongodb.MDB.close);
 	});
 }

@@ -32,6 +32,7 @@ var self = module.exports = {
 					},
 					host: host,
 					session: req.session,
+					title: opts.title || null,
 					nav: this.NAVLINKS
 				}
 			};

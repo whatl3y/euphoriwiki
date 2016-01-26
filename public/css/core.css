@@ -240,3 +240,14 @@ ul.nav > li {
 .text-large {
 	font-size: 1.5em;
 }
+
+.widget .widget-header {
+	padding: 4px;
+	background: #FF0000;
+	color: white;
+	border-radius: 3px;
+}
+
+.widget a {
+	color: #FF0000 !important;
+}

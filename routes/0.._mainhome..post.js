@@ -14,7 +14,8 @@
 							key: widget.name,
 							filters: widget.filter || {},
 							sort: sortObject,
-							limit: widget.limit || null
+							limit: widget.limit || null,
+							fields: widget.fields || {}
 						};
 					});
 					

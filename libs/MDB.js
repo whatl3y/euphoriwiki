@@ -39,31 +39,22 @@ MDB.prototype.go=function(cb) {
 	var self=this;
 	
 	var main = function(err,db) {
+		self.db = db;
+		
 		if (typeof cb==='function') {
-			cb(err,{
-				db:		db,
-				close:	self.close,						//should be called in CB function at end to close DB connection
-				self:	self
-			});
+			cb(err,{db:db, self:self});
 		} else if (typeof cb==='object') {
 			for (var _i in cb) {
-				cb[_i](err,{
-					db:		db,
-					close:	self.close,					//should be called in CB function at end to close DB connection
-					self:	self
-				});
+				cb[_i](err,{db:db, self:self});
 			}
 		}
 	}
 	
-	try {
-		this.MongoClient.connect(this.connectionString,function(err,db) {
-			if (err!=null) main(err);
-			else main(null,db);
-		});
-	} catch(err) {
-		main(err);
-	}
+	//make the initial connection
+	this.MongoClient.connect(this.connectionString,function(err,db) {
+		if (err!=null) main(err);
+		else main(null,db);
+	});
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -80,6 +71,7 @@ MDB.prototype.go=function(cb) {
 |								options.array[<i>].filters: optional options to include in the find() query
 |								options.array[<i>].sort: optional sort options
 |								options.array[<i>].limit: optional limit to limit amount of documents returned
+|								options.array[<i>].fields: the specific fields you want to return
 |				2. cb(REQ): callback
 |							cb(err,obj)
 |SIDE EFFECTS:	
@@ -99,8 +91,9 @@ MDB.prototype.findRecursive=function(options,cb) {
 		var filter = options.array[options.index].filters || {};
 		var sort = options.array[options.index].sort || {order:1};
 		var limit = options.array[options.index].limit || null;
+		var fields = options.array[options.index].fields || {};
 		
-		coll.find(filter).sort(sort).limit(limit).toArray(function(err,docs) {
+		coll.find(filter,fields).sort(sort).limit(limit).toArray(function(err,docs) {
 			if (err) cb(err,options.object);
 			else {
 				options.object[options.array[options.index].key] = docs;
@@ -125,6 +118,7 @@ MDB.prototype.findRecursive=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 MDB.prototype.close=function(db) {
 	if (db!=null) db.close();
+	else this.db.close();
 }
 
 //-------------------------------------------------------

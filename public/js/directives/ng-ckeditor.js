@@ -52,7 +52,7 @@
 
                 var onLoad = function () {
                     var options = {
-                        toolbar: 'full',
+                        /*toolbar: 'full',
                         toolbar_full: [ //jshint ignore:line
                             {
                                 name: 'basicstyles',
@@ -72,7 +72,7 @@
                             {name: 'clipboard', items: ['Undo', 'Redo']},
                             {name: 'document', items: ['PageBreak', 'Source']}
                         ],
-                        disableNativeSpellChecker: false,
+                        disableNativeSpellChecker: false,*/
                         uiColor: '#FAFAFA',
                         height: '400px',
                         width: '100%',

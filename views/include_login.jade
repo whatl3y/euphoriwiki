@@ -1,5 +1,5 @@
 div(class="loginwrapper padding-large text-center",data-ng-controller="loginCtrl")
-	div(class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4")
+	div(class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
 			div(class="padding-medium")
 				div(class="panel panel-red shadowsmall-red wrapper")
 					div(class="panel-body")
@@ -30,19 +30,4 @@ div(class="loginwrapper padding-large text-center",data-ng-controller="loginCtrl
 							div(class="form-group")
 								button(type="submit",class="btn btn-danger") Login
 	div(class="text-left",data-ng-controller="mainHomeCtrl")
-		div(class="wrapper separate-vert-medium col-xs-12",data-ng-show="widgets.length")
-			h1 Common Pages
-			alert(type="danger",data-ng-show="error") {{ error }}
-			div(class="widget separate-vert-small col-xs-12 col-sm-6 col-md-4 col-lg-3",data-ng-show="widgets.length",data-ng-repeat="widget in widgets")
-				div(class="shadowsmall padding-medium")
-					div
-						div(class="text-center text-large widget-header") {{ widget.name }}
-						div(class="padding-medium",data-ng-show="!widget.items.length")
-							alert(class="text-center") There are no items that have been updated yet.
-						ul(class="list-unstyled",data-ng-show="widget.items.length")
-							li(data-ng-repeat="item in widget.items")
-								div(class="separate-vert-small")
-									div
-										a(data-ng-href="{{ item.path }}",target="_blank") {{ item.path }}
-									div
-										small(class="soft-text") Updated on {{ functions.formatDateTime(item.updated) }}
+		include include_homepagewidgets.jade

@@ -11,7 +11,7 @@ div(class="padding-large",data-ng-controller="mainHomeCtrl")
 							div(class="separate-vert-small col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
 								input(type="text",class="input-lg form-control",id="newPage",name="newPage",data-ng-model="newPagePath")
 							div(class="col-xs-12")
-								input(type="submit",class="btn btn-success")
+								input(type="submit",class="btn btn-success",value="Go To Page")
 							div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
 								alert(type="danger") {{ newPageError }}
 	div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
@@ -33,19 +33,4 @@ div(class="padding-large",data-ng-controller="mainHomeCtrl")
 								span ).
 						li
 							div You can click the My Page link above to edit your own personal page where no one else can make changes but you.
-	div(class="wrapper col-xs-12",data-ng-show="widgets.length")
-		h1 Common Pages
-		alert(type="danger",data-ng-show="error") {{ error }}
-		div(class="widget separate-vert-small col-xs-12 col-sm-6 col-md-4 col-lg-3",data-ng-show="widgets.length",data-ng-repeat="widget in widgets")
-			div(class="shadowsmall padding-medium")
-				div
-					div(class="text-center text-large widget-header") {{ widget.name }}
-					div(class="padding-medium",data-ng-show="!widget.items.length")
-						alert(class="text-center") There are no items that have been updated yet.
-					ul(class="list-unstyled",data-ng-show="widget.items.length")
-						li(data-ng-repeat="item in widget.items")
-							div(class="separate-vert-small")
-								div
-									a(data-ng-href="{{ item.path }}",target="_blank") {{ item.path }}
-								div
-									small(class="soft-text") Updated on {{ functions.formatDateTime(item.updated) }}
+	include include_homepagewidgets.jade

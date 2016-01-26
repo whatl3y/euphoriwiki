@@ -1,4 +1,4 @@
-function wikiPageCtrl($scope,$http,$sce) {
+function wikiPageCtrl($scope,$http,$sce,Upload) {
 	$scope.pathname = location.pathname;
 	$scope.emptyPageError = "There is no content on this page yet. Feel free to add content now by cliking to Edit Page link at the top right of your page!";
 	$scope.content = {};
@@ -13,13 +13,15 @@ function wikiPageCtrl($scope,$http,$sce) {
 		view: true,
 		editHtml: false,
 		editMarkup: false,
+		uploadDocx: false,
+		uploadFile: false,
 		olderVersions: false
 	};
 	
 	$scope.functions = {
 		initialize: function() {
 			new Core.Modals().alertPopup({loading:true});
-			$http.post('/initwikipage',{type:"init", page:location.pathname})
+			$http.post('/wikipage',{type:"init", page:location.pathname})
 			.success(function(ret) {
 				if (!ret.success) {
 					$scope.error = ret.error;
@@ -32,6 +34,8 @@ function wikiPageCtrl($scope,$http,$sce) {
 					$scope.content.person = ret.person || {};
 					$scope.content.lastUpdate = ret.lastUpdate || null;
 					$scope.content.versions = ret.versions || [];
+					
+					$scope.userfiles = ret.userFiles || [];
 				}
 				
 				$scope.initcomplete = true;
@@ -41,6 +45,21 @@ function wikiPageCtrl($scope,$http,$sce) {
 				console.log(data,err);
 				angular.element( '#loader' ).remove();
 			});
+		},
+		
+		pageStateToUploadType: function() {
+			var ps = $scope.pageState;
+			
+			switch (true) {
+				case ps.uploadDocx:
+					return "wordToHtml";
+				case ps.uploadFile:
+					return "uploadFile";
+				case ps.spreadsheetToTable:
+					return "spreadsheetToTable";
+				default:
+					return false;
+			};
 		},
 		
 		htmlToMarkdown: function(html) {
@@ -106,7 +125,7 @@ function wikiPageCtrl($scope,$http,$sce) {
 			}
 			
 			new Core.Modals().alertPopup({loading:true});
-			$http.post('/initwikipage',{type:"update", page:location.pathname, html:$scope.content.html, markdown:$scope.content.markdown})
+			$http.post('/wikipage',{type:"update", page:location.pathname, html:$scope.content.html, markdown:$scope.content.markdown})
 			.success(function(ret) {
 				if (ret.success) location.reload();
 				else {
@@ -118,6 +137,43 @@ function wikiPageCtrl($scope,$http,$sce) {
 			})
 			.error(function(data,err) {
 				console.log(data,err);
+				angular.element( '#loader' ).remove();
+			});
+		},
+		
+		downloadFile: function(filename) {
+			console.log(filename);
+		},
+		
+		uploadFile: function(file) {
+			delete($scope.fileError);
+			
+			var uploadType = $scope.functions.pageStateToUploadType();
+			
+			new Core.Modals().alertPopup({loading:true});
+			Upload.upload({
+				url: '/wikipage',
+				file: file,
+				fields: {type:uploadType}
+			})
+			.success(function(data) {
+				console.log(data);
+				if (data.filesuccess) {
+					
+				} else if (data.wordsuccess) {
+					$scope.content.html = ($scope.content.html || "") + data.html;
+					$scope.functions.htmlToMarkdown($scope.content.html);
+					
+					$scope.functions.changePageState("view");
+				} else {
+					$scope.fileError = data.error || "There was a problem uploading your file. Please try again.";
+				}
+				
+				angular.element( '#loader' ).remove();
+			})
+			.error(function(ret,_err) {
+				console.log(ret,_err);
+				$scope.fileError = "There was a problem uploading your file. Please try again.";
 				angular.element( '#loader' ).remove();
 			});
 		},
