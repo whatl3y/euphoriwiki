@@ -9,33 +9,45 @@
 		var fileType = fileInfo.type;
 	}
 	
+	var username = (req.session.loggedIn) ? req.session.sAMAccountName.toLowerCase() : null;
+	
 	switch(info.type) {
 		case "init":
-			config.mongodb.db.collection("wikicontent").find({path:info.page}).toArray(function(_e,info) {
+			config.mongodb.db.collection("wikicontent").find({path:info.page}).toArray(function(_e,pageInfo) {
 				if (_e) res.json({success:false, error:_e});
 				else {
 					var oRet;
-					if (!info.length) oRet = {success:true, exists:false, html:"", markup:""};
+					if (!pageInfo.length) oRet = {success:true, exists:false, html:"", markup:""};
 					else oRet = {
 						success: true,
 						exists: true,
-						html: info[0].content_html,
-						markup: info[0].content_markup,
-						lastUpdate: info[0].updated,
-						person: info[0].updatedBy,
-						versions: info[0].history
+						html: pageInfo[0].content_html,
+						markup: pageInfo[0].content_markup,
+						widgets: pageInfo[0].widgets,
+						lastUpdate: pageInfo[0].updated,
+						person: pageInfo[0].updatedBy,
+						versions: pageInfo[0].history
 					};
 					
-					if (req.session.loggedIn) {
-						config.mongodb.db.collection("accounts").find({username:req.session.sAMAccountName},{files: {"$slice":20}}).toArray(function(_e,userInfo) {
-							if (_e) log.error(_e);
-							else oRet = Object.merge(oRet,{userFiles:userInfo[0].files});
-							
+					//find sub pages under this page
+					var escapedPath = info.page.replace(/\.\/\+\[\]/g,"\$0");
+					
+					config.mongodb.db.collection("wikicontent").find({path:new RegExp("^"+escapedPath+"/.+$")},{path:1,description:1,pageViews:1}).toArray(function(_e,pages) {
+						if (_e) log.error(_e);
+						else if (pages.length) oRet.subpages = pages;
+						
+						if (req.session.loggedIn) {
+							config.mongodb.db.collection("accounts").find({username:username},{files: {"$slice":100}}).toArray(function(_e,userInfo) {
+								if (_e) log.error(_e);
+								else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
+								else oRet = Object.merge(oRet,{userFiles:userInfo[0].files});
+								
+								res.json(oRet);
+							});
+						} else {
 							res.json(oRet);
-						});
-					} else {
-						res.json(oRet);
-					}
+						}
+					});
 				}
 			});
 			
@@ -53,7 +65,7 @@
 						updatedBy: {
 							firstname: req.session.givenName,
 							lastname: req.session.sn,
-							username: req.session.sAMAccountName
+							username: username
 						}
 					}
 				};
@@ -83,7 +95,8 @@
 			break;
 		
 		case "uploadFile":
-			var newFileName = fileName + Date.now();
+			var lastPeriod = fileName.lastIndexOf(".");
+			var newFileName = fileName.substring(0,lastPeriod) + "_" + Date.now() + fileName.substring(lastPeriod);
 			
 			var gfs = Grid(config.mongodb.db, mongo);
 			var writeStream = gfs.createWriteStream({filename: newFileName});
@@ -96,15 +109,17 @@
 			writeStream.on("close",function(file) {
 				log.debug("File created and piped to GridFS. Filename: "+newFileName);
 				
-				res.json({filesuccess:true, filename:newFileName});
+				var newFileInfo = {
+					uploadedTime: new Date(),
+					origFilename: fileName,
+					filename: newFileName
+				};
 				
-				config.mongodb.db.collection("accounts").update({username:req.session.sAMAccountName},{
+				res.json({filesuccess:true, fileInfo:newFileInfo});
+				
+				config.mongodb.db.collection("accounts").update({username:username},{
 					"$push": {
-						files: {
-							uploadedTime: new Date(),
-							origFilename: fileName,
-							filename: newFileName
-						}
+						files: newFileInfo
 					}
 				},{upsert:true},function(err) {
 					if (err) log.error(err);
@@ -112,6 +127,34 @@
 			});
 			
 			fs.createReadStream(filePath).pipe(writeStream);
+			
+			break;
+		
+		case "deleteFile":
+			var fileName = info.filename;
+			
+			var gfs = Grid(config.mongodb.db, mongo);
+			gfs.remove({filename:fileName},function(err) {
+				if (err) log.error(err);
+				
+				config.mongodb.db.collection("accounts").update({username:username},{ "$pull": { files:{ filename:fileName } }},{upsert:true},function(err) {
+					if (err) {
+						log.error(err);
+						res.json({success:false, error:err});
+					} else res.json({success:true});
+				})
+			});
+			
+			break;
+		
+		case "updateWidgets":
+			var widgets = info.widgets;
+			for (var _k in widgets) widgets[_k] = (widgets[_k]=="false" || widgets[_k]=="0") ? false : (!!widgets[_k]);
+			
+			config.mongodb.db.collection("wikicontent").update({path:info.page},{$set:{ widgets:widgets }},{ upsert:true },function(err) {
+				if (err) res.json({success:false, error:err});
+				else res.json({success:true});
+			});
 			
 			break;
 		

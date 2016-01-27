@@ -1,104 +1,148 @@
-div(data-ng-show="editState")
-	div(class="text-center padding-medium")
-		button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Save Changes
-		button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
-	div(class="padding-medium")
-		alert(type="danger",data-ng-show="saveError") {{ saveError }}
-	div
-		ul(class="nav nav-tabs")
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('view')") Preview Page
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('uploadFile')") Upload File
-			li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
-				a(data-ng-href="#",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
-div(class="separate-vert-large")
-	div(data-ng-show="pageState.view")
-		div(data-ng-show="!content.html && initcomplete")
-			div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
-				h3
-					alert {{ emptyPageError }}
-		div(data-ng-show="content.html")
-			div(data-ng-bind-html="functions.sanitizeHtml(content.html)")
-		div(class="col-xs-12")
-			small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ content.person.firstname + " " + content.person.lastname }}
-	div(data-ng-show="pageState.editHtml")
-		div(class="separate-vert-small")
-			alert(type="success")
-				span You can use Bootstrap 3 
-				a(href="http://getbootstrap.com/css/",target="_blank") CSS
-				span  classes/styles or 
-				a(href="http://getbootstrap.com/components/",target="_blank") Components
-				span  to add great-looking design to your pages!
-		div(class="separate-vert-small")
-			alert
-				span NOTE: Keep these things in mind while you're making page edits
-				ol
-					li
-						span Be sure to use the 
-						b  
-							a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
-						span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
-					li
-						span Click on the 
-						b  <> Source 
-						span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
-		textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
-	div(data-ng-show="pageState.editMarkup")
-		div(class="padding-small panel panel-default panel-danger")
-			div(class="panel-body") NOTE: Markdown language does not have a 1-to-1 correlation to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.
-		textarea(class="form-control",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
-	div(data-ng-show="pageState.uploadDocx")
-		h1 Add Microsoft Word Documents
-		div(class="separate-vert-small")
-			alert
-				div Use the control below to upload a .doc or .docx document that will be converted into HTML and added to your page.
-				br
+div(class="col-xs-12 col-sm-4 col-md-3",data-ng-show="widgets.subpages")
+	div(class="padding-medium shadowsmall-red")
+		div(class="text-large") Pages within 
+			em {{ pathname }}
+		ul(class="list-unstyled")
+			li(class="separate-vert-small",data-ng-repeat="page in subpages | orderBy : 'path'")
 				div
-					b Keep in mind the following considerations about Microsoft Word Doc Conversion:
-					ol
-						li Uploading a new document does not save your page. You still need to save your changes above for the changes to take place.
-						li When you upload a word document, upon successful conversion you will get redirected to the Preview Page tab and the converted document will be appended to your page.
-						li This conversion is not perfect, and formatting changes might be lost from your Word Document in the HTML conversion. You might need to update them manually in the Rich Text Editor to get back the exact formatting.
-		div(class="separate-vert-medium")
-			div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
-				div(class="panel-body text-center")
-					h4 Upload Word Document
-					div(class="separate-vert-small")
-						input(type="file",fileread="uploadedWordDoc")
-					div(class="separate-vert-medium",data-ng-show="fileError")
-						alert(type="danger") {{ fileError }}
-	div(data-ng-show="pageState.uploadFile")
-		h1 Upload Files to Download or Link To
-		div(class="separate-vert-medium")
-			div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
-				div(class="panel-body text-center")
-					div(class="separate-vert-small")
-						input(type="file",fileread="uploadedFile")
-					div(class="separate-vert-medium",data-ng-show="fileError")
-						alert(type="danger") {{ fileError }}
-			div(class="separate-vert-large col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3",data-ng-show="userfiles.length")
-				h3
-					u Files You've Uploaded
-				table(class="table table-striped table-bordered")
-					tr
-						th #
-						th File Name
-						th Uploaded Date
-					tr(data-ng-repeat="file in userfiles")
-						td {{ $index+1 }}
-						td
-							a(href="javascript:void(0)",data-ng-click="handlers.downloadFile(file.filename)") {{ file.origFilename }}
-						td {{ functions.formatDateTime(file.uploadedTime) }}
-	div(data-ng-show="pageState.olderVersions")
-		h2 Review older versions below
-		div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+					a(data-ng-href="{{ page.path }}") {{ page.path }}
+				div(class="soft-text")
+					small {{ page.pageViews || 0 }} page views
+div(data-ng-class="(widgets.subpages==true) ? 'col-xs-12 col-sm-8 col-md-9' : ''")
+	div(data-ng-show="editState")
+		div(class="text-center padding-medium")
+			button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Save Changes
+			button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
+		div(class="padding-medium")
+			alert(type="danger",data-ng-show="saveError") {{ saveError }}
+		div
+			ul(class="nav nav-tabs")
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('view')") Preview Page
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('uploadFile')") File Management
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('settings')") Settings
+				li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
+					a(data-ng-href="#",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
+	div
+		div(data-ng-show="pageState.view")
+			div(data-ng-show="!content.html && initcomplete")
+				div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
+					h3
+						alert {{ emptyPageError }}
+			div(data-ng-show="content.html")
+				div(data-ng-bind-html="functions.sanitizeHtml(content.html)")
+			div(class="col-xs-12")
+				small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ content.person.firstname + " " + content.person.lastname }}
+		div(data-ng-show="pageState.editHtml")
 			div(class="separate-vert-small")
-				alert(class="text-center",data-ng-show="!content.versions.length") There are no older versions of this page to review.
-				select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by '+version.updatedBy.firstname+' '+version.updatedBy.lastname for version in content.versions")
+				alert(type="success")
+					span You can use Bootstrap 3 
+					a(href="http://getbootstrap.com/css/",target="_blank") CSS
+					span  classes/styles or 
+					a(href="http://getbootstrap.com/components/",target="_blank") Components
+					span  to add great-looking design to your pages!
+			div(class="separate-vert-small")
+				alert
+					span NOTE: Keep these things in mind while you're making page edits
+					ol
+						li
+							span Be sure to use the 
+							b  
+								a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
+							span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
+						li
+							span Click on the 
+							b  <> Source 
+							span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
+			textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
+		div(data-ng-show="pageState.editMarkup")
+			div(class="padding-small panel panel-default panel-danger")
+				div(class="panel-body") NOTE: Markdown language does not have a 1-to-1 correlation to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.
+			textarea(class="form-control",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
+		div(data-ng-show="pageState.uploadDocx")
+			h1 Add Microsoft Word Documents
+			div(class="separate-vert-small")
+				alert
+					div Use the control below to upload a .doc or .docx document that will be converted into HTML and added to your page.
+					br
+					div
+						b Keep in mind the following considerations about Microsoft Word Doc Conversion:
+						ol
+							li Uploading a new document does not save your page. You still need to save your changes above for the changes to take place.
+							li When you upload a word document, upon successful conversion you will get redirected to the Preview Page tab and the converted document will be appended to your page.
+							li This conversion is not perfect, and formatting changes might be lost from your Word Document in the HTML conversion. You might need to update them manually in the Rich Text Editor to get back the exact formatting.
+			div(class="separate-vert-medium")
+				div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-2 col-lg-offset-5")
+					div(class="panel-body text-center")
+						div(class="separate-vert-small")
+							input(type="file",id="file-input-word",class="sr-only",fileread="uploadedWordDoc")
+							button(id="upload-file-word",class="btn btn-primary") Upload Word Document
+						div(class="separate-vert-medium",data-ng-show="fileError")
+							alert(type="danger") {{ fileError }}
+		div(data-ng-show="pageState.uploadFile")
+			h1 Upload Files to Download or Link To
+			div(class="separate-vert-medium")
+				div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-2 col-lg-offset-5")
+					div(class="panel-body text-center")
+						div(class="separate-vert-small")
+							input(type="file",id="file-input-main",class="sr-only",fileread="uploadedFile")
+							button(id="upload-file-main",class="btn btn-primary") Add File
+						div(class="separate-vert-medium",data-ng-show="fileError")
+							alert(type="danger") {{ fileError }}
+				div(class="separate-vert-large col-xs-12 col-sm-8 col-sm-offset-2",data-ng-show="userfiles.length")
+					h3
+						u Files You've Uploaded
+					table(class="table table-striped table-bordered")
+						tr
+							th #
+							th
+								a(href="javascript:void(0)",data-ng-click="functions.files.changeOrder('origFilename')") File Name
+							th
+								span Path to Use
+								br
+								code &lt;img src="[Path Below]"/&gt;
+								br
+								code &lt;a href="[Path Below]"&gt;My Link&lt;/a&gt;
+							th
+								a(href="javascript:void(0)",data-ng-click="functions.files.changeOrder('uploadedTime')") Date Uploaded
+							th Delete File
+						tr(data-ng-repeat="file in userfiles | orderBy : functions.files.sortColumn : functions.files.reverseOrder")
+							td {{ $index+1 }}
+							td
+								a(data-ng-href="/file/{{ file.filename }}",target="_blank") {{ file.origFilename }}
+							td /file/{{ file.filename }}
+							td {{ functions.formatDateTime(file.uploadedTime) }}
+							td
+								a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename)") Delete
+				div(class="separate-vert-large text-center col-xs-12 col-sm-8 col-sm-offset-2",data-ng-show="!userfiles.length")
+					alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
+		div(data-ng-show="pageState.settings")
+			h2 Page Settings
+			div(class="separate-vert-medium")
+				div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+					div(class="panel panel-default")
+						div(class="panel-body")
+							h4
+								u Widgets
+							form(class="text-center")
+								div(class="form-group")
+									div
+										label(for="subpagesWidget") Add sub-page tree to your page
+									div
+										input(type="checkbox",id="subpagesWidget",name="subpagesWidget",data-ng-model="widgets.subpages",data-ng-true-value="true",data-ng-false-value="false")
+								div(class="form-group text-center")
+									button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
+		div(data-ng-show="pageState.olderVersions")
+			h2 Review older versions below
+			div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+				div(class="separate-vert-small")
+					alert(class="text-center",data-ng-show="!content.versions.length") There are no older versions of this page to review.
+					select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by '+version.updatedBy.firstname+' '+version.updatedBy.lastname for version in content.versions")

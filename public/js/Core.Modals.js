@@ -35,7 +35,7 @@ Core.Modals.prototype.asyncLoader=function(params) {
 	};
 	
 	var ret=$(document.createElement('div')).appendTo($( 'body' ));
-	var img=$(document.createElement('div')).html('<img width="25px" height="25px" src="images/loader.gif" />').appendTo(ret);
+	var img=$(document.createElement('div')).html('<img width="25px" height="25px" src="/public/images/loader.gif" />').appendTo(ret);
 	var message=$(document.createElement('div')).addClass('asyncloadermessage').css(params.css).html(params.message).appendTo(ret);
 	
 	if ($( '.asyncloader' ).length) {				//put another loader on bottom of the ones that exist on the screen already

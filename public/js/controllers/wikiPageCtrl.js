@@ -11,6 +11,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 	
 	$scope.pageState = {
 		view: true,
+		settings: false,
 		editHtml: false,
 		editMarkup: false,
 		uploadDocx: false,
@@ -20,8 +21,16 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 	
 	$scope.functions = {
 		initialize: function() {
+			angular.element("button#upload-file-word").on("click",function() {
+				angular.element("#file-input-word").trigger("click");
+			});
+			
+			angular.element("button#upload-file-main").on("click",function() {
+				angular.element("#file-input-main").trigger("click");
+			});
+			
 			new Core.Modals().alertPopup({loading:true});
-			$http.post('/wikipage',{type:"init", page:location.pathname})
+			$http.post('/wikipage',{type:"init", page:$scope.pathname})
 			.success(function(ret) {
 				if (!ret.success) {
 					$scope.error = ret.error;
@@ -35,8 +44,12 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 					$scope.content.lastUpdate = ret.lastUpdate || null;
 					$scope.content.versions = ret.versions || [];
 					
+					$scope.widgets = ret.widgets || {};
+					$scope.subpages = ret.subpages || [];
 					$scope.userfiles = ret.userFiles || [];
 				}
+				
+				console.log(ret);
 				
 				$scope.initcomplete = true;
 				angular.element( '#loader' ).remove();
@@ -108,6 +121,17 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 			}
 		},
 		
+		files: {
+			sortColumn: "origFilename",
+			reverseOrder: false,
+			changeOrder: function(column) {
+				var sameColumn = this.sortColumn == column;
+				
+				this.sortColumn = column;
+				this.reverseOrder = (sameColumn) ? !this.reverseOrder : false;
+			}
+		},
+		
 		style: {
 			tabState: function(isActive) {
 				return (isActive) ? "active" : "";
@@ -116,6 +140,27 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 	};
 	
 	$scope.handlers = {
+		initializeEdit: function() {
+			$scope.functions.changePageState('view');
+			$scope.editState=!$scope.editState;
+			
+			console.log("edit page");
+			//make ajax call to lock page
+			/*
+			$http.post('/wikipage',{type:"edit"})
+			.success(function(ret) {
+				if (ret.success) location.reload();
+				else {
+					$scope.saveError = ret.error || "There was an issue saving your data. Please try again.";
+					console.log(ret);
+				}
+			})
+			.error(function(data,err) {
+				console.log(data,err);
+			});
+			*/
+		},
+		
 		saveChanges: function() {
 			delete($scope.saveError);
 			
@@ -141,16 +186,12 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 			});
 		},
 		
-		downloadFile: function(filename) {
-			console.log(filename);
-		},
-		
 		uploadFile: function(file) {
 			delete($scope.fileError);
 			
 			var uploadType = $scope.functions.pageStateToUploadType();
 			
-			new Core.Modals().alertPopup({loading:true});
+			var loader = new Core.Modals().asyncLoader({message:"Saving your file. It will be added to the list shortly..."});
 			Upload.upload({
 				url: '/wikipage',
 				file: file,
@@ -159,7 +200,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 			.success(function(data) {
 				console.log(data);
 				if (data.filesuccess) {
-					
+					$scope.userfiles.push(data.fileInfo);
 				} else if (data.wordsuccess) {
 					$scope.content.html = ($scope.content.html || "") + data.html;
 					$scope.functions.htmlToMarkdown($scope.content.html);
@@ -169,12 +210,53 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 					$scope.fileError = data.error || "There was a problem uploading your file. Please try again.";
 				}
 				
-				angular.element( '#loader' ).remove();
+				loader.remove();
 			})
 			.error(function(ret,_err) {
 				console.log(ret,_err);
 				$scope.fileError = "There was a problem uploading your file. Please try again.";
-				angular.element( '#loader' ).remove();
+				loader.remove();
+			});
+		},
+		
+		deleteFile: function(filename) {
+			if (confirm("Are you sure you want to delete the file permanently? This is an irreversible action so the file cannot be recovered later.")) {
+				var loader = new Core.Modals().asyncLoader({message:"Deleting the file. It will be removed to the list shortly..."});
+				$http.post('/wikipage',{type:"deleteFile", filename:filename})
+				.success(function(ret) {
+					//console.log(ret);
+					
+					if (ret.success) {
+						$scope.userfiles = $scope.userfiles.filter(function(file) {
+							return file.filename != filename;
+						});
+					} else {
+						$scope.fileError = ret.error || "There was an issue deleting your file. Please try again.";
+					}
+					
+					loader.remove();
+				})
+				.error(function(data,err) {
+					console.log(data,err);
+					loader.remove();
+				});
+			}
+		},
+		
+		updateWidgets: function() {
+			var loader = new Core.Modals().asyncLoader({message:"Updating your widget configuration now..."});
+			$http.post('/wikipage',{type:"updateWidgets", page:$scope.pathname, widgets:$scope.widgets})
+			.success(function(ret) {
+				//console.log(ret);
+				
+				if (ret.success) console.log("Successfully updated widgets");
+				else $scope.error = ret.error || "There was an issue deleting your file. Please try again.";
+				
+				loader.remove();
+			})
+			.error(function(data,err) {
+				console.log(data,err);
+				loader.remove();
 			});
 		},
 		

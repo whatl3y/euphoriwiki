@@ -1,7 +1,7 @@
 function mainHomeCtrl($scope,$http) {
 	$scope.functions= {
 		initialize: function() {
-			//new Core.Modals().alertPopup({loading:true});
+			var loader = new Core.Modals().asyncLoader({message:"Loading wiki page widgets..."});
 			$http.post('/mainhome',{type:"getWidgets"})
 			.success(function(ret) {
 				if (!ret.success) {
@@ -10,12 +10,12 @@ function mainHomeCtrl($scope,$http) {
 					$scope.widgets = ret.widgets;
 				}
 				
-				console.log(ret);
-				//angular.element( '#loader' ).remove();
+				//console.log(ret);
+				loader.remove();
 			})
 			.error(function(data,err) {
 				console.log(data,err);
-				//angular.element( '#loader' ).remove();
+				loader.remove();
 			});
 		},
 		

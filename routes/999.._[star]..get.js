@@ -1,10 +1,6 @@
 (function(req,res) {
 	var o = {};
-	if (req.session.loggedIn) {
-		o = {loggedIn: true};
-	} else {
-		o = {loggedIn: false}
-	}
+	o.loggedIn = (req.session.loggedIn) ? true : false;
 	
 	var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/"+req.params[0];
 	
