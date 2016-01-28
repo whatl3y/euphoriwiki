@@ -44,7 +44,9 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate',
 	}];
 })
 .directive('fileread',fileread)
+.directive('compileHtml',compileHtml)
 .controller('globalCtrl',globalCtrl)
 .controller('mainHomeCtrl',mainHomeCtrl)
 .controller('loginCtrl',loginCtrl)
-.controller('wikiPageCtrl',wikiPageCtrl);
+.controller('wikiPageCtrl',wikiPageCtrl)
+.controller('adminSettingsCtrl',adminSettingsCtrl);

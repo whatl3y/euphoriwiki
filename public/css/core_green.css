@@ -47,7 +47,7 @@ input[type="file"] {
 }
 
 .soft-text {
-	color: #D0D0D0 !important;
+	color: #D0D0D0;
 }
 
 .click {
@@ -72,9 +72,9 @@ input[type="file"] {
 }
 
 .shadowsmall-color {
-	box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
-	-moz-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
-	-webkit-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
+	box-shadow: 0 1px 4px rgba(0, 150, 0, 0.3), 0 0 30px rgba(0, 150, 0, 0.1) inset !important;
+	-moz-box-shadow: 0 1px 4px rgba(0, 150, 0, 0.3), 0 0 30px rgba(0, 150, 0, 0.1) inset !important;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 150, 0, 0.3), 0 0 30px rgba(0, 150, 0, 0.1) inset !important;
 }
 
 .shadowlarge {
@@ -96,7 +96,7 @@ input[type="file"] {
 }
 
 .wrapper.dark {
-	background: #FF0000;
+	background: darkgreen;
 	color: #FFFFFF;
 }
 
@@ -142,7 +142,7 @@ input[type="file"] {
 }
 
 .panel-red {
-	border-color: #FF0000 !important;
+	border-color: darkgreen !important;
 }
 
 .panel-danger {
@@ -249,18 +249,6 @@ div.asyncloader {
 	margin-right: 15px;
 }
 
-.margin-small {
-	margin: 5px;
-}
-
-.margin-medium {
-	margin: 15px;
-}
-
-.margin-large {
-	margin: 30px;
-}
-
 .max100 {
 	max-width: 100px !important;
 }
@@ -278,24 +266,20 @@ div.asyncloader {
 }
 
 .text-theme-color {
-	color: red !important;
+	color: green !important;
 }
 
 .text-large {
 	font-size: 1.5em;
 }
 
-.text-xlarge {
-	font-size: 2em;
-}
-
 .widget .widget-header {
 	padding: 4px;
-	background: #FF0000;
+	background: darkgreen;
 	color: white;
 	border-radius: 3px;
 }
 
 .widget a {
-	color: #FF0000 !important;
+	color: darkgreen !important;
 }

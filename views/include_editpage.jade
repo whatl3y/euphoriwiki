@@ -1,6 +1,6 @@
 div(class="separate-vert-medium")
 	div(class="col-xs-12 col-sm-4 col-md-3",data-ng-show="widgets.subpages.enabled",data-ng-class="(widgets.subpages.orientation=='right') ? 'pull-right' : ''")
-		div(class="padding-medium shadowsmall-red")
+		div(class="padding-medium shadowsmall-color")
 			div(class="text-large") Pages within 
 				em {{ pathname }}
 			ul(class="list-unstyled")
@@ -29,7 +29,7 @@ div(class="separate-vert-medium")
 					li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
 						a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
 					li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
-						a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Settings
+						a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
 					li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
 						a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
 		div
@@ -129,27 +129,29 @@ div(class="separate-vert-medium")
 				h2 Page Settings
 				div(class="separate-vert-medium")
 					div(class="col-xs-12 col-sm-8 col-sm-offset-2")
-						div(class="panel panel-default")
-							div(class="panel-body")
-								h4
-									u Widgets
-								form(class="text-center")
-									div(class="form-group")
+						div(class="margin-medium padding-medium shadowsmall-color")
+							h4 Primary Settings
+				div(class="separate-vert-medium")
+					div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+						div(class="margin-medium padding-medium shadowsmall-color")
+							h4 Widgets
+							form(class="text-center")
+								div(class="form-group")
+									div
+										h3 Add a page tree to the left or right
+									div
 										div
-											h3 Add sub-page tree to your page
+											input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
+											label(for="subpagesWidgetEnabled") Enabled
+											input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
+											label(for="subpagesWidgetDisabled") Disabled
 										div
-											div
-												input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
-												label(for="subpagesWidgetEnabled") Enabled
-												input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
-												label(for="subpagesWidgetDisabled") Disabled
-											div
-												input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
-												label(for="subpagesWidgetLeft") Aligned Left (Default)
-												input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
-												label(for="subpagesWidgetRight") Aligned Right
-									div(class="form-group text-center")
-										button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
+											input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
+											label(for="subpagesWidgetLeft") Aligned Left (Default)
+											input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
+											label(for="subpagesWidgetRight") Aligned Right
+								div(class="form-group text-center")
+									button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
 			div(data-ng-show="pageState.olderVersions")
 				h2 Review older versions below
 				div(class="col-xs-12 col-sm-8 col-sm-offset-2")

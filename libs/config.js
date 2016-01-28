@@ -9,6 +9,10 @@ var self = module.exports = {
 		IS_PRODUCTION: process.env.IS_PRODUCTION || false
 	},
 	
+	admin: {
+		SETTINGS: []
+	},
+	
 	view: {
 		NAVLINKS: [],				//placeholder where all links will be stored once we retrieve them from our persistent store
 		CLIENTSOCKETEVENTS : [],	//placeholder where all client socket event listeners will be stored and sent to the client on a request
@@ -33,7 +37,8 @@ var self = module.exports = {
 					host: host,
 					session: req.session,
 					title: opts.title || null,
-					nav: this.NAVLINKS
+					nav: this.NAVLINKS,
+					settings: self.admin.SETTINGS
 				}
 			};
 		}

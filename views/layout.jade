@@ -2,6 +2,7 @@
 - var pageTitle = data.title || "Wiki";
 - var host = data.host || "";
 - var dir = '/public/js/';
+- var globalCSS = (data.settings.length) ? (data.settings.filter(function(s){return s.domid=="globalcss"})[0].value || "") : "";
 
 doctype html
 html
@@ -15,6 +16,9 @@ html
 		
 		script(type='text/javascript').
 			LOCAL_DATA=!{JSON.stringify(data.external||{})}
+			
+		//custom styles from admin settings
+		style= globalCSS
 		
 		script(src=dir+'libraries/underscore/underscore-1.7.0__dev.js')
 		script(src=dir+'libraries/socket.io/socket.io-1.3.5.js')
@@ -38,11 +42,13 @@ html
 		
 		script(src=dir+'directives/ng-file-upload.min.js')
 		script(src=dir+'directives/filereadDir.js')
+		script(src=dir+'directives/compileHtml.js')
 		script(src=dir+'directives/ng-ckeditor.js')
 		script(src=dir+'controllers/globalCtrl.js')
 		script(src=dir+'controllers/mainHomeCtrl.js')
 		script(src=dir+'controllers/loginCtrl.js')
 		script(src=dir+'controllers/wikiPageCtrl.js')
+		script(src=dir+'controllers/adminSettingsCtrl.js')
 		script(src=dir+'apps/AngularJS_Euphoriwiki.js')
 	
 		title= pageTitle

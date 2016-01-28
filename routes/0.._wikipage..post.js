@@ -1,7 +1,6 @@
 (function(req,res) {
 	var info = req.body;
 	
-	if (info.page) info.page = ((info.page[info.page.length-1]=="/") ? info.page.substring(0,info.page.length-1) : info.page).toLowerCase();
 	if (info.file) {
 		var fileInfo = info.file;
 		var fileName = fileInfo.name;
@@ -10,10 +9,11 @@
 	}
 	
 	var username = (req.session.loggedIn) ? req.session.sAMAccountName.toLowerCase() : null;
+	var wiki = new WikiHandler({path:info.page});
 	
 	switch(info.type) {
 		case "init":
-			config.mongodb.db.collection("wikicontent").find({path:info.page}).toArray(function(_e,pageInfo) {
+			wiki.getPage(function(_e,pageInfo) {
 				if (_e) res.json({success:false, error:_e});
 				else {
 					var oRet;
@@ -29,10 +29,7 @@
 						versions: pageInfo[0].history
 					};
 					
-					//find sub pages under this page
-					var escapedPath = info.page.replace(/\.\/\+\[\]/g,"\$0");
-					
-					config.mongodb.db.collection("wikicontent").find({path:new RegExp("^"+escapedPath+"/.+$")},{path:1,description:1,pageViews:1}).toArray(function(_e,pages) {
+					wiki.getSubPages(function(_e,pages) {
 						if (_e) log.error(_e);
 						else if (pages.length) oRet.subpages = pages;
 						
@@ -58,7 +55,7 @@
 			else {
 				var saveData = {
 					"$set": {
-						path: info.page,
+						path: wiki.path,
 						content_html: info.html,
 						content_markdown: info.markdown,
 						updated: new Date(),
@@ -70,10 +67,10 @@
 					}
 				};
 				
-				config.mongodb.db.collection("wikicontent").find({path:info.page}).toArray(function(_e,current) {
+				wiki.getPage(function(_e,current) {
 					if (current.length) saveData["$push"] = {history: current[0]};
 					
-					config.mongodb.db.collection("wikicontent").update({ path:info.page },saveData,{ upsert:true },
+					config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
 						function(err,doc) {
 							if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
 							else res.json({success:true});
@@ -151,7 +148,7 @@
 			var widgets = info.widgets;
 			for (var _k in widgets) widgets[_k].enabled = (widgets[_k].enabled=="false" || widgets[_k].enabled=="0") ? false : (!!widgets[_k].enabled);
 			
-			config.mongodb.db.collection("wikicontent").update({path:info.page},{$set:{ widgets:widgets }},{ upsert:true },function(err) {
+			config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{ widgets:widgets }},{ upsert:true },function(err) {
 				if (err) res.json({success:false, error:err});
 				else res.json({success:true});
 			});

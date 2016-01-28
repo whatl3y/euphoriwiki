@@ -135,6 +135,27 @@ Object.reKey = function(obj,oldToNew) {
 	return newObj;
 }
 
+/*-----------------------------------------------------------------------------------------
+|NAME:			removeDollarKeys (PUBLIC)
+|DESCRIPTION:	Some DBs and other things don't like objects with keys that start with dollar signs
+|				($), so this will remove those since they're typically added by frameworks like AngularJS.
+|PARAMETERS:	1. obj(REQ): the object we're removing dollar keys from
+|SIDE EFFECTS:	Nothing|
+|CALLED FROM:	many
+|ASSUMES:		Nothing
+|RETURNS:		the updated JS Object, or original data
+-----------------------------------------------------------------------------------------*/
+Object.removeDollarKeys = function(obj) {
+	if (typeof obj==="object" && obj!=null) {
+		for (var _k in obj) {
+			if (_k.indexOf("$") == 0) delete(obj[_k]);
+			else if (typeof obj[_k]==="object" && obj[_k]!=null) obj[_k]=Object.removeDollarKeys(obj[_k]);
+		}
+	}
+	
+	return obj;
+}
+
 //-------------------------------------------------------
 //NodeJS
 if (typeof module !== 'undefined' && module.exports) {
