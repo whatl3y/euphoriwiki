@@ -1,3 +1,3 @@
 (function(req,res) {
-	res.render("index",config.view.send(req));
+  res.render("index",config.view.send(req));
 })
