@@ -149,7 +149,7 @@
 		
 		case "updateWidgets":
 			var widgets = info.widgets;
-			for (var _k in widgets) widgets[_k] = (widgets[_k]=="false" || widgets[_k]=="0") ? false : (!!widgets[_k]);
+			for (var _k in widgets) widgets[_k].enabled = (widgets[_k].enabled=="false" || widgets[_k].enabled=="0") ? false : (!!widgets[_k].enabled);
 			
 			config.mongodb.db.collection("wikicontent").update({path:info.page},{$set:{ widgets:widgets }},{ upsert:true },function(err) {
 				if (err) res.json({success:false, error:err});

@@ -21,6 +21,11 @@ iframe {
 	border: none;
 }
 
+input[type="radio"] {
+	margin-left: 5px !important;
+	margin-right: 5px !important;
+}
+
 input[type="file"] {
 	margin-left: auto;
 	margin-right: auto;
@@ -230,6 +235,14 @@ div.asyncloader {
 
 .margin-left-medium {
 	margin-left: 15px;
+}
+
+.margin-right-small {
+	margin-right: 5px;
+}
+
+.margin-right-medium {
+	margin-right: 15px;
 }
 
 .max100 {

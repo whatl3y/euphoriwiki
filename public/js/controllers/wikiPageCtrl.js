@@ -1,5 +1,6 @@
 function wikiPageCtrl($scope,$http,$sce,Upload) {
 	$scope.pathname = location.pathname;
+	$scope.pagePieces = LOCAL_DATA.EXTRA.pagePieces;
 	$scope.emptyPageError = "There is no content on this page yet. Feel free to add content now by cliking to Edit Page link at the top right of your page!";
 	$scope.content = {};
 	$scope.config = {
