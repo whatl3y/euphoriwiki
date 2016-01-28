@@ -6,59 +6,59 @@
 
 doctype html
 html
-	head
-		meta(charset="utf-8")
-		meta(http-equiv="X-UA-Compatible",content="IE=edge")
-		meta(name="viewport",content="width=device-width, initial-scale=1")
-		
-		link(rel='stylesheet',type='text/css',href='/public/css/core.css')
-		link(rel='stylesheet',type='text/css',href='/public/js/libraries/bootstrap/3.3.5/css/bootstrap.css')
-		
-		script(type='text/javascript').
-			LOCAL_DATA=!{JSON.stringify(data.external||{})}
-			
-		//custom styles from admin settings
-		style= globalCSS
-		
-		script(src=dir+'libraries/underscore/underscore-1.7.0__dev.js')
-		script(src=dir+'libraries/socket.io/socket.io-1.3.5.js')
-		script(src=dir+'libraries/jquery/jquery-1.11.0__dev.js')
-		script(src=dir+'libraries/angularjs/1.4.0/angular.js')
-		script(src=dir+'libraries/angularjs/1.4.0/angular-animate.js')
-		script(src=dir+'libraries/bootstrap/3.3.5/js/bootstrap.min.js')
-		script(src=dir+'libraries/angular-ui-bootstrap/ui-bootstrap-tpls-0.13.3.js')
-		
-		script(src=dir+"libraries/upndown.bundle.min.js")
-		script(src=dir+"libraries/marked.min.js")
-		script(src="//cdn.ckeditor.com/4.4.7/standard/ckeditor.js")
-		
-		script(src=dir+'String_prototypes.js')
-		script(src=dir+'Object_prototypes.js')
-		script(src=dir+'Core.js')
-		script(src=dir+'Core.QueryString.js')
-		script(src=dir+'Core.DateTime.js')
-		script(src=dir+'Core.Modals.js')
-		script(src=dir+'Core.SocketHandler.js')
-		
-		script(src=dir+'directives/ng-file-upload.min.js')
-		script(src=dir+'directives/filereadDir.js')
-		script(src=dir+'directives/compileHtml.js')
-		script(src=dir+'directives/ng-ckeditor.js')
-		script(src=dir+'controllers/globalCtrl.js')
-		script(src=dir+'controllers/mainHomeCtrl.js')
-		script(src=dir+'controllers/loginCtrl.js')
-		script(src=dir+'controllers/wikiPageCtrl.js')
-		script(src=dir+'controllers/adminSettingsCtrl.js')
-		script(src=dir+'apps/AngularJS_Euphoriwiki.js')
-	
-		title= pageTitle
-	body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl")
-		div(class="container-fluid")
-			include ./header.jade
-			
-			//alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
-			//	span(class="glyphicon glyphicon-warning-sign")
-			//	span {{ global.error }}
-			//	span(class="glyphicon glyphicon-warning-sign")
-			
-			block main
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible",content="IE=edge")
+    meta(name="viewport",content="width=device-width, initial-scale=1")
+    
+    link(rel='stylesheet',type='text/css',href='/public/css/core.css')
+    link(rel='stylesheet',type='text/css',href='/public/js/libraries/bootstrap/3.3.5/css/bootstrap.css')
+    
+    script(type='text/javascript').
+      LOCAL_DATA=!{JSON.stringify(data.external||{})}
+      
+    //custom styles from admin settings
+    style= globalCSS
+    
+    script(src=dir+'libraries/underscore/underscore-1.7.0__dev.js')
+    script(src=dir+'libraries/socket.io/socket.io-1.3.5.js')
+    script(src=dir+'libraries/jquery/jquery-1.11.0__dev.js')
+    script(src=dir+'libraries/angularjs/1.4.0/angular.js')
+    script(src=dir+'libraries/angularjs/1.4.0/angular-animate.js')
+    script(src=dir+'libraries/bootstrap/3.3.5/js/bootstrap.min.js')
+    script(src=dir+'libraries/angular-ui-bootstrap/ui-bootstrap-tpls-0.13.3.js')
+    
+    script(src=dir+"libraries/upndown.bundle.min.js")
+    script(src=dir+"libraries/marked.min.js")
+    script(src="//cdn.ckeditor.com/4.4.7/standard/ckeditor.js")
+    
+    script(src=dir+'String_prototypes.js')
+    script(src=dir+'Object_prototypes.js')
+    script(src=dir+'Core.js')
+    script(src=dir+'Core.QueryString.js')
+    script(src=dir+'Core.DateTime.js')
+    script(src=dir+'Core.Modals.js')
+    script(src=dir+'Core.SocketHandler.js')
+    
+    script(src=dir+'directives/ng-file-upload.min.js')
+    script(src=dir+'directives/filereadDir.js')
+    script(src=dir+'directives/compileHtml.js')
+    script(src=dir+'directives/ng-ckeditor.js')
+    script(src=dir+'controllers/globalCtrl.js')
+    script(src=dir+'controllers/mainHomeCtrl.js')
+    script(src=dir+'controllers/loginCtrl.js')
+    script(src=dir+'controllers/wikiPageCtrl.js')
+    script(src=dir+'controllers/adminSettingsCtrl.js')
+    script(src=dir+'apps/AngularJS_Euphoriwiki.js')
+  
+    title= pageTitle
+  body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl")
+    div(class="container-fluid")
+      include ./header.jade
+      
+      //alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
+      //  span(class="glyphicon glyphicon-warning-sign")
+      //  span {{ global.error }}
+      //  span(class="glyphicon glyphicon-warning-sign")
+      
+      block main

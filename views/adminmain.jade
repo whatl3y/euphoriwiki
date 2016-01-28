@@ -1,18 +1,18 @@
 extends layout
 
-block main	
-	div(class="padding-large",data-ng-controller="adminSettingsCtrl")
-		div(class="col-xs-3 hidden-xs nav-affix",data-spy="affix",data-offset-top="50")
-			small
-				ul(class="list-unstyled")
-					li(data-ng-repeat="setting in settings")
-						a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
-		div(class="col-xs-12 col-sm-9 pull-right")
-			h1 Wiki Admin Settings
-			div(class="col-xs-12 separate-vert-medium",data-ng-repeat="setting in settings")
-				div(class="col-xs-12 shadowsmall-color padding-medium")
-						div(id="{{ setting.domid }}",class="text-large")
-							u {{ setting.name }}
-						div(compile-html="functions.sanitizeHtml(setting.html)")
-						div(class="separate-vert-small text-center col-xs-12")
-							button(class="btn btn-success",data-ng-click="handlers.saveSetting(setting.domid,setting.value)") Save {{ setting.name }}
+block main  
+  div(class="padding-large",data-ng-controller="adminSettingsCtrl")
+    div(class="col-xs-3 hidden-xs nav-affix",data-spy="affix",data-offset-top="50")
+      small
+        ul(class="list-unstyled")
+          li(data-ng-repeat="setting in settings")
+            a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
+    div(class="col-xs-12 col-sm-9 pull-right")
+      h1 Wiki Admin Settings
+      div(class="col-xs-12 separate-vert-medium",data-ng-repeat="setting in settings")
+        div(class="col-xs-12 shadowsmall-color padding-medium")
+            div(id="{{ setting.domid }}",class="text-large")
+              u {{ setting.name }}
+            div(compile-html="functions.sanitizeHtml(setting.html)")
+            div(class="separate-vert-small text-center col-xs-12")
+              button(class="btn btn-success",data-ng-click="handlers.saveSetting(setting.domid,setting.value)") Save {{ setting.name }}
