@@ -19,19 +19,19 @@ div(class="separate-vert-medium")
       div
         ul(class="nav nav-tabs")
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
-            a(data-ng-href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
+            a(href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
     div
       div(data-ng-show="pageState.view")
         div(data-ng-show="!content.html && initcomplete")
@@ -129,46 +129,55 @@ div(class="separate-vert-medium")
         h2 Page Settings
         div(class="separate-vert-medium")
           div(class="col-xs-12 col-md-8 col-md-offset-2")
-            div(class="margin-medium padding-medium shadowsmall-color")
-              h4 Page Tags
-              div(class="separate-vert-small text-theme-color")
-                em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
-              div
-                span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
-                  span {{ tag }}
-                  small(class="margin-left-small")
-                    a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
-                      em x
-              div(class="separate-vert-small")
-                div(class="text-center")
-                  form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
-                    div(class="form-group")
-                      label(for="tempTag") New Tag
-                      input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
-                      button(type="submit",class="btn btn-default margin-left-small") Add Tag
-               div(class="form-group text-center")
-                  button(class="btn btn-success",data-ng-click="handlers.updateTags()") Save Tags
+            h3 Short Page Description
+            small This will save upon clicking the Save Changes button above.
+            div(class="panel panel-default")
+              div(class="panel-body")
+                textarea(class="form-control",data-ng-model="content.description")
         div(class="separate-vert-medium")
           div(class="col-xs-12 col-md-8 col-md-offset-2")
-            div(class="margin-medium padding-medium shadowsmall-color")
-              h4 Widgets
-              form(class="text-center")
-                div(class="form-group")
-                  div
-                    h3 Add a page tree to the left or right
-                  div
+            h3 Page Tags
+            div(class="panel panel-default")
+              div(class="panel-body")
+                div(class="separate-vert-small text-theme-color")
+                  em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
+                div
+                  span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
+                    span {{ tag }}
+                    small(class="margin-left-small")
+                      a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
+                        em x
+                div(class="separate-vert-small")
+                  div(class="text-center")
+                    form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
+                      div(class="form-group")
+                        label(for="tempTag") New Tag
+                        input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
+                        button(type="submit",class="btn btn-default margin-left-small") Add Tag
+                 div(class="form-group text-center")
+                    button(class="btn btn-success",data-ng-click="handlers.updateTags()") Save Tags
+        div(class="separate-vert-medium")
+          div(class="col-xs-12 col-md-8 col-md-offset-2")
+            h3 Widgets
+            div(class="panel panel-default")
+              div(class="panel-body")
+                form(class="text-center")
+                  div(class="form-group")
                     div
-                      input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
-                      label(for="subpagesWidgetEnabled") Enabled
-                      input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
-                      label(for="subpagesWidgetDisabled") Disabled
+                      h3 Add a page tree to the left or right
                     div
-                      input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
-                      label(for="subpagesWidgetLeft") Aligned Left (Default)
-                      input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
-                      label(for="subpagesWidgetRight") Aligned Right
-                div(class="form-group text-center")
-                  button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
+                      div
+                        input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
+                        label(for="subpagesWidgetEnabled") Enabled
+                        input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
+                        label(for="subpagesWidgetDisabled") Disabled
+                      div
+                        input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
+                        label(for="subpagesWidgetLeft") Aligned Left (Default)
+                        input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
+                        label(for="subpagesWidgetRight") Aligned Right
+                  div(class="form-group text-center")
+                    button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
       div(data-ng-show="pageState.olderVersions")
         h2 Review older versions below
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")

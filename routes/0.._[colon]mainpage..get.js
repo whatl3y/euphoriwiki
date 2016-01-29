@@ -34,5 +34,16 @@
     }
   } else {
     res.render(view,config.view.send(req,{obj:o}));
+    
+    // NOTE: need to move this to class at some point
+    // increment the page visits for the page
+    var path = (mainPage.indexOf("favicon.ico") == 0) ? null : "/"+mainPage;
+    if (path) {
+      path = ((path[path.length-1]=="/") ? path.substring(0,path.length-1) : path).toLowerCase();
+      config.mongodb.db.collection("wikicontent").update({path:path},{"$inc":{pageViews:1}},function(_e) {
+        if (_e) log.error(_e);
+        else log.trace("Page, " + path + ", has been visited.");
+      });
+    }
   }
 })

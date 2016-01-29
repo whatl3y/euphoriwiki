@@ -1,3 +1,4 @@
+var _ = require("underscore");
 var config = require('./config.js');
 
 /*-----------------------------------------------------------------------------------------
@@ -73,7 +74,18 @@ WikiHandler.prototype.searchPages=function(query,cb) {
   var querySplit = query.split(" ");
   querySplit.push(query);
   
-  this.getPage({filters: {$or: [{path:regEx},{tags:{$in:querySplit}}]},fields:{path:1,description:1,tags:1,pageViews:1,updated:1,_id:0},sort:{pageViews:-1}},function(e,pages) {
+  //an array of regular expressions to split the entire query up and see if
+  //anything matches the END of a path of a page
+  //i.e. "customer axiom" would match the path "/something/axiom"
+  var regExQuerySplit = [];
+  
+  _.each(querySplit,function(word) {
+    regExQuerySplit.push(new RegExp(".*" + word + "$"/* + ".*"*/));
+  });
+  
+  var returnedFields = {path:1,description:1,tags:1,pageViews:1,updated:1,_id:0};
+  
+  this.getPage({filters: {$or: [{path:regEx},{tags:{$in:querySplit}},{path:{$in:regExQuerySplit}}]},fields:returnedFields,sort:{pageViews:-1}},function(e,pages) {
     if (e) cb(e);
     else cb(null,pages);
   });

@@ -1,5 +1,5 @@
 (function(req,res) {
-  var query = req.body.query;
+  var query = req.params.query;
   var wiki = new WikiHandler();
   
   wiki.searchPages(query,function(e,pages) {

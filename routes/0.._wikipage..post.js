@@ -21,6 +21,7 @@
           else oRet = {
             success: true,
             exists: true,
+            description: pageInfo[0].description,
             html: pageInfo[0].content_html,
             markup: pageInfo[0].content_markup,
             widgets: pageInfo[0].widgets,
@@ -57,6 +58,7 @@
         var saveData = {
           "$set": {
             path: wiki.path,
+            description: info.description,
             content_html: info.html,
             content_markdown: info.markdown,
             updated: new Date(),

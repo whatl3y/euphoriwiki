@@ -2,7 +2,4 @@ extends layout
 
 block main
   div(class="row")
-    - if (data.session.loggedIn)
-      include include_mainhome.jade
-    - else
-      include include_login.jade
+    include include_mainhome.jade

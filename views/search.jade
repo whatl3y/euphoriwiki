@@ -3,6 +3,8 @@ extends layout
 block main  
   - var pages = data.external.EXTRA.pages;
   
+  include include_search.jade
+  
   div(class="separate-vert-small")
     div(class="col-xs-12 col-md-8 col-md-offset-2")
       h1
@@ -14,14 +16,11 @@ block main
               span= index+1+". "
               a(href=page.path,target="_blank")= page.path
             div(class="margin-left-large")
-              small(class="soft-text")= "Last updated on: " + page.updated + ". This page has " + page.pageViews + " total views."
+              small(class="soft-text")= "Last updated on: " + (page.updated || new Date()) + ". This page has " + (page.pageViews || 0) + " total views."
               div
                 b Page Description: 
                 span= page.description || "No page description..."
           div(class="divider")
       - else
         h4
-          alert(class="separate-vert-large text-center") We couldn't find any results from the search. Please try again.
-          form(method="post",action="/search")
-            div(class="separate-vert-small col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-              input(type="text",class="input-xlg form-control center",placeholder="Try searching again...",id="query",name="query")
+          alert(class="separate-vert-large text-center") We couldn't find any results from the search. Please try again, or go to any page you want to create a new one.
