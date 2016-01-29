@@ -32,7 +32,7 @@ function mainHomeCtrl($scope,$http) {
 	};
 	
 	$scope.handlers = {
-		newPage: function(path) {
+    newPage: function(path) {
 			path = path || "";
 			if (path.length) {
 				location.href = (path[0] == "/") ? path.substring(1) : path;

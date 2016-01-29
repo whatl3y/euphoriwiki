@@ -26,7 +26,8 @@
             widgets: pageInfo[0].widgets,
             lastUpdate: pageInfo[0].updated,
             person: pageInfo[0].updatedBy,
-            versions: pageInfo[0].history
+            versions: pageInfo[0].history,
+            tags: pageInfo[0].tags
           };
           
           wiki.getSubPages(function(_e,pages) {
@@ -140,6 +141,16 @@
             res.json({success:false, error:err});
           } else res.json({success:true});
         })
+      });
+      
+      break;
+      
+    case "updateTags":
+      var tags = info.tags;
+      
+      config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{ tags:tags }},{ upsert:true },function(err) {
+        if (err) res.json({success:false, error:err});
+        else res.json({success:true});
       });
       
       break;

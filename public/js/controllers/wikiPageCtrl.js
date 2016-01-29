@@ -44,6 +44,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 					$scope.content.person = ret.person || {};
 					$scope.content.lastUpdate = ret.lastUpdate || null;
 					$scope.content.versions = ret.versions || [];
+          $scope.content.tags = ret.tags || [];
 					
 					$scope.widgets = ret.widgets || {};
 					$scope.subpages = ret.subpages || [];
@@ -243,6 +244,23 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 				});
 			}
 		},
+    
+    updateTags: function() {
+      var loader = new Core.Modals().asyncLoader({message:"Updating your widget configuration now..."});
+			$http.post('/wikipage',{type:"updateTags", page:$scope.pathname, tags:$scope.content.tags})
+			.success(function(ret) {
+				//console.log(ret);
+				
+				if (ret.success) console.log("Successfully updated tags");
+				else $scope.error = ret.error || "There was an issue updating your tags. Please try again.";
+				
+				loader.remove();
+			})
+			.error(function(data,err) {
+				console.log(data,err);
+				loader.remove();
+			});
+    },
 		
 		updateWidgets: function() {
 			var loader = new Core.Modals().asyncLoader({message:"Updating your widget configuration now..."});
@@ -251,7 +269,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
 				//console.log(ret);
 				
 				if (ret.success) console.log("Successfully updated widgets");
-				else $scope.error = ret.error || "There was an issue deleting your file. Please try again.";
+				else $scope.error = ret.error || "There was an issue updating your widgets. Please try again.";
 				
 				loader.remove();
 			})

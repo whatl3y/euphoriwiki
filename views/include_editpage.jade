@@ -65,9 +65,9 @@ div(class="separate-vert-medium")
                 span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
         textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
       div(data-ng-show="pageState.editMarkup")
-        div(class="padding-small panel panel-default panel-danger")
+        div(class="separate-vert-small panel panel-default panel-danger")
           div(class="panel-body") NOTE: Markdown language does not have a 1-to-1 correlation to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.
-        textarea(class="form-control",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
+        textarea(class="form-control",rows="20",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
       div(data-ng-show="pageState.uploadDocx")
         h1 Add Microsoft Word Documents
         div(class="separate-vert-small")
@@ -98,7 +98,7 @@ div(class="separate-vert-medium")
                 button(id="upload-file-main",class="btn btn-primary") Add File
               div(class="separate-vert-medium",data-ng-show="fileError")
                 alert(type="danger") {{ fileError }}
-          div(class="separate-vert-large col-xs-12 col-sm-8 col-sm-offset-2",data-ng-show="userfiles.length")
+          div(class="separate-vert-large col-xs-12 col-md-8 col-md-offset-2",data-ng-show="userfiles.length")
             h3
               u Files You've Uploaded
             table(class="table table-striped table-bordered")
@@ -123,16 +123,33 @@ div(class="separate-vert-medium")
                 td {{ functions.formatDateTime(file.uploadedTime) }}
                 td
                   a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename)") Delete
-          div(class="separate-vert-large text-center col-xs-12 col-sm-8 col-sm-offset-2",data-ng-show="!userfiles.length")
+          div(class="separate-vert-large text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
             alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
       div(data-ng-show="pageState.settings")
         h2 Page Settings
         div(class="separate-vert-medium")
-          div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+          div(class="col-xs-12 col-md-8 col-md-offset-2")
             div(class="margin-medium padding-medium shadowsmall-color")
-              h4 Primary Settings
+              h4 Page Tags
+              div(class="separate-vert-small text-theme-color")
+                em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
+              div
+                span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
+                  span {{ tag }}
+                  small(class="margin-left-small")
+                    a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
+                      em x
+              div(class="separate-vert-small")
+                div(class="text-center")
+                  form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
+                    div(class="form-group")
+                      label(for="tempTag") New Tag
+                      input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
+                      button(type="submit",class="btn btn-default margin-left-small") Add Tag
+               div(class="form-group text-center")
+                  button(class="btn btn-success",data-ng-click="handlers.updateTags()") Save Tags
         div(class="separate-vert-medium")
-          div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+          div(class="col-xs-12 col-md-8 col-md-offset-2")
             div(class="margin-medium padding-medium shadowsmall-color")
               h4 Widgets
               form(class="text-center")

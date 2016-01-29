@@ -4,6 +4,11 @@
   ];
   var mainPage = req.params.mainpage;
   
+  var wiki = new WikiHandler({path:mainPage});
+  var o = {};
+  o.loggedIn = (req.session.loggedIn) ? true : false;
+  o.pagePieces = wiki.pageTree();
+  
   var page = _.filter(pages,function(p) {return p.name==mainPage});
   var view = (page.length) ? page[0].view : "wikipage";
   
@@ -16,7 +21,7 @@
         if (admin.length) {
           //get the admin settings to include
           
-          res.render(view,config.view.send(req));
+          res.render(view,config.view.send(req,{obj:o}));
         } else res.redirect("/user/" + username);
       });
     }
@@ -28,6 +33,6 @@
       res.redirect("/user/" + username);
     }
   } else {
-    res.render(view,config.view.send(req));
+    res.render(view,config.view.send(req,{obj:o}));
   }
 })

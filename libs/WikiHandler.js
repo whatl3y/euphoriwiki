@@ -51,11 +51,60 @@ WikiHandler.prototype.getPage=function(options,cb) {
   var path = (typeof options==="string") ? options : (options.path || this.path);
   var filters = (typeof options==="string") ? {path:path} : (options.filters || {path:path});
   var fields = (typeof options==="string") ? {} : (options.fields || {});
+  var sort = (typeof options==="string") ? {} : (options.sort || {});
   
-  config.mongodb.db.collection("wikicontent").find(filters,fields).toArray(function(_e,pageInfo) {
+  config.mongodb.db.collection("wikicontent").find(filters,fields).sort(sort).toArray(function(_e,pageInfo) {
     if (_e) cb(_e);
     else cb(null,pageInfo);
   });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      searchPages (PUBLIC)
+|DESCRIPTION:  Queries for pages based on a user search
+|PARAMETERS:  1. query(OPT): text of what a user search for
+|             2. cb(REQ): callback function
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <string>
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.searchPages=function(query,cb) {
+  var regEx = new RegExp(".*" + query + ".*");
+  var querySplit = query.split(" ");
+  querySplit.push(query);
+  
+  this.getPage({filters: {$or: [{path:regEx},{tags:{$in:querySplit}}]},fields:{path:1,description:1,tags:1,pageViews:1,updated:1,_id:0},sort:{pageViews:-1}},function(e,pages) {
+    if (e) cb(e);
+    else cb(null,pages);
+  });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      pageTree (PUBLIC)
+|DESCRIPTION:  Gets the page tree given the specfied route/path
+|PARAMETERS:  1. path(OPT): an optional path to return sanitized
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <string>
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.pageTree=function(path) {
+  path = path || this.path || "";
+  
+  var pages=[];
+  
+  //pages.push({text:'home',link:"/"});
+  var splitPages=path.split('/');
+  var tempLink="";
+  
+  for (var _i=0;_i<splitPages.length;_i++) {
+    tempLink+="/"+splitPages[_i];
+    pages.push({
+      text: splitPages[_i],
+      link: tempLink
+    });
+  }
+  
+  return pages;
 }
 
 /*-----------------------------------------------------------------------------------------

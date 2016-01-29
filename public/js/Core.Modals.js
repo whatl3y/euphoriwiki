@@ -29,7 +29,7 @@ Core.Modals.prototype.asyncLoader=function(params) {
 	params=params || {};
 	params= {
 		message:	params.message || '',
-		css:		params.css || {color:'green'},
+		css:		params.css || {},
 		close:		params.close || false,
 		closeTime:	params.closeTime || 2000
 	};
