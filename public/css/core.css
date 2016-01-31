@@ -52,6 +52,7 @@ input.emphasize {
 }
 
 .navbar-default {
+  background-color: transparent !important;
   background-color: initial !important;
   border: none !important;
 }
@@ -137,11 +138,19 @@ input.emphasize {
   margin-right: auto;
 }
 
+.border-soft {
+  border-color: #E5E5E5 !important;
+}
+
 .divider {
   height: 1px;
-    margin: 10px 0;
-    overflow: hidden;
-    background-color: #e5e5e5;
+  margin: 10px 0;
+  overflow: hidden;
+  background-color: #E5E5E5;
+}
+
+.divider.color {
+  background-color: #FF0000;
 }
 
 .divider.thick {
@@ -169,12 +178,22 @@ input.emphasize {
   color: white !important;
 }
 
+ul.subpage-list {
+  margin-left: 3px;
+}
+
 ul.nav > li {
   cursor: pointer;
   margin-right: 10px;
 }
 
 .nav-affix {
+  top: 0px;
+  z-index: 9;
+  width: 100%;
+}
+
+.sidenav-affix {
   top: 20px;
 }
 
@@ -216,6 +235,14 @@ div.asyncloader {
   width: 200px;
   opacity: 0.6;
   z-index: 9;
+}
+
+.border-right {
+  border-right: 1px solid;
+}
+
+.border-left {
+  border-left: 1px solid;
 }
 
 .separate-vert-small {
@@ -295,6 +322,18 @@ div.asyncloader {
 
 .max300 {
   max-width: 300px !important;
+}
+
+.minH100 {
+  min-height: 100px;
+}
+
+.minH300 {
+  min-height: 300px;
+}
+
+.minH500 {
+  min-height: 500px;
 }
 
 .text-small {

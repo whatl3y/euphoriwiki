@@ -1,5 +1,6 @@
 function wikiPageCtrl($scope,$http,$sce,Upload) {
   $scope.pathname = location.pathname;
+  $scope.newPathname = location.pathname;
   $scope.pagePieces = LOCAL_DATA.EXTRA.pagePieces;
   $scope.emptyPageError = "There is no content on this page yet. Feel free to add content now by cliking to Edit Page link at the top right of your page!";
   $scope.content = {};
@@ -61,6 +62,11 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
         console.log(data,err);
         angular.element( '#loader' ).remove();
       });
+    },
+    
+    objSize: function(obj) {
+      console.log(obj,Object.size(obj));
+      return Object.size(obj);
     },
     
     pageStateToUploadType: function() {
@@ -176,7 +182,6 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       $http.post('/wikipage',{
         type: "update",
         page: location.pathname,
-        description: $scope.content.description,
         html: $scope.content.html,
         markdown: $scope.content.markdown
       })
@@ -252,31 +257,37 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       }
     },
     
-    updateTags: function() {
-      var loader = new Core.Modals().asyncLoader({message:"Updating your widget configuration now..."});
-      $http.post('/wikipage',{type:"updateTags", page:$scope.pathname, tags:$scope.content.tags})
-      .success(function(ret) {
-        //console.log(ret);
-        
-        if (ret.success) console.log("Successfully updated tags");
-        else $scope.error = ret.error || "There was an issue updating your tags. Please try again.";
-        
-        loader.remove();
-      })
-      .error(function(data,err) {
-        console.log(data,err);
-        loader.remove();
-      });
+    updatePath: function(newPath) {
+      if ($scope.pathname != newPath && $scope.pathname != "/"+newPath) {
+        if (confirm("Are you sure you want to change the path? This will change the current location where users will find this page.")) {
+          new Core.Modals().alertPopup({loading:true});
+          $http.post('/wikipage',{type:"updatePath", page:$scope.pathname, newPath:newPath})
+          .success(function(ret) {
+            //console.log(ret);
+            
+            if (ret.success) location.href = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
+            else {
+              $scope.newPathError = ret.error || "There was an issue updating the setting. Please try again.";
+              angular.element( '#loader' ).remove();
+            }
+          })
+          .error(function(data,err) {
+            $scope.newPathError = err || "There was an issue updating the setting. Please try again.";
+            console.log(data,err);
+            angular.element( '#loader' ).remove();
+          });
+        }
+      }
     },
     
-    updateWidgets: function() {
-      var loader = new Core.Modals().asyncLoader({message:"Updating your widget configuration now..."});
-      $http.post('/wikipage',{type:"updateWidgets", page:$scope.pathname, widgets:$scope.widgets})
+    updatePageSetting: function(key,value) {
+      var loader = new Core.Modals().asyncLoader({message:"Updating the setting..."});
+      $http.post('/wikipage',{type:"updatePageSetting", page:$scope.pathname, key:key, value:value})
       .success(function(ret) {
         //console.log(ret);
         
-        if (ret.success) console.log("Successfully updated widgets");
-        else $scope.error = ret.error || "There was an issue updating your widgets. Please try again.";
+        if (ret.success) console.log("Successfully updated setting with key: " + key);
+        else console.log(ret.error);    //$scope.error = ret.error || "There was an issue updating the setting. Please try again.";
         
         loader.remove();
       })

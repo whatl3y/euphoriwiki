@@ -21,7 +21,7 @@
         if (admin.length) {
           //get the admin settings to include
           
-          res.render(view,config.view.send(req,{obj:o}));
+          res.render(view,config.view.send(req,{obj:o,title:"/"+mainPage}));
         } else res.redirect("/user/" + username);
       });
     }
@@ -33,7 +33,7 @@
       res.redirect("/user/" + username);
     }
   } else {
-    res.render(view,config.view.send(req,{obj:o}));
+    res.render(view,config.view.send(req,{obj:o,title:"/"+mainPage}));
     
     // NOTE: need to move this to class at some point
     // increment the page visits for the page

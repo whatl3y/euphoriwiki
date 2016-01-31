@@ -58,7 +58,6 @@
         var saveData = {
           "$set": {
             path: wiki.path,
-            description: info.description,
             content_html: info.html,
             content_markdown: info.markdown,
             updated: new Date(),
@@ -146,22 +145,40 @@
       });
       
       break;
+    
+    case "updatePath":
+      var newPath = info.newPath;
+      newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
       
-    case "updateTags":
-      var tags = info.tags;
-      
-      config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{ tags:tags }},{ upsert:true },function(err) {
-        if (err) res.json({success:false, error:err});
-        else res.json({success:true});
-      });
+      if (wiki.allowedPath(newPath)) {
+        wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {
+          if (e) res.json({success:false, error:"We couldn't update your path. Please try again."});
+          else {
+            if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
+            else {
+              config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
+                if (err) res.json({success:false, error:err});
+                else res.json({success:true});
+              })
+            }
+          }
+        });
+      } else {
+        res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
+      }
       
       break;
     
-    case "updateWidgets":
-      var widgets = info.widgets;
-      for (var _k in widgets) widgets[_k].enabled = (widgets[_k].enabled=="false" || widgets[_k].enabled=="0") ? false : (!!widgets[_k].enabled);
+    case "updatePageSetting":
+      var key = info.key;
+      var val = info.value;
       
-      config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{ widgets:widgets }},{ upsert:true },function(err) {
+      if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
+      
+      var o = {};
+      o[key] = val;
+      
+      config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:o},{ upsert:true },function(err) {
         if (err) res.json({success:false, error:err});
         else res.json({success:true});
       });

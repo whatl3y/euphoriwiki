@@ -82,15 +82,24 @@ Object.unserialize = function(string) {
 |ASSUMES:    Nothing
 |RETURNS:    a JS Object
 -----------------------------------------------------------------------------------------*/
-Object.merge = function(obj1,obj2) {
-  var obj3={};
+Object.merge = function(obj1,obj2,obj3) {
+  var obj3=obj3 || {};
   if (typeof obj1!=='object') {
     //do nothing
   } else if (typeof obj2!=='object') {
-    for (var attrname in obj1) {obj3[attrname] = obj1[attrname];}
+    for (var attrname in obj1) {
+      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
+      else obj3[attrname] = obj1[attrname];
+    }
   } else {
-    for (var attrname in obj1) {obj3[attrname] = obj1[attrname];}
-    for (var attrname in obj2) {obj3[attrname] = obj2[attrname];}
+    for (var attrname in obj1) {
+      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
+      else obj3[attrname] = obj1[attrname];
+    }
+    for (var attrname in obj2) {
+      if (typeof obj2[attrname]==="object" && obj2[attrname]!=null) obj3[attrname] = Object.merge(obj2[attrname],null,obj3[attrname]);
+      else obj3[attrname] = obj2[attrname];
+    }
   }
   
   return obj3;

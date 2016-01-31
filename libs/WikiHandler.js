@@ -1,5 +1,6 @@
 var _ = require("underscore");
 var config = require('./config.js');
+var Object = require("../public/js/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    WikiHandler.js
@@ -26,9 +27,38 @@ WikiHandler=function(options) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getSubPages=function(cb) {
-  this.getPage({filters:{path:new RegExp("^"+this.escapePath()+"/.+$")},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
+  //var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
+  var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
+  
+  this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
     if (_e) cb(_e);
-    else cb(null,pages);
+    else {
+      /*var aryToNestedObj = function(ary,obj,val) {
+        obj = obj || {};
+        val = val || "";
+        
+        var key = ary[0];
+        var newAry = ary.slice(1);
+        obj[key] = {};
+        val += "/" + key;
+        
+        if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{value:val},val);
+        else obj[key][newAry[0]] = {value:val};
+        
+        return obj;
+      };
+      
+      var oPages = {};
+      var pagesSplit = [];
+      for (var _i=0;_i<pages.length;_i++) {
+        pagesSplit = pages[_i].path.split("/").slice(1);
+        
+        oPages = Object.merge(oPages,aryToNestedObj(pagesSplit));
+      }*/
+      
+      if (_e) cb(_e);
+      else cb(null,pages);
+    }
   })
 }
 
@@ -117,6 +147,41 @@ WikiHandler.prototype.pageTree=function(path) {
   }
   
   return pages;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      allowedPath (PUBLIC)
+|DESCRIPTION:  Takes a path provided and determines if it's allowed for a page to have this path.
+|PARAMETERS:  1. path(OPT): 
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <boolean>
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.allowedPath=function(path) {
+  var invalid = [
+    /^\/user$/,
+    /^\/user[\/]{1}.*/,
+    /^\/admin[\/]*$/,
+    /^\/login[\/]*$/,
+    /^\/logout[\/]*$/,
+    /^\/search[\/]*.*/,
+    /^\/file[\/]*.*/
+  ];
+  
+  if (typeof path!=="string") return false;
+  else {
+    path = (path.indexOf("/") == 0) ? path : "/"+path;
+    
+    var isValid = true;
+    _.each(invalid,function(re) {
+      if (re.test(path)) {
+        isValid=false;
+        return;
+      }
+    });
+    
+    return isValid;
+  }
 }
 
 /*-----------------------------------------------------------------------------------------

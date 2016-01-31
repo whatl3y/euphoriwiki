@@ -1,24 +1,25 @@
 - var navlinks = data.nav;
 
-div(class="header row")
-  div(class="wrapper dark shadowlarge")
-    div(class="col-xs-12 col-sm-9")
-      nav(class="navbar navbar-default")
-        div
-          div(class="navbar-header")
-            button(type="button",class="navbar-toggle collapsed",data-toggle="collapse",data-target="#navbarcoll",aria-expanded="false")
-              span(class="sr-only") Toggle navigation
-              span(class="icon-bar")
-              span(class="icon-bar")
-              span(class="icon-bar")
-          div(id="navbarcoll",class="collapse navbar-collapse")
-            ul(class="nav navbar-nav")
-              - each link in navlinks
-                li(class="button-main")
-                  a(href=link.link)= link.text
-    div(class="col-xs-12 col-sm-3 pull-right text-right")
-      div(class="padding-small")
-        form(method="post",data-ng-submit="handlers.search(query)")
-          label(for="query",class="padding-small col-xs-3") Search
-          div(class="col-xs-9")
-            input(type="text",class="form-control",placeholder="What are you looking for?",id="query",name="query",data-ng-model="query")
+div(class="nav-affix",data-spy="affix",data-offset-top="20")
+  div(class="header row")
+    div(class="wrapper dark shadowlarge")
+      div(class="col-xs-12 col-sm-9")
+        nav(class="navbar navbar-default")
+          div
+            div(class="navbar-header")
+              button(type="button",class="navbar-toggle collapsed",data-toggle="collapse",data-target="#navbarcoll",aria-expanded="false")
+                span(class="sr-only") Toggle navigation
+                span(class="icon-bar")
+                span(class="icon-bar")
+                span(class="icon-bar")
+            div(id="navbarcoll",class="collapse navbar-collapse")
+              ul(class="nav navbar-nav")
+                - each link in navlinks
+                  li(class="button-main")
+                    a(href=link.link)= link.text
+      div(class="col-xs-12 col-sm-3 pull-right text-right")
+        div(class="padding-small")
+          form(method="post",data-ng-submit="handlers.search(query)")
+            label(for="query",class="padding-small col-xs-3") Search
+            div(class="col-xs-9")
+              input(type="text",class="form-control",placeholder="What are you looking for?",id="query",name="query",data-ng-model="query")

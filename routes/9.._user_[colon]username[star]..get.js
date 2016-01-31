@@ -5,12 +5,15 @@
   var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/user/"+username+req.params[0];
   
   A.find({attribute:"sAMAccountName", value:username},function(_e,info) {
-    if (_e || !info) res.render("userpage",config.view.send(req,{obj:{
-      pageHeader: "We could not find a user with username: "+username,
-      firstname: "Unknown",
-      lastname: "Unknown"
-    },title:path}));
-    else {
+    if (_e || !info) {
+      res.render("userpage",config.view.send(req,{obj:{
+        pageHeader: "We could not find a user with username: "+username,
+        firstname: "Unknown",
+        lastname: "Unknown"
+      },title:path}));
+      
+      log.info(_e || "Tried to go to /user/" + username + " but couldn't find this user.");
+    } else {
       var userInfo = info.users[0];
       var o;
       

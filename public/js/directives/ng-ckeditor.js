@@ -76,7 +76,8 @@
                         uiColor: '#FAFAFA',
                         height: '400px',
                         width: '100%',
-						allowedContent: true
+                        allowedContent: true,
+                        extraAllowedContent: '*[*]{*}(*)'
                     };
                     options = angular.extend(options, scope[attrs.ckeditor]);
 

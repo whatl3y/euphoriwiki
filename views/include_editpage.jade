@@ -1,9 +1,11 @@
-div(class="separate-vert-medium")
+div(class="wrapper separate-vert-medium")
   div(class="col-xs-12 col-sm-4 col-md-3",data-ng-show="widgets.subpages.enabled",data-ng-class="(widgets.subpages.orientation=='right') ? 'pull-right' : ''")
-    div(class="padding-medium shadowsmall-color")
+    div(class="padding-medium minH300 border-soft",data-ng-class="(widgets.subpages.orientation=='right') ? 'border-left' : 'border-right'")
       div(class="text-large") Pages within 
         em {{ pathname }}
-      ul(class="list-unstyled")
+      div(class="padding-small",data-ng-show="!subpages.length")
+        alert No pages within {{ pathname }} yet!
+      ul(class="subpage-list list-unstyled",data-ng-show="subpages.length")
         li(class="separate-vert-small",data-ng-repeat="page in subpages | orderBy : 'path'")
           div
             a(data-ng-href="{{ page.path }}") {{ page.path }}
@@ -129,11 +131,25 @@ div(class="separate-vert-medium")
         h2 Page Settings
         div(class="separate-vert-medium")
           div(class="col-xs-12 col-md-8 col-md-offset-2")
-            h3 Short Page Description
-            small This will save upon clicking the Save Changes button above.
+            h3 Page Path
+            small IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
             div(class="panel panel-default")
               div(class="panel-body")
-                textarea(class="form-control",data-ng-model="content.description")
+                div
+                  input(type="text",class="form-control",data-ng-model="newPathname")
+                div(class="separate-vert-small form-group text-center")
+                  button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
+                alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
+        div(class="separate-vert-medium")
+          div(class="col-xs-12 col-md-8 col-md-offset-2")
+            h3 Short Page Description
+            small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.
+            div(class="panel panel-default")
+              div(class="panel-body")
+                div
+                  textarea(class="form-control",data-ng-model="content.description")
+                div(class="separate-vert-small form-group text-center")
+                  button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
         div(class="separate-vert-medium")
           div(class="col-xs-12 col-md-8 col-md-offset-2")
             h3 Page Tags
@@ -154,8 +170,8 @@ div(class="separate-vert-medium")
                         label(for="tempTag") New Tag
                         input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
                         button(type="submit",class="btn btn-default margin-left-small") Add Tag
-                 div(class="form-group text-center")
-                    button(class="btn btn-success",data-ng-click="handlers.updateTags()") Save Tags
+                  div(class="separate-vert-small form-group text-center")
+                    button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
         div(class="separate-vert-medium")
           div(class="col-xs-12 col-md-8 col-md-offset-2")
             h3 Widgets
@@ -176,8 +192,8 @@ div(class="separate-vert-medium")
                         label(for="subpagesWidgetLeft") Aligned Left (Default)
                         input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
                         label(for="subpagesWidgetRight") Aligned Right
-                  div(class="form-group text-center")
-                    button(class="btn btn-success",data-ng-click="handlers.updateWidgets()") Save Widgets
+                  div(class="separate-vert-small form-group text-center")
+                    button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
       div(data-ng-show="pageState.olderVersions")
         h2 Review older versions below
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")
