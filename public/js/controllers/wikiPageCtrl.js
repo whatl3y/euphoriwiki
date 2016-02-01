@@ -21,6 +21,10 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
     olderVersions: false
   };
   
+  //file type options for if/when a user uploads or makes changes to files
+  $scope.fileUploadScopes = [{text:"Page File",val:"page"},{text:"User File",val:"user"}];
+  $scope.fileUploadScope = "page";
+  
   $scope.functions = {
     initialize: function() {
       angular.element("button#upload-file-word").on("click",function() {
@@ -48,11 +52,11 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.content.versions = ret.versions;
           $scope.content.tags = ret.tags || [];
           
-          console.log($scope.content.versions);
-          
           $scope.widgets = ret.widgets || {};
           $scope.subpages = ret.subpages || [];
-          $scope.userfiles = ret.userFiles;
+          $scope.userfiles = ret.userFiles || [];
+          $scope.pagefiles = ret.pageFiles || [];
+          $scope.availableTemplates = ret.pageTemplates || [];
         }
         
         $scope.initcomplete = true;
@@ -180,7 +184,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{
         type: "update",
-        page: location.pathname,
+        page: $scope.pathname,
         html: $scope.content.html,
         markdown: $scope.content.markdown
       })
@@ -208,12 +212,13 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       Upload.upload({
         url: '/wikipage',
         file: file,
-        fields: {type:uploadType}
+        fields: {type:uploadType, scope:$scope.fileUploadScope, page:$scope.pathname}
       })
       .success(function(data) {
         console.log(data);
         if (data.filesuccess) {
-          $scope.userfiles.push(data.fileInfo);
+          var whichAry = ($scope.fileUploadScope=="page") ? "pagefiles" : "userfiles";
+          $scope[whichAry].push(data.fileInfo);
         } else if (data.wordsuccess) {
           $scope.content.html = ($scope.content.html || "") + data.html;
           $scope.functions.htmlToMarkdown($scope.content.html);
@@ -232,15 +237,16 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       });
     },
     
-    deleteFile: function(filename) {
+    deleteFile: function(filename,scope) {
       if (confirm("Are you sure you want to delete the file permanently? This is an irreversible action so the file cannot be recovered later.")) {
         var loader = new Core.Modals().asyncLoader({message:"Deleting the file. It will be removed to the list shortly..."});
-        $http.post('/wikipage',{type:"deleteFile", filename:filename})
+        $http.post('/wikipage',{type:"deleteFile", filename:filename, scope:scope, page:$scope.pathname})
         .success(function(ret) {
           //console.log(ret);
           
           if (ret.success) {
-            $scope.userfiles = $scope.userfiles.filter(function(file) {
+            var whichAry = (scope=="page") ? "pagefiles" : "userfiles";
+            $scope[whichAry] = $scope[whichAry].filter(function(file) {
               return file.filename != filename;
             });
           } else {
@@ -277,6 +283,25 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           });
         }
       }
+    },
+    
+    getTemplate: function(template) {
+      new Core.Modals().alertPopup({loading:true});
+      $http.post('/wikipage',{type:"getTemplate", template:template})
+      .success(function(ret) {
+        //console.log(ret);
+        
+        if (ret.success) {
+          $scope.content.html = ret.html;
+          $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
+        } else $scope.error = ret.error || "There was a problem fetching the template. Please try again.";
+        
+        angular.element( "#loader" ).remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        angular.element( "#loader" ).remove();
+      });
     },
     
     updatePageSetting: function(key,value) {

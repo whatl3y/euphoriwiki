@@ -41,8 +41,15 @@ div(class="wrapper separate-vert-medium")
           div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
             h3
               alert {{ emptyPageError }}
+            div(class="separate-vert-medium text-xlarge") or
+            div
+              alert(type="success",class="wrapper")
+                div(class="text-left")
+                  div(class="text-large") Select From a Template
+                  div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+                    select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(template)")
         div(data-ng-show="content.html")
-          div(data-ng-bind-html="functions.sanitizeHtml(content.html)")
+          div(compile-html="functions.sanitizeHtml(content.html)")
         div(class="col-xs-12")
           small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ content.person.firstname + " " + content.person.lastname }}
       div(data-ng-show="pageState.editHtml")
@@ -94,17 +101,50 @@ div(class="wrapper separate-vert-medium")
       div(data-ng-show="pageState.uploadFile")
         h1 Upload Files to Download or Link To
         div(class="separate-vert-medium")
-          div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-2 col-lg-offset-5")
+          div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
             div(class="panel-body text-center")
+              div(class="separate-vert-small text-left text-theme-color")
+                div Select the scope to upload a new file. You are the only one with control to see a "user" file, where anyone who edits the page can see a "page" file.
+              h3(class="text-left") File Scope
+              div(class="separate-vert-small")
+                select(class="form-control input-lg",data-ng-model="fileUploadScope",data-ng-options="opt.val as opt.text for opt in fileUploadScopes")
               div(class="separate-vert-small")
                 input(type="file",id="file-input-main",class="sr-only",fileread="uploadedFile")
                 button(id="upload-file-main",class="btn btn-primary") Add File
               div(class="separate-vert-medium",data-ng-show="fileError")
                 alert(type="danger") {{ fileError }}
-          div(class="separate-vert-large col-xs-12 col-md-8 col-md-offset-2",data-ng-show="userfiles.length")
+          div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
             h3
-              u Files You've Uploaded
-            table(class="table table-striped table-bordered")
+              u(popover-trigger="mouseenter",popover-append-to-body="true",popover="These files can be seen and controlled by anyone with editing privileges on this wiki page. If the files won't be used anywhere other than this page, use this scope.") Page Files for 
+                em {{ pathname }}
+            table(class="table table-striped table-bordered",data-ng-show="pagefiles.length")
+              tr
+                th #
+                th
+                  a(href="javascript:void(0)",data-ng-click="functions.files.changeOrder('origFilename')") File Name
+                th
+                  span Path to Use
+                  br
+                  code &lt;img src="[Path Below]"/&gt;
+                  br
+                  code &lt;a href="[Path Below]"&gt;My Link&lt;/a&gt;
+                th
+                  a(href="javascript:void(0)",data-ng-click="functions.files.changeOrder('uploadedTime')") Date Uploaded
+                th Delete File
+              tr(data-ng-repeat="file in pagefiles | orderBy : functions.files.sortColumn : functions.files.reverseOrder")
+                td {{ $index+1 }}
+                td
+                  a(data-ng-href="/file/{{ file.filename }}",target="_blank") {{ file.origFilename }}
+                td /file/{{ file.filename }}
+                td {{ functions.formatDateTime(file.uploadedTime) }}
+                td
+                  a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'page')") Delete
+          div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!pagefiles.length")
+            alert This page doesn't have any files yet. As soon as this page has at least 1 file uploaded to it you can see and manage them here.
+          div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+            h3
+              u(popover-trigger="mouseenter",popover-append-to-body="true",popover="These files can only be controlled by you, and no one else in the wiki has visibility to these files other than the wiki admins.") Your Personal Files
+            table(class="table table-striped table-bordered",data-ng-show="userfiles.length")
               tr
                 th #
                 th
@@ -125,8 +165,8 @@ div(class="wrapper separate-vert-medium")
                 td /file/{{ file.filename }}
                 td {{ functions.formatDateTime(file.uploadedTime) }}
                 td
-                  a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename)") Delete
-          div(class="separate-vert-large text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
+                  a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'user')") Delete
+          div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
             alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
       div(data-ng-show="pageState.settings")
         h2 Page Settings

@@ -96,6 +96,20 @@ WikiHandler.prototype.getPage=function(options,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      getTemplates (PUBLIC)
+|DESCRIPTION:  Gets all the active templates in the DB that users can use.
+|PARAMETERS:  1. cb(REQ): the callback functions after we get the templates
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getTemplates=function(cb) {
+  config.mongodb.db.collection("wikitemplates").find({}).sort({name:1}).toArray(function(_e,templates) {
+    cb(_e,templates);
+  });
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      searchPages (PUBLIC)
 |DESCRIPTION:  Queries for pages based on a user search
 |PARAMETERS:  1. query(OPT): text of what a user search for
