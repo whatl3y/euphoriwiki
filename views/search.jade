@@ -14,7 +14,7 @@ block main
           div(class="separate-vert-medium")
             div(class="text-large")
               span= index+1+". "
-              a(href=page.path,target="_blank")= page.path
+              a(href=page.path)= page.path
             div(class="margin-left-large")
               small(class="soft-text")= "Last updated on: " + (page.updated || new Date()) + ". This page has " + (page.pageViews || 0) + " total views."
               div

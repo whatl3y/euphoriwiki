@@ -178,8 +178,21 @@ input.emphasize {
   color: white !important;
 }
 
-ul.subpage-list {
-  margin-left: 3px;
+/*ul.subpages:hover {
+  background: #F5F5F5;
+}
+
+ul.subpages > li:hover {
+  background: #E5E5E5;
+}*/
+
+ul.subpages div.subpage-page:hover {
+  background: #F5F5F5;
+  background: rgba(255,0,0,0.05);
+}
+
+ul.list-left {
+  margin-left: 10px;
 }
 
 ul.nav > li {

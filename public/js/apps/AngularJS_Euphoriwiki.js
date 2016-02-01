@@ -45,6 +45,8 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate',
 })
 .directive('fileread',fileread)
 .directive('compileHtml',compileHtml)
+.directive('subpage',subpageDir)
+.directive('subpageMember',subpageMemberDir)
 .controller('globalCtrl',globalCtrl)
 .controller('mainHomeCtrl',mainHomeCtrl)
 .controller('loginCtrl',loginCtrl)

@@ -45,15 +45,15 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.content.description = ret.description || "";
           $scope.content.person = ret.person || {};
           $scope.content.lastUpdate = ret.lastUpdate || null;
-          $scope.content.versions = ret.versions || [];
+          $scope.content.versions = ret.versions;
           $scope.content.tags = ret.tags || [];
+          
+          console.log($scope.content.versions);
           
           $scope.widgets = ret.widgets || {};
           $scope.subpages = ret.subpages || [];
-          $scope.userfiles = ret.userFiles || [];
+          $scope.userfiles = ret.userFiles;
         }
-        
-        //console.log(ret);
         
         $scope.initcomplete = true;
         angular.element( '#loader' ).remove();
@@ -65,7 +65,6 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
     },
     
     objSize: function(obj) {
-      console.log(obj,Object.size(obj));
       return Object.size(obj);
     },
     

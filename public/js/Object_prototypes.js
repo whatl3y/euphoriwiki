@@ -88,16 +88,16 @@ Object.merge = function(obj1,obj2,obj3) {
     //do nothing
   } else if (typeof obj2!=='object') {
     for (var attrname in obj1) {
-      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
+      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null && !(obj1[attrname] instanceof Array)) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
       else obj3[attrname] = obj1[attrname];
     }
   } else {
     for (var attrname in obj1) {
-      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
+      if (typeof obj1[attrname]==="object" && obj1[attrname]!=null && !(obj1[attrname] instanceof Array)) obj3[attrname] = Object.merge(obj1[attrname],null,obj3[attrname]);
       else obj3[attrname] = obj1[attrname];
     }
     for (var attrname in obj2) {
-      if (typeof obj2[attrname]==="object" && obj2[attrname]!=null) obj3[attrname] = Object.merge(obj2[attrname],null,obj3[attrname]);
+      if (typeof obj2[attrname]==="object" && obj2[attrname]!=null && !(obj2[attrname] instanceof Array)) obj3[attrname] = Object.merge(obj2[attrname],null,obj3[attrname]);
       else obj3[attrname] = obj2[attrname];
     }
   }

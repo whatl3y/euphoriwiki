@@ -31,9 +31,9 @@
             tags: pageInfo[0].tags
           };
           
-          wiki.getSubPages(function(_e,pages) {
+          wiki.getSubPages(function(_e,oPages) {
             if (_e) log.error(_e);
-            else if (pages.length) oRet.subpages = pages;
+            else if (Object.size(oPages)) oRet.subpages = oPages;
             
             if (req.session.loggedIn) {
               config.mongodb.db.collection("accounts").find({username:username},{files: {"$slice":100}}).toArray(function(_e,userInfo) {

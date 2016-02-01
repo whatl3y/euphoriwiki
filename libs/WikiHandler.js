@@ -27,13 +27,15 @@ WikiHandler=function(options) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getSubPages=function(cb) {
-  //var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
-  var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
+  var self=this;
+  
+  var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
+  //var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
   
   this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
     if (_e) cb(_e);
     else {
-      /*var aryToNestedObj = function(ary,obj,val) {
+      var aryToNestedObj = function(ary,obj,val) {
         obj = obj || {};
         val = val || "";
         
@@ -42,22 +44,25 @@ WikiHandler.prototype.getSubPages=function(cb) {
         obj[key] = {};
         val += "/" + key;
         
-        if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{value:val},val);
-        else obj[key][newAry[0]] = {value:val};
+        if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{/*value:val*/},val);
+        else obj[key][newAry[0]] = {/*value:val*/};
         
         return obj;
       };
       
       var oPages = {};
       var pagesSplit = [];
+      var thisPathPagesSplit = self.path.split("/").slice(1);
       for (var _i=0;_i<pages.length;_i++) {
+        
         pagesSplit = pages[_i].path.split("/").slice(1);
+        //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
         
         oPages = Object.merge(oPages,aryToNestedObj(pagesSplit));
-      }*/
+      }
       
       if (_e) cb(_e);
-      else cb(null,pages);
+      else cb(null,oPages);
     }
   })
 }
