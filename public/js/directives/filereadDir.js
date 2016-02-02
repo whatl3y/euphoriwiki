@@ -3,14 +3,14 @@ function fileread($window) {
     scope: {
       fileread: '='
     },
-    link: function($scope,$element) {
+    link: function($scope,$element,$attrs) {
       $element.bind('change', function (changeEvent) {
         if (window.File && window.FileReader) {
           var reader = new FileReader();
           reader.onload = function (loadEvent) {
             $scope.$apply(function () {
               $scope.fileread = loadEvent.target.result;
-              $scope.$parent.handlers.uploadFile(changeEvent.target.files[0]);
+              $scope.$parent.handlers.uploadFile(changeEvent.target.files[0],$attrs.fileread);
             });
           }
           if (changeEvent.target.files[0]) reader.readAsDataURL(changeEvent.target.files[0]);

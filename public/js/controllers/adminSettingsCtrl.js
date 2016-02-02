@@ -45,7 +45,11 @@ function adminSettingsCtrl($scope,$http,$sce) {
         console.log(data,err);
         loader.remove();
       });
-    }
+    },
+    
+    uploadFile: function(file,key) {
+      $scope[key] = file;
+    },
   };
   
   $scope.functions.initialize();

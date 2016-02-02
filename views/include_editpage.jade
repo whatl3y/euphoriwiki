@@ -41,13 +41,16 @@ div(class="wrapper separate-vert-medium")
           div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
             h3
               alert {{ emptyPageError }}
-            div(class="separate-vert-medium text-xlarge") or
-            div
-              alert(type="success",class="wrapper")
-                div(class="text-left")
-                  div(class="text-large") Select From a Template
-                  div(class="col-xs-12 col-sm-8 col-sm-offset-2")
-                    select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(template)")
+            
+            - //MAKE SURE USER IS LOGGED IN HERE TO SHOW TEMPLATES
+            - if (data.session.loggedIn)
+              div(class="separate-vert-medium text-xlarge") or
+              div
+                alert(type="success",class="wrapper")
+                  div(class="text-left")
+                    div(class="text-large") Select From a Template
+                    div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+                      select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(template)")
         div(data-ng-show="content.html")
           div(compile-html="functions.sanitizeHtml(content.html)")
         div(class="col-xs-12")
@@ -73,7 +76,21 @@ div(class="wrapper separate-vert-medium")
                 span Click on the 
                 b  <> Source 
                 span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
-        textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
+        div(class="separate-vert-small row")
+          div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3")
+            alert(type="success",class="wrapper")
+              div(class="text-left")
+                div(class="text-large") Append a Template to this Page
+                div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+                  select(class="form-control input-lg",data-ng-model="appendTemplate",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(appendTemplate,true)")
+        div(class="rte-editor-wrapper padding-medium",data-ng-show="!rawHTML")
+          include include_bootstraprte.jade
+        div(data-ng-show="rawHTML")
+          div(class="btn-group separate-vert-medium")
+            a(class="btn btn-default active",title="Review Raw HTML",data-ng-click="rawHTML=!rawHTML")
+              i(class="fa fa-code")
+          textarea(id="rte-raw-html",rows="20",class="form-control",data-ng-model="content.html")
+        //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
       div(data-ng-show="pageState.editMarkup")
         div(class="separate-vert-small panel panel-default panel-danger")
           div(class="panel-body") NOTE: Markdown language does not have a 1-to-1 correlation to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.

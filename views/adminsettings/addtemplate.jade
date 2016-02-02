@@ -1,0 +1,10 @@
+- //access to adminSettingsCtrl functions
+- //the information saved needs to go to setting.value as either an object or other piece of data
+
+div(class="separate-vert-small")
+  div
+    span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="template in setting.value")
+      span {{ template.file }}
+      small(class="margin-left-small")
+  div
+    input(type="file",fileread="newTemplate",data-ng-model="newTemplate")

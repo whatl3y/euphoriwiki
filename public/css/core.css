@@ -46,6 +46,30 @@ input.emphasize {
   -webkit-box-shadow: 0 1px 30px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1) inset !important;
 }
 
+.rte-editor-wrapper {
+  background: #F0F0F0;
+}
+
+#rte-raw-html {
+  
+}
+
+#rte-toolbar-wrapper {
+  margin: 5px;
+}
+
+#rte-editor {
+  overflow: scroll;
+  background: white;
+  border-collapse: separate;
+  border-radius: 3px;
+  height: 500px;
+  max-height: 500px;
+  padding: 4px;
+  margin: 10px;
+  outline: none;
+}
+
 .navbar {
   min-height: initial !important;
   margin-bottom: 0px !important;
@@ -349,12 +373,16 @@ div.asyncloader {
   min-height: 500px;
 }
 
-.text-small {
-  font-size: 0.75em;
+.text-theme-color {
+  color: #FF0000 !important;
 }
 
-.text-theme-color {
-  color: red !important;
+.text-xsmall {
+  font-size: 0.6em;
+}
+
+.text-small {
+  font-size: 0.75em;
 }
 
 .text-large {

@@ -1,3 +1,4 @@
+- // Needs access to the mainHomeCtrl controller
 div(class="wrapper col-xs-12",data-ng-show="widgets.length")
   h1 Quick Links
   alert(type="danger",data-ng-show="error") {{ error }}
@@ -12,6 +13,7 @@ div(class="wrapper col-xs-12",data-ng-show="widgets.length")
             div(class="separate-vert-small")
               div
                 a(data-ng-href="{{ item.path }}",target="_blank") {{ item.path }} 
+                small(class="soft-text text-xsmall") {{ item.pageViews }} views
                 span(data-ng-show="item.extraText") {{ item.extraText }}
               div
                 small(class="soft-text") Updated on {{ functions.formatDateTime(item.updated) }}

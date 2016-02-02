@@ -2,7 +2,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
   $scope.pathname = location.pathname;
   $scope.newPathname = location.pathname;
   $scope.pagePieces = LOCAL_DATA.EXTRA.pagePieces;
-  $scope.emptyPageError = "There is no content on this page yet. Feel free to add content now by cliking to Edit Page link at the top right of your page!";
+  $scope.emptyPageError = "There is no content on this page yet. Feel free to log in and add content now by selecting from a template below or clicking to Edit Page link at the top right of your page!";
   $scope.content = {};
   $scope.config = {
     ckOptions: {
@@ -27,6 +27,8 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
   
   $scope.functions = {
     initialize: function() {
+      $('#rte-editor').wysiwyg();
+      
       angular.element("button#upload-file-word").on("click",function() {
         angular.element("#file-input-word").trigger("click");
       });
@@ -45,12 +47,14 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           
           $scope.content = $scope.content || {};
           $scope.content.html = ret.html || "";
-          $scope.content.markdown = ret.markdown || "";
+          $scope.content.markdown = ret.markdown || $scope.functions.htmlToMarkdown( $scope.content.html ) || "";
           $scope.content.description = ret.description || "";
           $scope.content.person = ret.person || {};
           $scope.content.lastUpdate = ret.lastUpdate || null;
           $scope.content.versions = ret.versions;
           $scope.content.tags = ret.tags || [];
+          
+          angular.element("#rte-editor").html( $scope.content.html );
           
           $scope.widgets = ret.widgets || {};
           $scope.subpages = ret.subpages || [];
@@ -59,6 +63,8 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.availableTemplates = ret.pageTemplates || [];
         }
         
+        $scope.functions.rteInit();
+        
         $scope.initcomplete = true;
         angular.element( '#loader' ).remove();
       })
@@ -66,6 +72,27 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
         console.log(data,err);
         angular.element( '#loader' ).remove();
       });
+    },
+    
+    rteInit: function() {
+      //Bind event handlers to the RTE so that the model
+      //for the html stays correct.
+      angular.element("#rte-editor").on("focus",function() {
+        var $this = $( this );
+        $scope.$apply(function() {
+          $this.html( $scope.content.html );
+        });
+      });
+      
+      angular.element("#rte-editor").on("blur",function() {
+        var $this = $( this );
+        $scope.$apply(function() {
+          $scope.content.html = $this.html();
+          $scope.functions.htmlToMarkdown( $scope.content.html )
+        });
+      });
+      
+      angular.element("#rte-editor").html( $scope.content.html );
     },
     
     objSize: function(obj) {
@@ -285,15 +312,20 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       }
     },
     
-    getTemplate: function(template) {
+    getTemplate: function(template,append) {
+      append = append || false;
+      
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{type:"getTemplate", template:template})
       .success(function(ret) {
         //console.log(ret);
         
         if (ret.success) {
-          $scope.content.html = ret.html;
+          $scope.content.html = (append) ? (($scope.content.html || "")+ret.html) : ret.html;
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
+          
+          $scope.functions.changePageState("view");
+          template = "";
         } else $scope.error = ret.error || "There was a problem fetching the template. Please try again.";
         
         angular.element( "#loader" ).remove();
