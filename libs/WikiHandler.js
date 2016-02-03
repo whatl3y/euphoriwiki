@@ -119,6 +119,8 @@ WikiHandler.prototype.getTemplates=function(cb) {
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.searchPages=function(query,cb) {
+  query = query.toLowerCase();
+  
   var regEx = new RegExp(".*" + query + ".*");
   var querySplit = query.split(" ");
   querySplit.push(query);

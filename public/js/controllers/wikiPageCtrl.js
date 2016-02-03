@@ -27,8 +27,6 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
   
   $scope.functions = {
     initialize: function() {
-      $('#rte-editor').wysiwyg();
-      
       angular.element("button#upload-file-word").on("click",function() {
         angular.element("#file-input-word").trigger("click");
       });
@@ -47,7 +45,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           
           $scope.content = $scope.content || {};
           $scope.content.html = ret.html || "";
-          $scope.content.markdown = ret.markdown || $scope.functions.htmlToMarkdown( $scope.content.html ) || "";
+          $scope.content.markdown = ret.markdown || "";
           $scope.content.description = ret.description || "";
           $scope.content.person = ret.person || {};
           $scope.content.lastUpdate = ret.lastUpdate || null;
@@ -63,7 +61,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.availableTemplates = ret.pageTemplates || [];
         }
         
-        $scope.functions.rteInit();
+        $scope.functions.rteInit(true);
         
         $scope.initcomplete = true;
         angular.element( '#loader' ).remove();
@@ -74,25 +72,39 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       });
     },
     
-    rteInit: function() {
-      //Bind event handlers to the RTE so that the model
-      //for the html stays correct.
-      angular.element("#rte-editor").on("focus",function() {
-        var $this = $( this );
-        $scope.$apply(function() {
-          $this.html( $scope.content.html );
-        });
-      });
+    rteInit: function(bind) {
+      var rteElement = angular.element("#rte-editor");
+      rteElement.html( $scope.content.html );
       
-      angular.element("#rte-editor").on("blur",function() {
-        var $this = $( this );
-        $scope.$apply(function() {
-          $scope.content.html = $this.html();
-          $scope.functions.htmlToMarkdown( $scope.content.html )
+      if (bind) {
+        $('#rte-editor').wysiwyg();
+        
+        //Bind event handlers to the RTE so that the model
+        //for the html stays correct.
+        rteElement.on("focus",function() {
+          var $this = $( this );
+          $scope.$apply(function() {
+            $this.html( $scope.content.html );
+          });
         });
-      });
-      
-      angular.element("#rte-editor").html( $scope.content.html );
+        
+        rteElement.on("blur",function() {
+          var $this = $( this );
+          $scope.$apply(function() {
+            $scope.content.html = $this.html();
+            $scope.functions.htmlToMarkdown( $scope.content.html )
+          });
+        });
+        
+        //bind copy/paste event handler to RTE
+        var cp = new Core.CopyPaste({elements:rteElement, cb:function(err,imgSrc) {
+          if (err) console.log("Error while pasting content: " + err);
+          else {
+            $scope.content.html += "<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2'><img class='img-responsive' src='" + imgSrc + "' /></div>";
+            $scope.functions.rteInit();
+          }
+        }});
+      }
     },
     
     objSize: function(obj) {
@@ -324,6 +336,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.content.html = (append) ? (($scope.content.html || "")+ret.html) : ret.html;
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
           
+          $scope.functions.rteInit();
           $scope.functions.changePageState("view");
           template = "";
         } else $scope.error = ret.error || "There was a problem fetching the template. Please try again.";
