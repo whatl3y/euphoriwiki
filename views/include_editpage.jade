@@ -76,24 +76,18 @@ div(class="wrapper separate-vert-medium")
                 span Click on the 
                 b  <> Source 
                 span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
-        div(class="separate-vert-small row")
-          div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3")
-            alert(type="success",class="wrapper")
-              div(class="text-left")
-                div(class="text-large") Append a Template to this Page
-                div(class="col-xs-12 col-sm-8 col-sm-offset-2")
-                  select(class="form-control input-lg",data-ng-model="appendTemplate",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(appendTemplate,true)")
         div(class="rte-editor-wrapper padding-medium",data-ng-show="!rawHTML")
           include include_bootstraprte.jade
         div(data-ng-show="rawHTML")
           div(class="btn-group separate-vert-medium")
             a(class="btn btn-default active",title="Review Raw HTML",data-ng-click="rawHTML=!rawHTML")
               i(class="fa fa-code")
-          textarea(id="rte-raw-html",rows="20",class="form-control",data-ng-model="content.html")
+          textarea(id="rte-raw-html",rows="25",class="form-control",data-ng-model="content.html",data-ng-change="functions.rteInit()")
         //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
       div(data-ng-show="pageState.editMarkup")
-        div(class="separate-vert-small panel panel-default panel-danger")
-          div(class="panel-body") NOTE: Markdown language does not have a 1-to-1 correlation to HTML, so if you are updating the markdown version of the page and there were previous versions with HTML5 or other complex versions of HTML, some things could be lost.
+        div(class="separate-vert-small panel panel-danger")
+          div(class="panel-body")
+            b NOTE: Markdown is very different than HTML, so if you are updating the markdown version of the page and there were previous versions with complex HTML or other components, some things will most likely be lost. Continue at your own risk!
         textarea(class="form-control",rows="20",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
       div(data-ng-show="pageState.uploadDocx")
         h1 Add Microsoft Word Documents
@@ -187,71 +181,7 @@ div(class="wrapper separate-vert-medium")
             alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
       div(data-ng-show="pageState.settings")
         h2 Page Settings
-        div(class="separate-vert-medium")
-          div(class="col-xs-12 col-md-8 col-md-offset-2")
-            h3 Page Path
-            small IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
-            div(class="panel panel-default")
-              div(class="panel-body")
-                div
-                  input(type="text",class="form-control",data-ng-model="newPathname")
-                div(class="separate-vert-small form-group text-center")
-                  button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
-                alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
-        div(class="separate-vert-medium")
-          div(class="col-xs-12 col-md-8 col-md-offset-2")
-            h3 Short Page Description
-            small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.
-            div(class="panel panel-default")
-              div(class="panel-body")
-                div
-                  textarea(class="form-control",data-ng-model="content.description")
-                div(class="separate-vert-small form-group text-center")
-                  button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
-        div(class="separate-vert-medium")
-          div(class="col-xs-12 col-md-8 col-md-offset-2")
-            h3 Page Tags
-            div(class="panel panel-default")
-              div(class="panel-body")
-                div(class="separate-vert-small text-theme-color")
-                  em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
-                div
-                  span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
-                    span {{ tag }}
-                    small(class="margin-left-small")
-                      a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
-                        em x
-                div(class="separate-vert-small")
-                  div(class="text-center")
-                    form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
-                      div(class="form-group")
-                        label(for="tempTag") New Tag
-                        input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
-                        button(type="submit",class="btn btn-default margin-left-small") Add Tag
-                  div(class="separate-vert-small form-group text-center")
-                    button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
-        div(class="separate-vert-medium")
-          div(class="col-xs-12 col-md-8 col-md-offset-2")
-            h3 Widgets
-            div(class="panel panel-default")
-              div(class="panel-body")
-                form(class="text-center")
-                  div(class="form-group")
-                    div
-                      h3 Add a page tree to the left or right
-                    div
-                      div
-                        input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
-                        label(for="subpagesWidgetEnabled") Enabled
-                        input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
-                        label(for="subpagesWidgetDisabled") Disabled
-                      div
-                        input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
-                        label(for="subpagesWidgetLeft") Aligned Left (Default)
-                        input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
-                        label(for="subpagesWidgetRight") Aligned Right
-                  div(class="separate-vert-small form-group text-center")
-                    button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
+        include include_wikipagesettings.jade
       div(data-ng-show="pageState.olderVersions")
         h2 Review older versions below
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")

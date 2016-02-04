@@ -100,110 +100,128 @@
       if (ext == ".jade") retHtml = jade.renderFile(p);
       else retHtml = fs.readFileSync(p,{encoding:"utf8"});
       
-      res.json({success:true, html:retHtml});
+      res.json({success:true, html:html.prettyPrint(retHtml,{indent_size:2})});
       
       break;
     
     case "wordToHtml":
-      if(/.+openxmlformats\-officedocument.+/.test(fileType)) {
-        mammoth.convertToHtml({path:filePath}).then(function(result) {
-          var returnedResult = result.value.replace(/\<table\>/g,"<table class='table table-bordered table-striped'>");
-          res.json({wordsuccess:true, html:returnedResult, debug: result});
-        });
-      } else {
-        res.json({wordsuccess:false, error:"Uh oh, this doesn't appear to be a valid Microsoft Word document that we can parse and convert. Please try again."});
-      }      
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
+          mammoth.convertToHtml({path:filePath}).then(function(result) {
+            var returnedResult = result.value.replace(/\<table\>/g,"<table class='table table-bordered table-striped'>");
+            res.json({wordsuccess:true, html:returnedResult, debug: result});
+          }).catch(function(err) {
+            log.error(err);
+            res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});
+          });
+        } else {
+          res.json({wordsuccess:false, error:"Uh oh, this doesn't appear to be a valid Microsoft Word document that we can parse and convert. Please try again."});
+        }
+      }
       
       break;
     
-    case "uploadFile":      
-      var fh = new FileHandler({db:config.mongodb.db});
-      fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
-        if (err) {
-          log.error(err);
-          res.json({filesuccess:false, error:err});
-        } else {
-          log.debug("File created and piped to GridFS. Filename: "+newFileName);
-          
-          var newFileInfo = {
-            uploadedTime: new Date(),
-            origFilename: fileName,
-            filename: newFileName
-          };
-          
-          res.json({filesuccess:true, fileInfo:newFileInfo});
-          
-          var fileScope = info.scope;
-          var coll = (fileScope=="page") ? "wikicontent" : "accounts";
-          var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
-          config.mongodb.db.collection(coll).update(filter,{
-            "$push": {
-              files: newFileInfo
-            }
-          },{upsert:true},function(err) {
-            if (err) log.error(err);
-          });
-        }
-      });
+    case "uploadFile":
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        var fh = new FileHandler({db:config.mongodb.db});
+        fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
+          if (err) {
+            log.error(err);
+            res.json({filesuccess:false, error:err});
+          } else {
+            log.debug("File created and piped to GridFS. Filename: "+newFileName);
+            
+            var newFileInfo = {
+              uploadedTime: new Date(),
+              origFilename: fileName,
+              filename: newFileName
+            };
+            
+            res.json({filesuccess:true, fileInfo:newFileInfo});
+            
+            var fileScope = info.scope;
+            var coll = (fileScope=="page") ? "wikicontent" : "accounts";
+            var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
+            config.mongodb.db.collection(coll).update(filter,{
+              "$push": {
+                files: newFileInfo
+              }
+            },{upsert:true},function(err) {
+              if (err) log.error(err);
+            });
+          }
+        });
+      }
       
       break;
     
     case "deleteFile":
-      var fileName = info.filename;
-      
-      var fh = new FileHandler({db:config.mongodb.db});
-      fh.deleteFile({filename:fileName},function(e) {
-        if (e) log.error(e);
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        var fileName = info.filename;
         
-        var fileScope = info.scope;
-        var coll = (fileScope=="page") ? "wikicontent" : "accounts";
-        var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
-        config.mongodb.db.collection(coll).update(filter,{ "$pull": { files:{ filename:fileName } }},{upsert:true},function(err) {
-          if (err) {
-            log.error(err);
-            res.json({success:false, error:err});
-          } else res.json({success:true});
+        var fh = new FileHandler({db:config.mongodb.db});
+        fh.deleteFile({filename:fileName},function(e) {
+          if (e) log.error(e);
+          
+          var fileScope = info.scope;
+          var coll = (fileScope=="page") ? "wikicontent" : "accounts";
+          var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
+          config.mongodb.db.collection(coll).update(filter,{ "$pull": { files:{ filename:fileName } }},{upsert:true},function(err) {
+            if (err) {
+              log.error(err);
+              res.json({success:false, error:err});
+            } else res.json({success:true});
+          });
         });
-      });
-      
-      break;
+        
+        break;
+      }
     
     case "updatePath":
-      var newPath = info.newPath;
-      newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
-      
-      if (wiki.allowedPath(newPath)) {
-        wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {
-          if (e) res.json({success:false, error:"We couldn't update your path. Please try again."});
-          else {
-            if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        var newPath = info.newPath;
+        newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
+        
+        if (wiki.allowedPath(newPath)) {
+          wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {
+            if (e) res.json({success:false, error:"We couldn't update your path. Please try again."});
             else {
-              config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
-                if (err) res.json({success:false, error:err});
-                else res.json({success:true});
-              })
+              if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
+              else {
+                config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
+                  if (err) res.json({success:false, error:err});
+                  else res.json({success:true});
+                })
+              }
             }
-          }
-        });
-      } else {
-        res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
+          });
+        } else {
+          res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
+        }
       }
       
       break;
     
     case "updatePageSetting":
-      var key = info.key;
-      var val = info.value;
-      
-      if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
-      
-      var o = {};
-      o[key] = val;
-      
-      config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:o},{ upsert:true },function(err) {
-        if (err) res.json({success:false, error:err});
-        else res.json({success:true});
-      });
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        var key = info.key;
+        var val = info.value;
+        
+        if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
+        
+        var o = {};
+        o[key] = val;
+        
+        config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:o},{ upsert:true },function(err) {
+          if (err) res.json({success:false, error:err});
+          else res.json({success:true});
+        });
+      }
       
       break;
     

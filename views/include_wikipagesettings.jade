@@ -1,0 +1,74 @@
+- //20160204: included in include_editpage.jade
+- //has access to properties in wikiPageCtrl controller
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Page Path
+      div
+        small
+          alert IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
+      div
+        div
+          input(type="text",class="form-control",data-ng-model="newPathname")
+        div(class="separate-vert-small form-group text-center")
+          button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
+        alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Short Page Description
+      div
+        small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.
+      div
+        div
+          textarea(class="form-control",data-ng-model="content.description")
+        div(class="separate-vert-small form-group text-center")
+          button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Page Tags
+      div
+        div(class="separate-vert-small text-theme-color")
+          em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
+        div
+          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
+            span {{ tag }}
+            small(class="margin-left-small")
+              a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
+                em x
+        div(class="row separate-vert-small")
+          div(class="text-center")
+            form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
+              div(class="form-group")
+                label(for="tempTag") New Tag
+                input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
+                button(type="submit",class="btn btn-default margin-left-small") Add Tag
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Widgets
+      div
+        form(class="text-center")
+          div(class="form-group")
+            div
+              h3 Add a page tree to the left or right
+            div
+              div
+                input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
+                label(for="subpagesWidgetEnabled") Enabled
+                input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
+                label(for="subpagesWidgetDisabled") Disabled
+              div
+                input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
+                label(for="subpagesWidgetLeft") Aligned Left (Default)
+                input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
+                label(for="subpagesWidgetRight") Aligned Right
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets

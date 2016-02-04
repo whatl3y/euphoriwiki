@@ -1,19 +1,26 @@
 div(id="rte-toolbar-wrapper")
   div(class="text-large") Rich Text Editor
-  div(class="btn-toolbar" data-role="editor-toolbar" data-target="#rte-editor")
+  div(class="btn-toolbar",data-role="editor-toolbar",data-target="#rte-editor")
+    div(class="btn-group")
+      a(style="font-size:2em",class="btn btn-default dropdown-toggle",data-toggle="dropdown",popover-trigger="mouseenter",popover-placement="right",popover-append-to-body="true",popover="Click here to select a template to append to your page!")
+        i(class="glyphicon glyphicon-gift")
+        b(class="caret")
+      ul(class="dropdown-menu")
+        li(data-ng-repeat="temp in availableTemplates")
+          a(class="click",data-ng-click="handlers.getTemplate(temp.file,true)") {{ temp.name }}
     div(class="btn-group")
       a(class="btn btn-default dropdown-toggle",data-toggle="dropdown",title="Font Size")
         i(class="fa fa-text-height")
         b(class="caret")
       ul(class="dropdown-menu")
         li
-          a(data-edit="fontSize 5")
+          a(class="click",data-edit="fontSize 5")
             font(size="5") Huge
         li
-          a(data-edit="fontSize 3")
+          a(class="click",data-edit="fontSize 3")
             font(size="3") Normal
         li
-          a(data-edit="fontSize 1")
+          a(class="click",data-edit="fontSize 1")
             font(size="1") Small
     div(class="btn-group")
       a(class="btn btn-default",data-edit="bold",title="Bold (Ctrl/Cmd+B)")

@@ -103,6 +103,19 @@ Authentication.prototype.login = function(upn,cb) {
   });
 }
 
+/*-----------------------------------------------------------------------------------------
+|NAME:      isLoggedIn (PUBLIC)
+|DESCRIPTION:  Determines if a user is logged in and returns that in a callback function
+|PARAMETERS:  1. cb(REQ): callback function after we determine if the user is logged in
+|                   cb(<true/false>)
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.isLoggedIn = function(cb) {
+  cb(!!this.session.loggedIn);
+}
+
 //-------------------------------------------------------
 //NodeJS
 if (typeof module !== 'undefined' && module.exports) {

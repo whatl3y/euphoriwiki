@@ -1,7 +1,8 @@
 function wikiPageCtrl($scope,$http,$sce,Upload) {
   $scope.pathname = location.pathname;
   $scope.newPathname = location.pathname;
-  $scope.pagePieces = LOCAL_DATA.EXTRA.pagePieces;
+  
+  $scope.pagePieces = [{text:"home",link:"/"}].concat(LOCAL_DATA.EXTRA.pagePieces || []);
   $scope.emptyPageError = "There is no content on this page yet. Feel free to log in and add content now by selecting from a template below or clicking to Edit Page link at the top right of your page!";
   $scope.content = {};
   $scope.config = {
@@ -24,6 +25,12 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
   //file type options for if/when a user uploads or makes changes to files
   $scope.fileUploadScopes = [{text:"Page File",val:"page"},{text:"User File",val:"user"}];
   $scope.fileUploadScope = "page";
+  
+  $scope.properties = {
+    path: $scope.pathname,
+    pathname: $scope.pathname,
+    pagename: $scope.pathname.substring($scope.pathname.lastIndexOf("/")+1)
+  };
   
   $scope.functions = {
     initialize: function() {
@@ -77,23 +84,9 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       rteElement.html( $scope.content.html );
       
       if (bind) {
-        $('#rte-editor').wysiwyg();
-        
-        //Bind event handlers to the RTE so that the model
-        //for the html stays correct.
-        rteElement.on("focus",function() {
-          var $this = $( this );
-          $scope.$apply(function() {
-            $this.html( $scope.content.html );
-          });
-        });
-        
-        rteElement.on("blur",function() {
-          var $this = $( this );
-          $scope.$apply(function() {
-            $scope.content.html = $this.html();
-            $scope.functions.htmlToMarkdown( $scope.content.html )
-          });
+        $('#rte-editor').wysiwyg({},function($editor) {
+          $scope.content.html = $editor.html();
+          $scope.functions.htmlToMarkdown( $scope.content.html )
         });
         
         //bind copy/paste event handler to RTE
@@ -144,6 +137,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
     markdownToHtml: function(markdown) {
       $scope.content = $scope.content || {};
       $scope.content.html = marked(markdown || "");
+      $scope.functions.rteInit();
     },
     
     sanitizeHtml: function(html) {
@@ -261,6 +255,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
         } else if (data.wordsuccess) {
           $scope.content.html = ($scope.content.html || "") + data.html;
           $scope.functions.htmlToMarkdown($scope.content.html);
+          $scope.functions.rteInit();
           
           $scope.functions.changePageState("view");
         } else {
@@ -337,8 +332,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
           
           $scope.functions.rteInit();
-          $scope.functions.changePageState("view");
-          template = "";
+          //$scope.functions.changePageState("view");
         } else $scope.error = ret.error || "There was a problem fetching the template. Please try again.";
         
         angular.element( "#loader" ).remove();
@@ -373,6 +367,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       
       $scope.content.html = version.content_html;
       $scope.content.markdown = version.content_markdown;
+      $scope.functions.rteInit();
     }
   };
   

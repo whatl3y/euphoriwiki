@@ -18,7 +18,7 @@
 		var html = $(this).html();
 		return html && html.replace(/(<br>|\s|<div><br><\/div>|&nbsp;)*$/, '');
 	};
-	$.fn.wysiwyg = function (userOptions) {
+	$.fn.wysiwyg = function (userOptions,saveCB) {
 		var editor = this,
 			selectedRange,
 			options,
@@ -66,6 +66,7 @@
 			},
 			saveSelection = function () {
 				selectedRange = getCurrentRange();
+        if (typeof saveCB==="function") saveCB(editor);
 			},
 			restoreSelection = function () {
 				var selection = window.getSelection();

@@ -41,9 +41,9 @@ input.input-xlg {
 
 input.emphasize {
   font-weight: bold;
-  box-shadow: 0 1px 30px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1) inset !important;
-  -moz-box-shadow: 0 1px 30px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1) inset !important;
-  -webkit-box-shadow: 0 1px 30px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1) inset !important;
+  box-shadow: 0 1px 30px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 0, 0, 0.1) inset !important;
+  -moz-box-shadow: 0 1px 30px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 0, 0, 0.1) inset !important;
+  -webkit-box-shadow: 0 1px 30px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 0, 0, 0.1) inset !important;
 }
 
 .rte-editor-wrapper {
@@ -63,8 +63,8 @@ input.emphasize {
   background: white;
   border-collapse: separate;
   border-radius: 3px;
-  height: 500px;
-  max-height: 500px;
+  height: 400px;
+  max-height: 1000px;
   padding: 4px;
   margin: 10px;
   outline: none;
@@ -115,10 +115,16 @@ input.emphasize {
   -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
 }
 
+.shadowsmall-subtle {
+  box-shadow: 0 1px 15px #ccc;
+  -moz-box-shadow: 0 1px 15px #ccc;
+  -webkit-box-shadow: 0 1px 15px #ccc;
+}
+
 .shadowsmall-color {
-  box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
-  -moz-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
-  -webkit-box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 30px rgba(255, 0, 0, 0.1) inset !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.1) inset !important;
+  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.1) inset !important;
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.1) inset !important;
 }
 
 .shadowlarge {
@@ -140,7 +146,7 @@ input.emphasize {
 }
 
 .wrapper.dark {
-  background: #FF0000;
+  background: #333333;
   color: #FFFFFF;
 }
 
@@ -150,6 +156,14 @@ input.emphasize {
 
 .wrapper.light.gray {
   background: #F5F5F5;
+}
+
+.wrapper.light > .header {
+  border: 2px solid;
+  margin-bottom: 5px;
+  border-radius: 2px;
+  background: #333333;
+  color: #FFFFFF;
 }
 
 .wrapper.dark.gray {
@@ -174,7 +188,7 @@ input.emphasize {
 }
 
 .divider.color {
-  background-color: #FF0000;
+  background-color: #333333;
 }
 
 .divider.thick {
@@ -193,8 +207,8 @@ input.emphasize {
 
 }
 
-.panel-red {
-  border-color: #FF0000 !important;
+.panel-#333333 {
+  border-color: #333333 !important;
 }
 
 .panel-danger {
@@ -263,7 +277,7 @@ div.asyncloader {
   position: fixed;
   right: 10px;
   bottom: 10px;
-  background: #FF0000;
+  background: #333333;
   color: #FFFFFF;
   border-radius: 10px;
   padding: 10px;
@@ -374,7 +388,7 @@ div.asyncloader {
 }
 
 .text-theme-color {
-  color: #FF0000 !important;
+  color: #333333 !important;
 }
 
 .text-xsmall {
@@ -395,11 +409,11 @@ div.asyncloader {
 
 .widget .widget-header {
   padding: 4px;
-  background: #FF0000;
+  background: #333333;
   color: white;
   border-radius: 3px;
 }
 
 .widget a {
-  color: #FF0000 !important;
+  color: #333333 !important;
 }
