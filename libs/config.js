@@ -65,27 +65,30 @@ var self = module.exports = {
   },
   
   mongodb: {
-    FULL_URI:  process.env.MONGODB_FULLURI || null,
-    PROTOCOL:  'mongodb',
-    HOST:    process.env.MONGODB_HOST || "localhost",
-    PORT:    Number(process.env.MONGODB_PORT || 27017),
-    USER:    process.env.MONGODB_USER,
-    PASSWORD:  process.env.MONGODB_PW,
-    TESTDB:    process.env.MONGODB_DB_DEV,
-    PRODDB:     process.env.MONGODB_DB,
+    access: {
+      FULL_URI:  process.env.MONGODB_FULLURI || null,
+      PROTOCOL:  'mongodb',
+      HOST:    process.env.MONGODB_HOST || "localhost",
+      PORT:    Number(process.env.MONGODB_PORT || 27017),
+      USER:    process.env.MONGODB_USER,
+      PASSWORD:  process.env.MONGODB_PW,
+      TESTDB:    process.env.MONGODB_DB_DEV,
+      PRODDB:     process.env.MONGODB_DB
+    },
+    
     MDB:    {},                //will be the instance of MDB we use to open a connection with the mongodb server
     db:      {},                //the object we'll be using to create cursors and return/set data in mongoDB
     
     dbInfo:  function() {
-      var db= (self.server.IS_PRODUCTION) ? this.PRODDB : this.TESTDB;
+      var db= (self.server.IS_PRODUCTION) ? this.access.PRODDB : this.access.TESTDB;
       
       return {
-        full:  this.FULL_URI,
-        p:    this.PROTOCOL,
-        h:    this.HOST,
-        user:  this.USER,
-        pw:    this.PASSWORD,
-        port:  this.PORT,
+        full:  this.access.FULL_URI,
+        p:    this.access.PROTOCOL,
+        h:    this.access.HOST,
+        user:  this.access.USER,
+        pw:    this.access.PASSWORD,
+        port:  this.access.PORT,
         db:    db
       }
     },

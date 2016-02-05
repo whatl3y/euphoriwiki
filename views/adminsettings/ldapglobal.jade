@@ -1,0 +1,28 @@
+- //access to adminSettingsCtrl functions
+- //the information saved needs to go to setting.value as either an object or other piece of data
+
+div(class="separate-vert-small")
+  div(class="row")
+    form
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 text-center")
+        alert(type="danger") NOTE: Be careful when changing these settings, as it can prevent users from being able to access the wiki.
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="ldap_protocol") LDAP Protocol
+          input(type="text",class="form-control",id="ldap_protocol",name="ldap_protocol",data-ng-model="setting.value.protocol")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="ldap_url") LDAP URL
+          input(type="text",class="form-control",id="ldap_url",name="ldap_url",data-ng-model="setting.value.url")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="ldap_basedn") LDAP Base DN
+          input(type="text",class="form-control",id="ldap_basedn",name="ldap_basedn",data-ng-model="setting.value.basedn")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="ldap_username") LDAP Bind Username
+          input(type="text",class="form-control",id="ldap_username",name="ldap_username",data-ng-model="setting.value.username")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="ldap_password") LDAP Bind Password
+          input(type="text",class="form-control",id="ldap_password",name="ldap_password",data-ng-model="setting.value.password")

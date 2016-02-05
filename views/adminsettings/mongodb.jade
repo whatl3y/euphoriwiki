@@ -1,0 +1,22 @@
+- //access to adminSettingsCtrl functions
+- //the information saved needs to go to setting.value as either an object or other piece of data
+
+div(class="separate-vert-small")
+  div(class="row")
+    form
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="mongodb_host") Host
+          input(type="text",class="form-control",id="mongodb_host",name="mongodb_host",data-ng-model="setting.value.HOST")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="mongodb_port") Port
+          input(type="text",class="form-control",id="mongodb_port",name="mongodb_port",data-ng-model="setting.value.PORT")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="mongodb_username") Username
+          input(type="text",class="form-control",id="mongodb_username",name="mongodb_username",data-ng-model="setting.value.USER")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
+          label(for="mongodb_password") Password
+          input(type="text",class="form-control",id="mongodb_password",name="mongodb_password",data-ng-model="setting.value.PASSWORD")

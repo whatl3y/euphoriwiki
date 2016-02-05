@@ -171,6 +171,56 @@ WikiHandler.prototype.pageTree=function(path) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      requiresReview (PUBLIC)
+|DESCRIPTION:  Determines if a path requires review prior to making the content published.
+|PARAMETERS:  1. path(OPT): an optional path to return sanitized
+|             2. cb(REQ): the callback function to tell us if this requires review. It will return
+|                   an integer to tell us how many reviews are required.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.requiresReview=function(path,cb) {
+  path = path || this.path;
+  this.getPage({filters:{path:path}, fields:{"settings.requiresReview":1}},function(e,pages) {
+    if (e) cb(e);
+    else if (!pages.length) cb(null,0);
+    else {
+      var numReviews = pages[0].settings.requiresReview || 0;
+      return cb(null,numReviews);
+    }
+  });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      createInheritanceFilter (PUBLIC)
+|DESCRIPTION:  This will create and return an object that can be included in a mongodb query
+|             to look for information within the current path OR any of the parent paths. This is
+|             relevant for looking for whether a particular condition exists in the current path
+|             or any parents for inheritance
+|PARAMETERS:  1. path(OPT): the path we're creating the filter for
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <object>: and $or mongodb filter object to be appended to other filters.
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.createInheritanceFilter=function(path) {
+  path = path || "";
+  
+  var pathAry = path.split("/");
+  pathAry.shift();
+  
+  var pathString = "";
+  var oFilter = {$or:[]};
+  
+  oFilter["$or"] = _.map(pathAry,function(piece) {
+    pathString += "/" + piece;
+    return {path:pathString};
+  });
+  
+  return oFilter;
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      allowedPath (PUBLIC)
 |DESCRIPTION:  Takes a path provided and determines if it's allowed for a page to have this path.
 |PARAMETERS:  1. path(OPT): 

@@ -43,10 +43,10 @@
               else if (Object.size(oPages)) oRet.subpages = oPages;
               
               if (req.session.loggedIn) {
-                config.mongodb.db.collection("accounts").find({username:username},{files: {"$slice":100}}).toArray(function(_e,userInfo) {
+                config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
                   if (_e) log.error(_e);
                   else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
-                  else oRet = Object.merge(oRet,{userFiles:userInfo[0].files});
+                  else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
                   
                   res.json(oRet);
                 });
@@ -84,10 +84,54 @@
             function(err,doc) {
               if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
               else res.json({success:true});
+              
+              config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+                function(e,result) {
+                  if (e) log.error(e);
+                });
             }
           );
         });
       }
+      break;
+    
+    case "updateDraft":
+      var onlyDelete = (info.delete==="false") ? false : (info.delete || false);
+      
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to update wiki pages."});
+      else {
+        var saveData = {
+          "$push": {
+            drafts: {
+              path: wiki.path,
+              html: info.html,
+              date: new Date()
+            }
+          }
+        };
+        
+        config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+          function(e,result) {
+            if (e) {
+              log.error(e);
+              res.json({success:false, error:"There was an error saving your draft. Please try again."});
+            } else {
+              if (onlyDelete) res.json({success:true});
+              else {
+                config.mongodb.db.collection("accounts").update({username:username},saveData,{upsert:true},
+                function(er,result) {
+                  if (er) {
+                    log.error(er);
+                    res.json({success:false, error:"There was an error saving your draft. Please try again."});
+                  } else {
+                    res.json({success:true});
+                  }
+                });
+              }
+            }
+          });
+      }
+      
       break;
     
     case "getTemplate":
@@ -110,7 +154,7 @@
         if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
           mammoth.convertToHtml({path:filePath}).then(function(result) {
             var returnedResult = result.value.replace(/\<table\>/g,"<table class='table table-bordered table-striped'>");
-            res.json({wordsuccess:true, html:returnedResult, debug: result});
+            res.json({wordsuccess:true, html:html.prettyPrint(returnedResult,{indent_size:2}), debug: result});
           }).catch(function(err) {
             log.error(err);
             res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});

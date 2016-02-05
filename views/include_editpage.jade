@@ -15,10 +15,21 @@ div(class="wrapper separate-vert-medium")
   div(data-ng-class="(widgets.subpages.enabled==true) ? 'col-xs-12 col-sm-8 col-md-9' : ''")
     div(data-ng-show="editState")
       div(class="text-center padding-medium")
-        button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Save Changes
+        button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Changes
+        button(class="btn btn-info margin-left-medium",data-ng-click="handlers.saveChanges(true)") Save Draft To Finish Later
         button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
       div(class="padding-medium")
         alert(type="danger",data-ng-show="saveError") {{ saveError }}
+      div(class="separate-vert-small row text-center",data-ng-if="content.draft")
+        div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
+          alert(type="danger",class="text-large")
+            div
+              span You have a saved draft for this page from 
+              b {{ functions.formatDateTime(content.draft.date) }}
+              span . Would you like to continue where you left off, or delete the draft?
+            div(class="separate-vert-small")
+              button(class="btn btn-success",data-ng-click="handlers.replaceWithDraft()") Finish Draft
+              button(class="btn btn-danger margin-left-medium",data-ng-click="handlers.saveChanges(true,true)") Delete Draft
       div
         ul(class="nav nav-tabs")
           li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
@@ -48,9 +59,9 @@ div(class="wrapper separate-vert-medium")
               div
                 alert(type="success",class="wrapper")
                   div(class="text-left")
-                    div(class="text-large") Select From a Template
+                    div(class="text-large") Select From a Page Template
                     div(class="col-xs-12 col-sm-8 col-sm-offset-2")
-                      select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availableTemplates",data-ng-change="handlers.getTemplate(template)")
+                      select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availablePageTemplates",data-ng-change="handlers.getTemplate(template)")
         div(data-ng-show="content.html")
           div(compile-html="functions.sanitizeHtml(content.html)")
         div(class="col-xs-12")

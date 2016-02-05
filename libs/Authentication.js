@@ -25,6 +25,8 @@ Authentication = function(options) {
   };
   
   this.ad = new ActiveDirectory(this.config);
+  this.GLOBAL_ADMIN = process.env.GLOBAL_USERNAME;
+  this.GLOBAL_PASSWORD = process.env.GLOBAL_PASSWORD;
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -44,9 +46,13 @@ Authentication.prototype.auth = function(options,cb) {
   if (!(options.username && options.password)) {
     cb("Either a username or password was not provided.");
   } else {
-    this.ad.authenticate(options.username,options.password,function(err,auth) {
-      cb(err,auth);
-    });
+    if (options.username == this.GLOBAL_ADMIN && options.password == this.GLOBAL_PASSWORD) {
+      cb(null,true);
+    } else {
+      this.ad.authenticate(options.username,options.password,function(err,auth) {
+        cb(err,auth);
+      });
+    }
   }
 }
 
@@ -78,7 +84,7 @@ Authentication.prototype.find = function(options,cb) {
 |NAME:      login (PUBLIC)
 |DESCRIPTION:  Gets necessary information about a user and logs them in by saving to the session.
 |PARAMETERS:  1. upn(REQ): userPrincipalName we're going to find, then store information in the session
-|        2. cb(REQ): 
+|             2. cb(REQ): 
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -86,21 +92,31 @@ Authentication.prototype.find = function(options,cb) {
 Authentication.prototype.login = function(upn,cb) {
   var self = this;
   
-  this.find({attribute:"userPrincipalName", value:upn},function(err,info) {
-    if (err) cb(err);
-    else {
-      //assuming the first user is the one we want
-      var userInfo = info.users[0];
-      
-      _.each(Object.keys(userInfo),function(p) {
-        self.session[p] = userInfo[p];
-      });
-      
-      self.session.loggedIn = true;
-      self.session.save();
-      cb(null);
-    }
-  });
+  if (upn == this.GLOBAL_ADMIN) {
+    self.session.ADMIN = true;
+    self.session.username = this.GLOBAL_ADMIN;
+    self.session.sAMAccountName = this.GLOBAL_ADMIN;
+    
+    self.session.loggedIn = true;
+    self.session.save();
+    cb(null);
+  } else {
+    this.find({attribute:"userPrincipalName", value:upn},function(err,info) {
+      if (err) cb(err);
+      else {
+        //assuming the first user is the one we want
+        var userInfo = info.users[0];
+        
+        _.each(Object.keys(userInfo),function(p) {
+          self.session[p] = userInfo[p];
+        });
+        
+        self.session.loggedIn = true;
+        self.session.save();
+        cb(null);
+      }
+    });
+  }
 }
 
 /*-----------------------------------------------------------------------------------------

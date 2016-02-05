@@ -10,7 +10,7 @@
       if (admin.length) {
         //get the admin settings to include
         
-        res.render("adminmain",config.view.send(req,{obj:o,title:"Admin Settings"}));
+        res.render("admin",config.view.send(req,{obj:o,title:"Admin Settings"}));
       } else res.redirect("/user/" + username);
     });
   }

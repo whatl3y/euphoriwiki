@@ -18,6 +18,7 @@ var html = require("html");
 var mammoth = require("mammoth");
 var IOHandler = require("./libs/IOHandler.js");
 var Auth = require("./libs/Authentication");
+var AccessManagement = require("./libs/AccessManagement");
 var RouteHandler = require("./libs/RouteHandler.js");
 var WikiHandler = require("./libs/WikiHandler.js");
 var FileHandler = require("./libs/FileHandler.js");

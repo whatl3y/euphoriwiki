@@ -58,6 +58,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.content.lastUpdate = ret.lastUpdate || null;
           $scope.content.versions = ret.versions;
           $scope.content.tags = ret.tags || [];
+          $scope.content.draft = ret.draft || false;
           
           angular.element("#rte-editor").html( $scope.content.html );
           
@@ -65,7 +66,9 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.subpages = ret.subpages || [];
           $scope.userfiles = ret.userFiles || [];
           $scope.pagefiles = ret.pageFiles || [];
-          $scope.availableTemplates = ret.pageTemplates || [];
+          
+          $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
+          $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
         }
         
         $scope.functions.rteInit(true);
@@ -206,17 +209,21 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       */
     },
     
-    saveChanges: function() {
+    saveChanges: function(draft,deleteDraft) {
+      draft = draft || false;
+      deleteDraft = deleteDraft || false;
+      
       delete($scope.saveError);
       
-      if (!$scope.content || !$scope.content.html) {
+      if (!draft && (!$scope.content || !$scope.content.html)) {
         $scope.saveError = "Before saving, please ensure you have some content you want to display on the page.";
         return;
       }
       
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{
-        type: "update",
+        type: (draft) ? "updateDraft" : "update",
+        delete: deleteDraft,
         page: $scope.pathname,
         html: $scope.content.html,
         markdown: $scope.content.markdown
@@ -234,6 +241,15 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
         console.log(data,err);
         angular.element( '#loader' ).remove();
       });
+    },
+    
+    replaceWithDraft: function() {
+      var draft = $scope.content.draft.html;
+      
+      $scope.content.html = draft;
+      $scope.functions.htmlToMarkdown();
+      $scope.functions.rteInit();
+      delete($scope.content.draft);
     },
     
     uploadFile: function(file) {

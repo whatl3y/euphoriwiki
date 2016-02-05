@@ -245,7 +245,7 @@ ul.nav > li {
 }
 
 .sidenav-affix {
-  top: 20px;
+  top: 80px;
 }
 
 .navbar-default .navbar-nav > li > a {
@@ -400,11 +400,11 @@ div.asyncloader {
 }
 
 .text-large {
-  font-size: 1.5em;
+  font-size: 1.5em !important;
 }
 
 .text-xlarge {
-  font-size: 2em;
+  font-size: 2em !important;
 }
 
 .widget .widget-header {

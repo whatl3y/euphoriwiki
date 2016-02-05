@@ -1,5 +1,6 @@
 (function(req,res) {
   var wiki = new WikiHandler();
+  var Access = new AccessManagement({db: config.mongodb.db});
   
   var o = {};
   o.loggedIn = (req.session.loggedIn) ? true : false;
