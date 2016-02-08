@@ -66,7 +66,7 @@
 			},
 			saveSelection = function () {
 				selectedRange = getCurrentRange();
-        if (typeof saveCB==="function") saveCB(editor);
+        if (typeof saveCB==="function") saveCB(editor,selectedRange);
 			},
 			restoreSelection = function () {
 				var selection = window.getSelection();

@@ -46,7 +46,11 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       $http.post('/wikipage',{type:"init", page:$scope.pathname})
       .success(function(ret) {
         if (!ret.success) {
-          $scope.error = ret.error;
+          if (ret.protected) {
+            $scope.protected = true;
+          } else {
+            $scope.error = ret.error;
+          }
         } else {
           $scope.exists = ret.exists;
           
@@ -62,10 +66,13 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           
           angular.element("#rte-editor").html( $scope.content.html );
           
+          $scope.password = ret.password || "";
           $scope.widgets = ret.widgets || {};
           $scope.subpages = ret.subpages || [];
           $scope.userfiles = ret.userFiles || [];
           $scope.pagefiles = ret.pageFiles || [];
+          $scope.pageLikes = Number(ret.pageLikes || 0);
+          $scope.canLike = (ret.canLike == false) ? false : true;
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
@@ -87,16 +94,27 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       rteElement.html( $scope.content.html );
       
       if (bind) {
-        $('#rte-editor').wysiwyg({},function($editor) {
+        $('#rte-editor').wysiwyg({},function($editor,saveRange) {
           $scope.content.html = $editor.html();
-          $scope.functions.htmlToMarkdown( $scope.content.html )
+          $scope.functions.htmlToMarkdown( $scope.content.html );
+          $scope.COPYPASTE = {
+            editor: $editor,
+            range: saveRange
+          }
         });
         
         //bind copy/paste event handler to RTE
         var cp = new Core.CopyPaste({elements:rteElement, cb:function(err,imgSrc) {
           if (err) console.log("Error while pasting content: " + err);
           else {
-            $scope.content.html += "<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2'><img class='img-responsive' src='" + imgSrc + "' /></div>";
+            var newImg = document.createElement("img");
+            //newImg.className = "img-responsive";
+            newImg.src = imgSrc;
+            
+            $scope.COPYPASTE.range.insertNode(newImg);
+            
+            //$scope.content.html += "<div><img class='img-responsive' src='" + imgSrc + "' /></div>";
+            $scope.content.html = $scope.COPYPASTE.editor.html();
             $scope.functions.rteInit();
           }
         }});
@@ -240,6 +258,91 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       .error(function(data,err) {
         console.log(data,err);
         angular.element( '#loader' ).remove();
+      });
+    },
+    
+    updatePagePassword: function(pw,clear) {
+      if (pw) {
+        var info = {
+          type: "updatePassword",
+          page: $scope.pathname,
+          password: pw
+        };
+        
+        if (clear) info.clear = true;
+        
+        var loader = new Core.Modals().asyncLoader({message:"Saving your page password."});
+        $http.post('/wikipage',info)
+        .success(function(ret) {
+          if (ret.success) {
+            if (clear) $scope.password = "";
+            else console.log("Successfully added page password!")
+          } else {
+            //$scope.passwordError = ret.error || "There was an issue entering your password. Please try again.";
+            console.log(ret);
+          }
+          
+          loader.remove();
+        })
+        .error(function(data,err) {
+          console.log(data,err);
+          loader.remove();
+        });
+      }
+    },
+    
+    enterPassword: function(pw) {
+      delete($scope.passwordError);
+      
+      if (!pw) {
+        $scope.passwordError = "Please enter a password to submit to gain access to the page."
+      } else {
+        new Core.Modals().alertPopup({loading:true});
+        $http.post('/wikipage',{
+          type: "password",
+          page: $scope.pathname,
+          password: pw
+        })
+        .success(function(ret) {
+          if (ret.success) location.reload();
+          else {
+            $scope.passwordError = ret.error || "There was an issue entering your password. Please try again.";
+            console.log(ret);
+            angular.element( '#loader' ).remove();
+          }
+        })
+        .error(function(data,err) {
+          console.log(data,err);
+          angular.element( '#loader' ).remove();
+        });
+      }
+    },
+    
+    likePage: function(unlike) {
+      unlike = unlike || false;
+      
+      var info = {type:"like", page:$scope.pathname};
+      if (unlike) {
+        info.unlike = true;
+        $scope.pageLikes--;
+        $scope.canLike = true;
+      } else {
+        $scope.pageLikes++;
+        $scope.canLike = false;
+      }
+      
+      $http.post('/wikipage',info)
+      .success(function(ret) {
+        //console.log(ret);
+        
+        if (ret.success) {
+          console.log("Successfully saved page like.");
+        } else {
+          console.log("Unsuccessful in liking page: ",ret);
+        }
+      })
+      .error(function(data,err) {
+        console.log(data,err);
       });
     },
     

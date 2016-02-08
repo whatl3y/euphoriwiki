@@ -256,6 +256,79 @@ WikiHandler.prototype.allowedPath=function(path) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      validatePassword (PUBLIC)
+|DESCRIPTION:  Determines if a page is password protected or not
+|PARAMETERS:  1. options(OPT): options to pass to the method
+|                   options.password: password provided by the user to authenticate with page
+|                   options.pagePW: optional password of the page if we've already gotten it from isPasswordProtected
+|                   options.session: the session object to save if the user is authenticated
+|             2. cb(REQ): the callback to call to return if the user is authenticated with the page
+|                     cb(err,<true if user is good/false if not>)
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.validatePassword=function(options,cb) {
+  var pw = options.password;
+  var pagePW = options.pagePW;
+  var session = options.session;
+  var pageInfo = options.info || null;
+  
+  var self = this;
+  
+  var validate = function(actualPW) {
+    if (typeof session[self.path]==="object" && session[self.path].auth) {
+      cb(null,true);
+    } else if (pw == actualPW) {
+      session[self.path] = (typeof session[self.path]==="object") ? Object.merge(session[self.path],{auth:true}) : {auth:true};
+      session.save();
+      cb(null,true);
+    } else {
+      cb(null,false);
+    }
+  }
+  
+  if (pagePW) {
+    validate(pagePW);
+  } else {
+    this.isPasswordProtected(pageInfo,function(e,pw) {
+      if (e) cb(e);
+      else {
+        if (!pw) cb(null,true);
+        else validate(pw);
+      }
+    });
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      isPasswordProtected (PUBLIC)
+|DESCRIPTION:  Determines if a page is password protected or not
+|PARAMETERS:  1. info(OPT): Either information returned from this.getPage(), or null to use the current path to get info
+|             2. cb(REQ): the callback to call to return whether this is PW-protected or not
+|                     cb(err,<string for pw, or false if not pw-protected>)
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.isPasswordProtected=function(info,cb) {
+  var check = function(pageInfo) {
+    if (typeof pageInfo.password === "string") cb(null,pageInfo.password);
+    else cb(null,false);
+  }
+  
+  if (typeof info==="object" && info!=null) {
+    check(info);
+  } else {
+    this.getPage(function(_e,pageInfo) {
+      if (_e) cb(_e);
+      else if (!pageInfo.length) cb(null,false);
+      else check(pageInfo[0]);
+    });
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      sanitizePath (PUBLIC)
 |DESCRIPTION:  Cleans up a path to be used in the DB.
 |PARAMETERS:  1. path(OPT): an optional path to return sanitized

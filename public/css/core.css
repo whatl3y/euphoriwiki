@@ -98,6 +98,28 @@ input.emphasize {
   text-align: center;
 }
 
+.circle {
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
+	/* Cleaner, but slightly less support: use "50%" as value */
+}
+
+.circ10 {
+  width: 10px;
+  height: 10px;
+}
+
+.circ20 {
+  width: 20px;
+  height: 20px;
+}
+
+.circ30 {
+  width: 30px;
+  height: 30px;
+}
+
 .vcenter {
   display: inline-block;
   vertical-align: middle;
@@ -145,7 +167,7 @@ input.emphasize {
   overflow: hidden;
 }
 
-.wrapper.dark {
+.dark {
   background: #333333;
   color: #FFFFFF;
 }

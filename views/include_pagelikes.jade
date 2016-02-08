@@ -1,0 +1,8 @@
+- if (data.external.EXTRA.loggedIn)
+  div(class="row",data-ng-if="!protected")
+      div(class="col-xs-12 text-right")
+        h5
+          a(href="javascript:void(0)",data-ng-click="handlers.likePage(!canLike)")
+            span(class="circle circ20 vcenter dark text-center")
+              span {{ pageLikes }}
+            span  {{ (canLike) ? "Like Page" : "Unlike" }}

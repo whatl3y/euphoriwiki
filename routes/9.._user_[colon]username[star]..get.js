@@ -33,6 +33,8 @@
         };
       }
       
+      o.loggedIn = (req.session.loggedIn) ? true : false;
+      
       res.render("userpage",config.view.send(req,{obj:o,title:path}));
     
       // NOTE: need to move this to class at some point

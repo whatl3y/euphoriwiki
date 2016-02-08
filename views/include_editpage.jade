@@ -48,7 +48,19 @@ div(class="wrapper separate-vert-medium")
             a(href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
     div
       div(data-ng-show="pageState.view")
-        div(data-ng-show="!content.html && initcomplete")
+        div(data-ng-show="protected",class="row text-center")
+          div(class="separate-vert-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-4 col-lg-offset-4")
+            alert(class="margin-small")
+              div(class="text-xlarge") Password Protected
+              div This page is password protected. Please enter the password below to enter the page.
+              div(class="separate-vert-medium")
+                form
+                  input(type="password",class="form-control input-lg",data-ng-model="pagePassword")
+                  div(class="separate-vert-small")
+                    button(class="btn btn-primary",data-ng-click="handlers.enterPassword(pagePassword)") Submit Password
+              div(class="padding-small",data-ng-show="passwordError")
+                alert(type="danger") {{ passwordError }}
+        div(data-ng-show="!content.html && initcomplete && !protected")
           div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
             h3
               alert {{ emptyPageError }}

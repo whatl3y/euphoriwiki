@@ -16,44 +16,72 @@
       wiki.getPage(function(_e,pageInfo) {
         if (_e) res.json({success:false, error:_e});
         else {
-          wiki.getTemplates(function(error,templates) {
-            if (error) log.error("Error getting templates for page: " + error);
-            
-            var oRet;
-            if (!pageInfo.length) oRet = {success:true, exists:false, html:"", markup:""};
-            else oRet = {
-              success: true,
-              exists: true,
-              description: pageInfo[0].description,
-              html: pageInfo[0].content_html,
-              markup: pageInfo[0].content_markup,
-              widgets: pageInfo[0].widgets,
-              lastUpdate: pageInfo[0].updated,
-              person: pageInfo[0].updatedBy,
-              versions: pageInfo[0].history,
-              tags: pageInfo[0].tags,
-              pageFiles: pageInfo[0].files
-            };
-            
-            //add templates to what is returned
-            oRet.pageTemplates = templates || [];
-            
-            wiki.getSubPages(function(_e,oPages) {
-              if (_e) log.error(_e);
-              else if (Object.size(oPages)) oRet.subpages = oPages;
-              
-              if (req.session.loggedIn) {
-                config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
-                  if (_e) log.error(_e);
-                  else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
-                  else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
+          wiki.validatePassword({session:req.session, info:pageInfo[0]},function(e,validated) {
+            if (e) res.json({success:false, error:e});
+            else {
+              if (validated) {
+                wiki.getTemplates(function(error,templates) {
+                  if (error) log.error("Error getting templates for page: " + error);
                   
-                  res.json(oRet);
+                  var oRet;
+                  if (!pageInfo.length) oRet = {success:true, exists:false, html:"", markup:""};
+                  else oRet = {
+                    success: true,
+                    exists: true,
+                    description: pageInfo[0].description,
+                    html: pageInfo[0].content_html,
+                    markup: pageInfo[0].content_markup,
+                    widgets: pageInfo[0].widgets,
+                    lastUpdate: pageInfo[0].updated,
+                    person: pageInfo[0].updatedBy,
+                    versions: pageInfo[0].history,
+                    tags: pageInfo[0].tags,
+                    pageFiles: pageInfo[0].files,
+                    password: pageInfo[0].password
+                  };
+                  
+                  //get like information and determine if the current logged in user
+                  //is allowed to like (i.e. whether they've already liked the page)
+                  if (pageInfo.length && typeof pageInfo[0].likes==="object") {
+                    oRet.pageLikes = pageInfo[0].likes.number;
+                    
+                    if (username) {
+                      var canLike = true;
+                      _.each(pageInfo[0].likes.info,function(like) {
+                        if (like.username == username) {
+                          canLike = false;
+                          return;
+                        }
+                      });
+                      
+                      oRet.canLike = canLike;
+                    }
+                  }
+                  
+                  //add templates to what is returned
+                  oRet.pageTemplates = templates || [];
+                  
+                  wiki.getSubPages(function(_e,oPages) {
+                    if (_e) log.error(_e);
+                    else if (Object.size(oPages)) oRet.subpages = oPages;
+                    
+                    if (req.session.loggedIn) {
+                      config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
+                        if (_e) log.error(_e);
+                        else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
+                        else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
+                        
+                        res.json(oRet);
+                      });
+                    } else {
+                      res.json(oRet);
+                    }
+                  });
                 });
               } else {
-                res.json(oRet);
+                res.json({success:false, protected: true});
               }
-            });
+            }
           });
         }
       });
@@ -78,21 +106,81 @@
         };
         
         wiki.getPage(function(_e,current) {
-          if (current.length) saveData["$push"] = {history: current[0]};
-          
-          config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
-            function(err,doc) {
-              if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
-              else res.json({success:true});
-              
-              config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
-                function(e,result) {
-                  if (e) log.error(e);
-                });
+          wiki.validatePassword({session:req.session, info:current[0]},function(e,validated) {
+            if (e) res.json({success:false, error:e});
+            else {
+              if (validated) {
+                if (current.length) saveData["$push"] = {history: current[0]};
+                
+                config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
+                  function(err,doc) {
+                    if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
+                    else res.json({success:true});
+                    
+                    config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+                      function(e,result) {
+                        if (e) log.error(e);
+                      });
+                  }
+                );
+              } else {
+                res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
+              }
             }
-          );
+          });
         });
       }
+      break;
+    
+    case "password":
+      var password = info.password;
+      wiki.validatePassword({session:req.session, password:password},function(e,validated) {
+        if (validated) {
+          res.json({success:true});
+        } else {
+          res.json({success:false, error:"Password is incorrect, please try again."});
+        }
+      });
+      
+      break;
+    
+    case "updatePassword":
+      var password = info.password;
+      
+      var data = (info.clear) ? {$unset:{password:""}} : {$set:{password:password}};
+      
+      config.mongodb.db.collection("wikicontent").update({ path:wiki.path },data,{ upsert:true },
+        function(e,doc) {
+          if (err) res.json({success:false, error:err});
+          else res.json({success:true});
+        }
+      );
+      
+      break;
+    
+    case "like":
+      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to like a wiki page."});
+      else {
+        if (info.unlike) {
+          config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{$inc:{"likes.number":-1},$pull:{"likes.info":{username:username}}},{ upsert:true },
+            function(err,doc) {
+              if (err) res.json({success:false, error:err});
+              else res.json({success:true});
+            }
+          );
+        } else {
+          config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{$inc:{"likes.number":1},$push:{"likes.info":{
+            username: username,
+            date: new Date()
+          }}},{ upsert:true },
+            function(err,doc) {
+              if (err) res.json({success:false, error:err});
+              else res.json({success:true});
+            }
+          );
+        }
+      }
+      
       break;
     
     case "updateDraft":

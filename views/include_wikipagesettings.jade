@@ -72,3 +72,20 @@ div(class="row separate-vert-medium")
                 label(for="subpagesWidgetRight") Aligned Right
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Password Protect Page
+      div
+        form
+          div(class="form-group")
+            div Password protect your page so users will be required to enter a password to enter the page and see its content.
+            div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+              div(class="col-xs-11")
+                input(type="{{ (pagepw.show) ? 'text' : 'password' }}",class="form-control",data-ng-model="password")
+              div(class="col-xs-1 text-center")
+                a(href="javascript:void(0)",data-ng-click="pagepw.show=!pagepw.show") {{ (pagepw.show) ? "Hide" : "Show" }} Password
+            div(class="text-center col-xs-12")
+              button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
+              button(class="btn btn-danger margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
