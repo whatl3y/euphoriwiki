@@ -96,6 +96,46 @@ WikiHandler.prototype.getPage=function(options,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      updatePagesWithCallback (PUBLIC)
+|DESCRIPTION:  Will run a query to get all pages that match a set of filters and will run a callback
+|             to update each page individually. This is good for updating the path for example based on
+|             a regular expression.
+|PARAMETERS:  1. options(OPT): Either a string, which represents the page of the page we're
+|          retrieving information about, or an object to help us filter on information
+|          for the query to get the page information.
+|              options.path
+|              options.filters: optional filter object to be used in mongodb query
+|              options.fields: object of fields we want to return
+|             2. singleDocUpdateCB (REQ): the callback function we'll run against each document we find.
+|                   NOTE: This should return an object we'll use to update the document.
+|             3. finalCB (REQ): the final callback we'll run after all documents have been updated.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB,finalCB) {
+  var filters = options.filters || {};
+  var fields = options.fields || {};
+  
+  var indErrors = null;
+  
+  config.mongodb.db.collection("wikicontent").find(filters,fields).each(function(err,doc) {
+    if (err) singleDocUpdateCB(err);
+    else {
+      var updateFields = singleDocUpdateCB(null,doc);
+      config.mongodb.db.collection("wikicontent").update({_id:doc._id},updateFields,function(err,result) {
+        if (err) {
+          indErrors = indErrors || [];
+          indErrors.push(err);
+        }
+      });
+    }
+  });
+  
+  finalCB(indErrors);
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      getTemplates (PUBLIC)
 |DESCRIPTION:  Gets all the active templates in the DB that users can use.
 |PARAMETERS:  1. cb(REQ): the callback functions after we get the templates
@@ -121,6 +161,12 @@ WikiHandler.prototype.getTemplates=function(cb) {
 WikiHandler.prototype.searchPages=function(query,cb) {
   query = query.toLowerCase();
   
+  var queryExact = "";
+  if (query.indexOf('"') > -1) {
+    queryExact = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$3");
+    query = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$1$5");
+  }
+  
   var regEx = new RegExp(".*" + query + ".*");
   var querySplit = query.split(" ");
   querySplit.push(query);
@@ -136,7 +182,11 @@ WikiHandler.prototype.searchPages=function(query,cb) {
   
   var returnedFields = {path:1,description:1,tags:1,pageViews:1,updated:1,_id:0};
   
-  this.getPage({filters: {$or: [{path:regEx},{tags:{$in:querySplit}},{path:{$in:regExQuerySplit}}]},fields:returnedFields,sort:{pageViews:-1}},function(e,pages) {
+  var filters = {path:/.*/};
+  if (query) filters = {$or: [{path:regEx},{tags:{$in:querySplit}},{path:{$in:regExQuerySplit}}]};
+  if (queryExact) filters = {$and:[{content_html:new RegExp(".*" + queryExact + ".*","gmi")},filters]};
+  
+  this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},function(e,pages) {
     if (e) cb(e);
     else cb(null,pages);
   });
@@ -242,16 +292,7 @@ WikiHandler.prototype.allowedPath=function(path) {
   if (typeof path!=="string") return false;
   else {
     path = (path.indexOf("/") == 0) ? path : "/"+path;
-    
-    var isValid = true;
-    _.each(invalid,function(re) {
-      if (re.test(path)) {
-        isValid=false;
-        return;
-      }
-    });
-    
-    return isValid;
+    return (_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true;
   }
 }
 

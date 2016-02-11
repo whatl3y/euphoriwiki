@@ -9,7 +9,7 @@
   }
   
   var username = (req.session.loggedIn) ? req.session.sAMAccountName.toLowerCase() : null;
-  var wiki = new WikiHandler({path:info.page});
+  var wiki = new WikiHandler({path:decodeURI(info.page)});
   
   switch(info.type) {
     case "init":

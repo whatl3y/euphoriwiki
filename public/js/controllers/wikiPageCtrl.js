@@ -1,6 +1,6 @@
 function wikiPageCtrl($scope,$http,$sce,Upload) {
-  $scope.pathname = location.pathname;
-  $scope.newPathname = location.pathname;
+  $scope.pathname = decodeURI(location.pathname);
+  $scope.newPathname = decodeURI(location.pathname);
   
   $scope.pagePieces = [{text:"home",link:"/"}].concat(LOCAL_DATA.EXTRA.pagePieces || []);
   $scope.emptyPageError = "There is no content on this page yet. Feel free to log in and add content now by selecting from a template below or clicking to Edit Page link at the top right of your page!";
@@ -108,7 +108,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           if (err) console.log("Error while pasting content: " + err);
           else {
             var newImg = document.createElement("img");
-            //newImg.className = "img-responsive";
+            newImg.className = "img-responsive";
             newImg.src = imgSrc;
             
             $scope.COPYPASTE.range.insertNode(newImg);
@@ -440,7 +440,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
     
     getTemplate: function(template,append) {
       append = append || false;
-      
+      console.log(template,append);
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{type:"getTemplate", template:template})
       .success(function(ret) {

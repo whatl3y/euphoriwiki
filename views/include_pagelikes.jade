@@ -3,6 +3,7 @@
       div(class="col-xs-12 text-right")
         h5
           a(href="javascript:void(0)",data-ng-click="handlers.likePage(!canLike)")
-            span(class="circle circ20 vcenter dark text-center")
-              span {{ pageLikes }}
-            span  {{ (canLike) ? "Like Page" : "Unlike" }}
+            //span(class="circle circ20 vcenter dark text-center")
+            span(class="glyphicon {{ (canLike) ? 'glyphicon-thumbs-up' : 'glyphicon-thumbs-down' }}") 
+            small  {{ (canLike) ? "Like" : "Unlike" }} 
+            span ({{ pageLikes }})
