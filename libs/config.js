@@ -130,7 +130,8 @@ var self = module.exports = {
     url: process.env.LDAP_URL,
     basedn: process.env.LDAP_BASEDN,
     username: process.env.LDAP_USERNAME,
-    password: process.env.LDAP_PASSWORD
+    password: process.env.LDAP_PASSWORD,
+    suffix: process.env.LDAP_SUFFIX
   },
   
   cryptography: {

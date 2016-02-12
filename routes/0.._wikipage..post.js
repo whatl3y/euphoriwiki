@@ -1,6 +1,9 @@
 (function(req,res) {
   var info = req.body;
   
+  var A = new Auth({session:req.session});
+  var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
+  
   if (info.file) {
     var fileInfo = info.file;
     var fileName = fileInfo.name;
@@ -8,7 +11,7 @@
     var fileType = fileInfo.type;
   }
   
-  var username = (req.session.loggedIn) ? req.session.sAMAccountName.toLowerCase() : null;
+  var username = A.username;
   var wiki = new WikiHandler({path:decodeURI(info.page)});
   
   switch(info.type) {
@@ -65,7 +68,7 @@
                     if (_e) log.error(_e);
                     else if (Object.size(oPages)) oRet.subpages = oPages;
                     
-                    if (req.session.loggedIn) {
+                    if (A.isLoggedIn()) {
                       config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
                         if (_e) log.error(_e);
                         else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
@@ -89,7 +92,7 @@
       break;
       
     case "update":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to update wiki pages."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to update wiki pages."});
       else {
         var saveData = {
           "$set": {
@@ -120,6 +123,8 @@
                     config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
                       function(e,result) {
                         if (e) log.error(e);
+                        
+                        audit.log({type:"Update Page", additional:{path:wiki.path}});
                       });
                   }
                 );
@@ -153,19 +158,23 @@
         function(e,doc) {
           if (err) res.json({success:false, error:err});
           else res.json({success:true});
+          
+          audit.log({type:"Update Page Password", additional:{path:wiki.path}});
         }
       );
       
       break;
     
     case "like":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to like a wiki page."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to like a wiki page."});
       else {
         if (info.unlike) {
           config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{$inc:{"likes.number":-1},$pull:{"likes.info":{username:username}}},{ upsert:true },
             function(err,doc) {
               if (err) res.json({success:false, error:err});
               else res.json({success:true});
+              
+              audit.log({type:"Unlike", additional:{path:wiki.path}});
             }
           );
         } else {
@@ -176,6 +185,8 @@
             function(err,doc) {
               if (err) res.json({success:false, error:err});
               else res.json({success:true});
+              
+              audit.log({type:"Like", additional:{path:wiki.path}});
             }
           );
         }
@@ -186,7 +197,7 @@
     case "updateDraft":
       var onlyDelete = (info.delete==="false") ? false : (info.delete || false);
       
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to update wiki pages."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to update wiki pages."});
       else {
         var saveData = {
           "$push": {
@@ -213,6 +224,8 @@
                     res.json({success:false, error:"There was an error saving your draft. Please try again."});
                   } else {
                     res.json({success:true});
+                    
+                    audit.log({type:"Update Draft", additional:{path:wiki.path}});
                   }
                 });
               }
@@ -237,12 +250,14 @@
       break;
     
     case "wordToHtml":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
           mammoth.convertToHtml({path:filePath}).then(function(result) {
             var returnedResult = result.value.replace(/\<table\>/g,"<table class='table table-bordered table-striped'>");
             res.json({wordsuccess:true, html:html.prettyPrint(returnedResult,{indent_size:2}), debug: result});
+            
+            audit.log({type:"Word To HTML Conversion", additional:{filePath:filePath}});
           }).catch(function(err) {
             log.error(err);
             res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});
@@ -255,7 +270,7 @@
       break;
     
     case "uploadFile":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         var fh = new FileHandler({db:config.mongodb.db});
         fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
@@ -282,6 +297,8 @@
               }
             },{upsert:true},function(err) {
               if (err) log.error(err);
+              
+              audit.log({type:"Upload File to GridFS", additional:{fileInfo:newFileInfo}});
             });
           }
         });
@@ -290,7 +307,7 @@
       break;
     
     case "deleteFile":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         var fileName = info.filename;
         
@@ -306,6 +323,8 @@
               log.error(err);
               res.json({success:false, error:err});
             } else res.json({success:true});
+            
+            audit.log({type:"Delete File From GridFS", additional:{fileName:fileName}});
           });
         });
         
@@ -313,7 +332,7 @@
       }
     
     case "updatePath":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         var newPath = info.newPath;
         newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
@@ -327,6 +346,8 @@
                 config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
                   if (err) res.json({success:false, error:err});
                   else res.json({success:true});
+                  
+                  audit.log({type:"Update Page Path", additional:{formerPath:wiki.path,newPath:newPath}});
                 })
               }
             }
@@ -339,7 +360,7 @@
       break;
     
     case "updatePageSetting":
-      if (!req.session.loggedIn) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         var key = info.key;
         var val = info.value;
@@ -352,6 +373,8 @@
         config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:o},{ upsert:true },function(err) {
           if (err) res.json({success:false, error:err});
           else res.json({success:true});
+          
+          audit.log({type:"Update Page Setting", additional:{path:wiki.path,settingInfo:o}});
         });
       }
       

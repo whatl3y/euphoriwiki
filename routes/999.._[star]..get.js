@@ -1,6 +1,8 @@
 (function(req,res) {
   var wiki = new WikiHandler();
+  var A = new Auth({session:req.session});
   var Access = new AccessManagement({db: config.mongodb.db});
+  var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   var o = {};
   o.loggedIn = (req.session.loggedIn) ? true : false;
@@ -17,5 +19,7 @@
       if (_e) log.error(_e);
       else log.trace("Page, " + path + ", has been visited.");
     });
+    
+    audit.log({type:"Visit Page", additional:{path:path}});
   }
 })

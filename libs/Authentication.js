@@ -16,6 +16,7 @@ Authentication = function(options) {
   options = options || {};
   
   this.session = options.session;        //the session object we will be able to save for future requests
+  this.username = this.username();
   
   this.config = {
     url: (config.ldap.protocol || "ldap")+"://"+config.ldap.url,
@@ -120,16 +121,27 @@ Authentication.prototype.login = function(upn,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      isLoggedIn (PUBLIC)
-|DESCRIPTION:  Determines if a user is logged in and returns that in a callback function
-|PARAMETERS:  1. cb(REQ): callback function after we determine if the user is logged in
-|                   cb(<true/false>)
+|NAME:      username (PUBLIC)
+|DESCRIPTION:  Determines if a user is logged in and returns the username if so, false otherwise.
+|PARAMETERS:    None
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
-|RETURNS:    Nothing
+|RETURNS:    <string or false>: string if logged in with username, else false
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.isLoggedIn = function(cb) {
-  cb(!!this.session.loggedIn);
+Authentication.prototype.username = function() {
+  return (this.isLoggedIn()) ? this.session.sAMAccountName.toLowerCase() : false;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      isLoggedIn (PUBLIC)
+|DESCRIPTION:  Determines if a user is logged in and returns that in a callback function
+|PARAMETERS:  None
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <boolean>: true/false if user is logged in
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.isLoggedIn = function() {
+  return !!this.session.loggedIn;
 }
 
 //-------------------------------------------------------

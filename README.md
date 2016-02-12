@@ -1,1 +1,1 @@
-# Euphoriwiki by Euphoritech
+# A nice small HTML wiki

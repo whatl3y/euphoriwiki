@@ -1,5 +1,6 @@
 (function(req,res) {
-  var A = new Auth();
+  var A = new Auth({session:req.session});
+  var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   var username = req.params.username.toLowerCase();
   var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/user/"+username+req.params[0];
@@ -17,7 +18,7 @@
       var userInfo = info.users[0];
       var o;
       
-      if (req.session.loggedIn && req.session.sAMAccountName==userInfo.sAMAccountName) {
+      if (A.isLoggedIn() && A.username==userInfo.sAMAccountName.toLowerCase()) {
         o = {
           pageHeader: "Your page!",
           loggedInUsersPage: true,
@@ -33,7 +34,7 @@
         };
       }
       
-      o.loggedIn = (req.session.loggedIn) ? true : false;
+      o.loggedIn = A.isLoggedIn();
       
       res.render("userpage",config.view.send(req,{obj:o,title:path}));
     
@@ -43,7 +44,7 @@
         path = ((path[path.length-1]=="/") ? path.substring(0,path.length-1) : path).toLowerCase();
         config.mongodb.db.collection("wikicontent").update({path:path},{"$inc":{pageViews:1}},function(_e) {
           if (_e) log.error(_e);
-          else log.trace("Page, " + path + ", has been visited.");
+          else audit.log({type:"Visit User Page", additional:{path:path}});
         });
       }
     }
