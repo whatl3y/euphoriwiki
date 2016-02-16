@@ -41,11 +41,11 @@ RouteHandler.prototype.update=function(cb) {
               var MDB=opts.self;
               
               var routeInfo = file.replace(/\.js/g,"").replace(/_/g,"/").replace(/\[star\]/g,"*").replace(/\[colon\]/g,":").split("..");
-              var routeOrder = routeInfo[0] || 0;
+              var routeOrder = Number(routeInfo[0] || 0);
               var routePath = routeInfo[1];
               var routeVerb = routeInfo[2] || "get";
               
-              db.collection(self.collection).update({path:routePath},{
+              db.collection(self.collection).update({path:routePath,verb:routeVerb},{
                 "$set": {
                   verb: routeVerb,
                   path: routePath,

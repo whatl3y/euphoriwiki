@@ -13,7 +13,7 @@
       if (isAdmin) {
         //get the admin settings to include
         
-        res.render("admin",config.view.send(req,{obj:o,title:"Admin Settings"}));
+        res.send("You can access this page!");
       } else res.redirect("/user/" + username);
     });
   }

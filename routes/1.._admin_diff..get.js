@@ -13,7 +13,7 @@
       if (isAdmin) {
         //get the admin settings to include
         
-        res.render("admin",config.view.send(req,{obj:o,title:"Admin Settings"}));
+        res.render("admin_diff",config.view.send(req,{obj:o}));
       } else res.redirect("/user/" + username);
     });
   }

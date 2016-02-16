@@ -1,0 +1,29 @@
+extends layout
+
+block main  
+  div(class="row",data-ng-controller="adminDiffCtrl")
+    div(class="col-xs-12")
+      div(class="padding-medium")
+        form(class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
+          div(class="form-group")
+            label(for="dirPath") Path to Parse
+            input(type="text",class="form-control input-lg",id="dirPath",name="dirPath",data-ng-model="dirPath")
+          div(class="form-group text-center")
+            button(class="btn btn-default",data-ng-click="handlers.checkDir(dirPath)") Check Directory
+            button(class="btn btn-success margin-left-small",data-ng-click="handlers.processDir(dirPath)") Process Directory
+          div(class="form-group text-center text-large",data-ng-show="message")
+            alert(type="{{ message.type }}") {{ message.content }}
+        div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1",data-ng-show="previousProcesses.length")
+          table(class="table table-striped table-bordered")
+            tr
+              th Date Ran
+              th Application Hostname
+              th Input Directory
+              th Full Directory
+              th Number of Files Processed
+            tr(data-ng-repeat="pro in previousProcesses | orderBy: 'pro.date'")
+              td {{ functions.formatDateTime(pro.date) }}
+              td {{ pro.hostname }}
+              td {{ pro.directory }}
+              td {{ pro.fulldirectory }}
+              td {{ pro.numberFiles }}

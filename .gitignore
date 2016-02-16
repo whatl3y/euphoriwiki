@@ -2,6 +2,7 @@
 /integrations
 /tests
 /logs
+/files
 /documentation
 /.env_windows
 /.env_linux

@@ -23,6 +23,7 @@ var AccessManagement = require("./libs/AccessManagement");
 var RouteHandler = require("./libs/RouteHandler.js");
 var WikiHandler = require("./libs/WikiHandler.js");
 var FileHandler = require("./libs/FileHandler.js");
+var DirectoryProcessor = require("./libs/DirectoryProcessor.js");
 var config = require("./libs/config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 var Object = require("./public/js/Object_prototypes.js");
@@ -117,7 +118,7 @@ function main(notClustering) {
           });
           
           //starts the web server listening on specified port
-          //if we're not using clustering
+          //if we're not clustered
           if (notClustering) {
             http.listen(config.server.PORT, function(){
               log.info("listening on *:"+config.server.PORT);

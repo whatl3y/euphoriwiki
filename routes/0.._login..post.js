@@ -9,8 +9,12 @@
     
     var A = new Auth({session:req.session});
     A.auth({username:info.username, password:info.password},function(err,authenticated) {
-      if (err || !authenticated) res.json({success:false, error:"Bad username/password combination. Please try again.", debug:err});
-      else {
+      if (err) {
+        res.json({success:false, error:"There was an issue trying to log you in. Please try again."});
+        log.error(err);
+      } else if (!authenticated) {
+        res.json({success:false, error:"Bad username/password combination. Please try again."});
+      } else {
         //save in session
         A.login(info.username,function(_e) {
           if (_e) res.json({success:false, error:_e});
