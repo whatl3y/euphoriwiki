@@ -1,12 +1,15 @@
 - var navlinks = data.nav;
 
-div(class="nav-affix",data-spy="affix",data-offset-top="20")
+div(class="nav-affix")
+  //,data-spy="affix",data-offset-top="20")
   div(class="header row")
-    div(class="wrapper dark shadowlarge")
-      div(class="col-xs-12 col-sm-9")
+    div(class="row dark shadowlarge")
+      div(class="col-xs-12")
         nav(class="navbar navbar-default")
           div
             div(class="navbar-header")
+              a(href="http://pmg.net",class="navbar-brand",target="_blank")
+                img(alt="Brand",width="40",height="20",src="/public/images/marketing/pmg.net_white.png")
               button(type="button",class="navbar-toggle collapsed",data-toggle="collapse",data-target="#navbarcoll",aria-expanded="false")
                 span(class="sr-only") Toggle navigation
                 span(class="icon-bar")
@@ -17,9 +20,33 @@ div(class="nav-affix",data-spy="affix",data-offset-top="20")
                 - each link in navlinks
                   li(class="button-main")
                     a(href=link.link)= link.text
-      div(class="col-xs-12 col-sm-3 pull-right text-right")
-        div(class="padding-small")
-          form(method="post",data-ng-submit="handlers.search(query)")
-            label(for="query",class="padding-small col-xs-3") Search
-            div(class="col-xs-9")
-              input(type="text",class="form-control",placeholder="What are you looking for?",id="query",name="query",data-ng-model="query")
+              div(class="navbar-right")
+                ul(class="nav navbar-nav")
+                  li(class="button-main")
+                    a(href="javascript:void(0)",class="dropdown")
+                      div(class="dropdown-toggle",data-target="#",data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
+                        span Search Wiki
+                        span(class="caret")
+                      ul(class="dropdown-menu quicksearch-dropdown")
+                        li(class="padding-medium")
+                          div(class="text-large text-center")
+                            strong Full Wiki Search
+                          div(class="soft-text")
+                            small Use this to search all wiki pages for a possible match. Use quotation marks around your search to also search within pages content.
+                        li(class="padding-medium")
+                          form(method="post",data-ng-submit="handlers.search(query)")
+                            div
+                              input(type="text",class="form-control input-lg",placeholder="Full Wiki Search...",id="query",name="query",data-ng-model="query")
+                            div(class="text-center separate-vert-small")
+                              button(class="btn btn-success") Search
+                        li(class="divider")
+                        li(class="padding-medium")
+                          div(class="text-large text-center")
+                            strong Quick Search
+                          div(class="soft-text")
+                            small After you type in at least 3 characters, this will find and show you any pages that contain the text you've entered. For example, type "help" below.
+                        li(class="row padding-medium")
+                          div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+                            select(class="allpages form-control",data-ng-model="gotopage",data-ng-options="page.path for page in allPages",data-ng-change="handlers.quickSearchSelect(gotopage)")
+                  li(class="button-main")
+                    a(href="/logout") Logout

@@ -39,6 +39,14 @@ input.input-xlg {
   border-radius: 6px;
 }
 
+input.input-xs {
+  height: 20px;
+  padding: 3px 7px;
+  font-size: 10px;
+  line-height: 1.2;
+  border-radius: 3px;
+}
+
 input.emphasize {
   font-weight: bold;
   box-shadow: 0 1px 30px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 0, 0, 0.1) inset !important;
@@ -264,6 +272,15 @@ ul.nav > li {
   top: 0px;
   z-index: 9;
   width: 100%;
+}
+
+.dropdown-menu {
+  z-index: 99 !important;
+}
+
+.quicksearch-dropdown {
+  color: black;
+  width: 400px;
 }
 
 .sidenav-affix {

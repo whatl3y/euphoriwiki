@@ -1,9 +1,11 @@
-function globalCtrl($scope) {
+function globalCtrl($scope,$http) {
   window.EuphoriwikiSocket=window.EuphoriwikiSocket || io(LOCAL_DATA.wshost);    //io(LOCAL_DATA.wshost+":"+LOCAL_DATA.port+LOCAL_DATA.namespace);
   
   $scope.global = {};
   $scope.functions= {
     initialize: function() {
+      $.autocompleteselect();
+      
       $scope.socketHandler=new Core.SocketHandler({
         $scope: $scope,
         socket: EuphoriwikiSocket,
@@ -18,6 +20,25 @@ function globalCtrl($scope) {
       if (!(window.File && window.FileReader)) {
         $scope.global.error = "There are some components your browser doesn't support that we use to validate tickets. Please use another browser.";
       }
+      
+      //go get all pages to be used in the quick search
+      $http.post('/global',{type:"init"})
+      .success(function(ret) {
+        if (!ret.success) {
+          $scope.allPages=[];
+          console.log(ret);
+        } else {
+          $scope.allPages = ret.allpages;
+          angular.element( 'select.allpages' ).autocompleteselect({
+            placeholder: "Quick Page Search (3 character minimum)",
+            inputclasses: "form-control input-xs"
+          });
+        }
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        //angular.element( '#loader' ).remove();
+      });
     },
     
     setSearchQuery: function() {
@@ -26,6 +47,11 @@ function globalCtrl($scope) {
   };
   
   $scope.handlers= {
+    quickSearchSelect: function(path) {
+      new Core.Modals().alertPopup({loading:true});
+      location.href = path.path;
+    },
+    
     search: function(query) {
       query = query || "";
       if (query.length) {

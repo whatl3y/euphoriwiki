@@ -16,7 +16,11 @@ html
     link(rel='stylesheet',type='text/css',href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css')
     
     link(rel='stylesheet',type='text/css',href='/public/css/core.css')
-    link(rel='stylesheet',type='text/css',href='/public/js/libraries/bootstrap/3.3.5/css/bootstrap.css')
+    link(rel='stylesheet',type='text/css',href=dir+'libraries/bootstrap/3.3.5/css/bootstrap.css')
+    link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.min.css')
+    link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.structure.min.css')
+    link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.theme.min.css')
+    
     
     script(type='text/javascript').
       LOCAL_DATA=!{JSON.stringify(data.external||{})}
@@ -26,7 +30,8 @@ html
     
     script(src=dir+'libraries/underscore/underscore-1.7.0__dev.js')
     script(src=dir+'libraries/socket.io/socket.io-1.3.5.js')
-    script(src=dir+'libraries/jquery/jquery-1.11.0__dev.js')
+    script(src=dir+'libraries/jquery/jquery-1.11.0.js')
+    script(src=dir+'libraries/jquery/ui/jquery-ui.min.js')
     script(src=dir+'libraries/angularjs/1.4.0/angular.js')
     script(src=dir+'libraries/angularjs/1.4.0/angular-animate.js')
     script(src=dir+'libraries/bootstrap/3.3.5/js/bootstrap.min.js')
@@ -40,6 +45,7 @@ html
     
     script(src=dir+'String_prototypes.js')
     script(src=dir+'Object_prototypes.js')
+    script(src=dir+'jQuery_widgets.js')
     script(src=dir+'Core.js')
     script(src=dir+'Core.CopyPaste.js')
     script(src=dir+'Core.QueryString.js')
@@ -50,8 +56,7 @@ html
     script(src=dir+'directives/ng-file-upload.min.js')
     script(src=dir+'directives/filereadDir.js')
     script(src=dir+'directives/compileHtml.js')
-    script(src=dir+'directives/subpageDir.js')
-    script(src=dir+'directives/subpageMemberDir.js')
+    script(src=dir+'directives/subpageDirectives.js')
     
     - //**************************************************************************
     - //AS OF 20160202 MIGHT CAN DELETE IN FAVOR OF HTML5 WYSIWYG BOOTSTRAP EDITOR: boostrap-wysiwyg
