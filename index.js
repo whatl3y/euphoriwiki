@@ -13,6 +13,7 @@ var path = require("path");
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var _ = require("underscore");
+var async = require("async");
 var jade = require("jade");
 var html = require("html");
 var mammoth = require("mammoth");

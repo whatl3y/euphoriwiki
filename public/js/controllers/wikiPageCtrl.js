@@ -53,6 +53,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           }
         } else {
           $scope.exists = ret.exists;
+          $scope.updateable = ret.updateable;
           
           $scope.content = $scope.content || {};
           $scope.content.html = ret.html || "";
@@ -73,6 +74,7 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           $scope.pagefiles = ret.pageFiles || [];
           $scope.pageLikes = Number(ret.pageLikes || 0);
           $scope.canLike = (ret.canLike == false) ? false : true;
+          $scope.pageadmins = ret.pageadmins || [];
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});

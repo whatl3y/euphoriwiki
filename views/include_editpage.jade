@@ -14,38 +14,47 @@ div(class="wrapper separate-vert-medium")
       - //      small {{ page.pageViews || 0 }} page views
   div(data-ng-class="(widgets.subpages.enabled==true) ? 'col-xs-12 col-sm-8 col-md-9' : ''")
     div(data-ng-show="editState")
-      div(class="text-center padding-medium")
-        button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Changes
-        button(class="btn btn-info margin-left-medium",data-ng-click="handlers.saveChanges(true)") Save Draft To Finish Later
-        button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
-      div(class="padding-medium")
-        alert(type="danger",data-ng-show="saveError") {{ saveError }}
-      div(class="separate-vert-small row text-center",data-ng-if="content.draft")
-        div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
-          alert(type="danger",class="text-large")
-            div
-              span You have a saved draft for this page from 
-              b {{ functions.formatDateTime(content.draft.date) }}
-              span . Would you like to continue where you left off, or delete the draft?
-            div(class="separate-vert-small")
-              button(class="btn btn-success",data-ng-click="handlers.replaceWithDraft()") Finish Draft
-              button(class="btn btn-danger margin-left-medium",data-ng-click="handlers.saveChanges(true,true)") Delete Draft
-      div
-        ul(class="nav nav-tabs")
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
-          li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
+      div(class="row",data-ng-show="!updateable")
+        div(class="separate-vert-small text-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3")
+          alert(type="danger")
+            div(class="text-xlarge")
+              u Not Authorized
+            div(class="separate-vert-medium text-center")
+              div You are not a page administrator so cannot make updates.
+              div Please contact the page administrator to get access to update this page.
+      div(data-ng-show="updateable")
+        div(class="text-center padding-medium")
+          button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Changes
+          button(class="btn btn-info margin-left-medium",data-ng-click="handlers.saveChanges(true)") Save Draft To Finish Later
+          button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
+        div(class="padding-medium")
+          alert(type="danger",data-ng-show="saveError") {{ saveError }}
+        div(class="separate-vert-small row text-center",data-ng-if="content.draft")
+          div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
+            alert(type="danger",class="text-large")
+              div
+                span You have a saved draft for this page from 
+                b {{ functions.formatDateTime(content.draft.date) }}
+                span . Would you like to continue where you left off, or delete the draft?
+              div(class="separate-vert-small")
+                button(class="btn btn-success",data-ng-click="handlers.replaceWithDraft()") Finish Draft
+                button(class="btn btn-danger margin-left-medium",data-ng-click="handlers.saveChanges(true,true)") Delete Draft
+        div
+          ul(class="nav nav-tabs")
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.view)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
     div
       div(data-ng-show="pageState.view")
         div(data-ng-show="protected",class="row text-center")

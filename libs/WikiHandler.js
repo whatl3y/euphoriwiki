@@ -21,12 +21,15 @@ WikiHandler=function(options) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      getSubPages (PUBLIC)
 |DESCRIPTION:  Gets all the information about a page.
-|PARAMETERS:  1. options(OPT): callback function after we find the pages.
+|PARAMETERS:  1. cb(OPT): callback function after we find the pages.
+|             2. returnAry(OPT): boolean indicating whether, instead of a new object
+|                 with children nested and represented as keys in an object, we will simply
+|                 return the array of all documents returned from the MongoDB query.
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getSubPages=function(cb) {
+WikiHandler.prototype.getSubPages=function(cb,returnAry) {
   var self=this;
   
   var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
@@ -35,34 +38,36 @@ WikiHandler.prototype.getSubPages=function(cb) {
   this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
     if (_e) cb(_e);
     else {
-      var aryToNestedObj = function(ary,obj,val) {
-        obj = obj || {};
-        val = val || "";
+      if (returnAry) cb(null,pages);
+      else {
+        var aryToNestedObj = function(ary,obj,val) {
+          obj = obj || {};
+          val = val || "";
+          
+          var key = ary[0];
+          var newAry = ary.slice(1);
+          obj[key] = {};
+          val += "/" + key;
+          
+          if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{/*value:val*/},val);
+          else obj[key][newAry[0]] = {/*value:val*/};
+          
+          return obj;
+        };
         
-        var key = ary[0];
-        var newAry = ary.slice(1);
-        obj[key] = {};
-        val += "/" + key;
+        var oPages = {};
+        var pagesSplit = [];
+        var thisPathPagesSplit = self.path.split("/").slice(1);
+        for (var _i=0;_i<pages.length;_i++) {
+          
+          pagesSplit = pages[_i].path.split("/").slice(1);
+          //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
+          
+          oPages = Object.merge(oPages,aryToNestedObj(pagesSplit));
+        }
         
-        if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{/*value:val*/},val);
-        else obj[key][newAry[0]] = {/*value:val*/};
-        
-        return obj;
-      };
-      
-      var oPages = {};
-      var pagesSplit = [];
-      var thisPathPagesSplit = self.path.split("/").slice(1);
-      for (var _i=0;_i<pages.length;_i++) {
-        
-        pagesSplit = pages[_i].path.split("/").slice(1);
-        //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
-        
-        oPages = Object.merge(oPages,aryToNestedObj(pagesSplit));
+        cb(null,oPages);
       }
-      
-      if (_e) cb(_e);
-      else cb(null,oPages);
     }
   })
 }

@@ -2,6 +2,7 @@
   var info = req.body;
   
   var A = new Auth({session:req.session});
+  var Access = new AccessManagement({db:config.mongodb.db});
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   if (info.file) {
@@ -16,124 +17,179 @@
   
   switch(info.type) {
     case "init":
-      wiki.getPage(function(_e,pageInfo) {
-        if (_e) res.json({success:false, error:_e});
-        else {
-          wiki.validatePassword({session:req.session, info:pageInfo[0]},function(e,validated) {
-            if (e) res.json({success:false, error:e});
-            else {
-              if (validated) {
-                wiki.getTemplates(function(error,templates) {
-                  if (error) log.error("Error getting templates for page: " + error);
-                  
-                  var oRet;
-                  if (!pageInfo.length) oRet = {success:true, exists:false, html:"", markup:""};
-                  else oRet = {
-                    success: true,
-                    exists: true,
-                    description: pageInfo[0].description,
-                    html: pageInfo[0].content_html,
-                    markup: pageInfo[0].content_markup,
-                    widgets: pageInfo[0].widgets,
-                    lastUpdate: pageInfo[0].updated,
-                    person: pageInfo[0].updatedBy,
-                    versions: pageInfo[0].history,
-                    tags: pageInfo[0].tags,
-                    pageFiles: pageInfo[0].files,
-                    password: pageInfo[0].password
-                  };
-                  
-                  //get like information and determine if the current logged in user
-                  //is allowed to like (i.e. whether they've already liked the page)
-                  if (pageInfo.length && typeof pageInfo[0].likes==="object") {
-                    oRet.pageLikes = pageInfo[0].likes.number;
-                    
-                    if (username) {
-                      var canLike = true;
-                      _.each(pageInfo[0].likes.info,function(like) {
-                        if (like.username == username) {
-                          canLike = false;
-                          return;
-                        }
-                      });
-                      
-                      oRet.canLike = canLike;
-                    }
-                  }
-                  
-                  //add templates to what is returned
-                  oRet.pageTemplates = templates || [];
-                  
-                  wiki.getSubPages(function(_e,oPages) {
-                    if (_e) log.error(_e);
-                    else if (Object.size(oPages)) oRet.subpages = oPages;
-                    
-                    if (A.isLoggedIn()) {
-                      config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
-                        if (_e) log.error(_e);
-                        else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
-                        else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
-                        
-                        res.json(oRet);
-                      });
-                    } else {
-                      res.json(oRet);
-                    }
-                  });
-                });
-              } else {
-                res.json({success:false, protected: true});
-              }
-            }
+      async.parallel([
+        function(callback) {
+          wiki.getPage(function(e,pageInfo) {
+            callback(e,pageInfo);
+          })
+        },
+        function(callback) {
+          wiki.validatePassword({session:req.session},function(e,validated) {
+            callback(e,validated);
+          })
+        },
+        function(callback) {
+          wiki.getTemplates(function(e,templates) {
+            callback(e,templates);
+          });
+        },
+        function(callback) {
+          wiki.getSubPages(function(e,oPages) {
+            callback(e,oPages);
+          });
+        },
+        function(callback) {
+          Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        },
+        function(callback) {
+          Access.isWikiAdmin(username,function(e,isAdmin) {
+            callback(e,isAdmin);
           });
         }
-      });
+      ],
+        function(err,results) {
+          if (err) res.json({success:false, error:err});
+          else {
+            var pageInfo = results[0];
+            var validated = results[1];
+            var templates = results[2];
+            var oPages = results[3];
+            var canUpdate = results[4] || results[5] || false;
+            
+            if (!validated) res.json({success:false, protected: true});
+            else {
+              var oRet;
+              if (!pageInfo.length) oRet = {success:true, exists:false, updateable:canUpdate, html:"", markup:""};
+              else oRet = {
+                success: true,
+                exists: true,
+                updateable: canUpdate,
+                description: pageInfo[0].description,
+                html: pageInfo[0].content_html,
+                markup: pageInfo[0].content_markup,
+                widgets: pageInfo[0].widgets,
+                lastUpdate: pageInfo[0].updated,
+                person: pageInfo[0].updatedBy,
+                versions: pageInfo[0].history,
+                tags: pageInfo[0].tags,
+                pageFiles: pageInfo[0].files,
+                password: pageInfo[0].password,
+                pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : []
+              };
+              
+              //get like information and determine if the current logged in user
+              //is allowed to like (i.e. whether they've already liked the page)
+              if (pageInfo.length && typeof pageInfo[0].likes==="object") {
+                oRet.pageLikes = pageInfo[0].likes.number;
+                
+                if (username) {
+                  var canLike = true;
+                  _.each(pageInfo[0].likes.info,function(like) {
+                    if (like.username == username) {
+                      canLike = false;
+                      return;
+                    }
+                  });
+                  
+                  oRet.canLike = canLike;
+                }
+              }
+              
+              //add templates to what is returned and save subpages
+              oRet.pageTemplates = templates || [];
+              if (Object.size(oPages)) oRet.subpages = oPages;
+              
+              if (A.isLoggedIn()) {
+                config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
+                  if (_e) log.error(_e);
+                  else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
+                  else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
+                  
+                  res.json(oRet);
+                });
+              } else {
+                res.json(oRet);
+              }
+            }
+          }
+        }
+      );
       
       break;
       
     case "update":
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to update wiki pages."});
-      else {
-        var saveData = {
-          "$set": {
-            path: wiki.path,
-            content_html: info.html,
-            content_markdown: info.markdown,
-            updated: new Date(),
-            updatedBy: {
-              firstname: req.session.givenName,
-              lastname: req.session.sn,
-              username: username
-            }
+      else {        
+        async.parallel([
+          function(callback) {
+            wiki.getPage(function(_e,current) {
+              callback(_e,current);
+            })
+          },
+          function(callback) {
+            wiki.validatePassword({session:req.session},function(e,validated) {
+              callback(e,validated);
+            });
+          },
+          function(callback) {
+            Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
+          },
+          function(callback) {
+            Access.isWikiAdmin(username,function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
           }
-        };
-        
-        wiki.getPage(function(_e,current) {
-          wiki.validatePassword({session:req.session, info:current[0]},function(e,validated) {
-            if (e) res.json({success:false, error:e});
+        ],
+          function(err,results) {
+            if (err) res.json({success:false, error:err});
             else {
-              if (validated) {
+              var current = results[0];
+              var validated = results[1];
+              var canUpdate = results[2] || results[3] || false;
+              
+              if (!validated) res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
+              else if (!canUpdate) res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
+              else {
+                var saveData = {
+                  "$set": {
+                    path: wiki.path,
+                    content_html: info.html,
+                    content_markdown: info.markdown,
+                    updated: new Date(),
+                    updatedBy: {
+                      firstname: req.session.givenName,
+                      lastname: req.session.sn,
+                      username: username
+                    }
+                  }
+                };
+                
                 if (current.length) saveData["$push"] = {history: current[0]};
                 
                 config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
                   function(err,doc) {
                     if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
-                    else res.json({success:true});
-                    
-                    config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
-                      function(e,result) {
-                        if (e) log.error(e);
-                        
-                        audit.log({type:"Update Page", additional:{path:wiki.path}});
-                      });
+                    else {
+                      res.json({success:true});
+                      
+                      config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+                        function(e,result) {
+                          if (e) log.error(e);
+                          
+                          audit.log({type:"Update Page", additional:{path:wiki.path}});
+                        }
+                      );
+                    }
                   }
                 );
-              } else {
-                res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
               }
             }
-          });
-        });
+          }
+        );
       }
       break;
     
@@ -337,24 +393,47 @@
         var newPath = info.newPath;
         newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
         
-        if (wiki.allowedPath(newPath)) {
-          wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {
-            if (e) res.json({success:false, error:"We couldn't update your path. Please try again."});
+        async.parallel([
+          function(callback) {
+            callback(null,wiki.allowedPath(newPath));
+          },
+          function(callback) {
+            wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {
+              callback(e,page);
+            });
+          },
+          function(callback) {
+            Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
+          },
+          function(callback) {
+            Access.isWikiAdmin(username,function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
+          }
+        ],
+          function(err,results) {
+            if (err) res.json({success:false, error:err});
             else {
-              if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
+              var allowed = results[0];
+              var page = results[1];
+              var canUpdate = results[2] || results[3] || false;
+              
+              if (!canUpdate) res.json({success:false, error:"You cannot update the path as you do not have appropriate rights. Contact the page administrator to get access."});
+              else if (!allowed) res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
+              else if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
               else {
                 config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
                   if (err) res.json({success:false, error:err});
                   else res.json({success:true});
                   
                   audit.log({type:"Update Page Path", additional:{formerPath:wiki.path,newPath:newPath}});
-                })
+                });
               }
             }
-          });
-        } else {
-          res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
-        }
+          }
+        );
       }
       
       break;

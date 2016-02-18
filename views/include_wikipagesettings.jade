@@ -42,10 +42,10 @@ div(class="row separate-vert-medium")
                 em x
         div(class="row separate-vert-small")
           div(class="text-center")
-            form(class="form-inline",data-ng-submit="content.tags.push(temp);temp=''")
+            form(class="form-inline",data-ng-submit="content.tags.push(tempT);tempT=''")
               div(class="form-group")
                 label(for="tempTag") New Tag
-                input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="temp")
+                input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="tempT")
                 button(type="submit",class="btn btn-default margin-left-small") Add Tag
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
@@ -89,3 +89,26 @@ div(class="row separate-vert-medium")
             div(class="text-center col-xs-12")
               button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
               button(class="btn btn-danger margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
+        div Page Administrators
+      div
+        div(class="separate-vert-small text-theme-color")
+          em This will determine a subset of people who have access to page edits to this AND any subpages to this page.
+        div
+          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
+            span {{ admin }}
+            small(class="margin-left-small")
+              a(href="javascript:void(0)",data-ng-click="pageadmins.splice($index,1)")
+                em x
+        div(class="row separate-vert-small")
+          div(class="text-center")
+            form(class="form-inline",data-ng-submit="pageadmins.push(tempAd);tempAd=''")
+              div(class="form-group")
+                label(for="tempAdmins") New Page Administrator
+                input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
+                button(type="submit",class="btn btn-default margin-left-small") Add Username
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins)") Save Page Admins

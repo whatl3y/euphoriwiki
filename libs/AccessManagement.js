@@ -64,9 +64,12 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
         if (pages.length) {
           var isAdmin = false;
           _.each(pages,function(p) {
-            _.each(p.settings.admins,function(adminUsername) {
-              if (adminUsername.toLowerCase() == username.toLowerCase()) isAdmin = true;
-            });
+            if (!(p.settings.admins instanceof Array)) isAdmin=true;
+            else {
+              _.each(p.settings.admins,function(adminUsername) {
+                if (adminUsername.toLowerCase() == username.toLowerCase()) isAdmin = true;
+              });
+            }            
           });
           
           cb(null,isAdmin);
