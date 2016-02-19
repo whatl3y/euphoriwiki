@@ -96,7 +96,11 @@ div(class="row separate-vert-medium")
         div Page Administrators
       div
         div(class="separate-vert-small text-theme-color")
-          em This will determine a subset of people who have access to page edits to this AND any subpages to this page.
+          em.
+            This will determine a subset of people who have access to edit 
+            this AND any subpages to this page. If no one here is specified, 
+            then this setting will ascend up the page tree to see if there are administrators 
+            specified there. If there are none at any level above this page, anyone can edit this page.
         div
           span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
             span {{ admin }}

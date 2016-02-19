@@ -58,17 +58,17 @@
             var oPages = results[3];
             var canUpdate = results[4] || results[5] || false;
             
-            if (!validated) res.json({success:false, protected: true});
+            if (!validated) res.json({success:false, protected:true});
             else {
               var oRet;
-              if (!pageInfo.length) oRet = {success:true, exists:false, updateable:canUpdate, html:"", markup:""};
+              if (!pageInfo.length) oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
               else oRet = {
                 success: true,
                 exists: true,
                 updateable: canUpdate,
                 description: pageInfo[0].description,
                 html: pageInfo[0].content_html,
-                markup: pageInfo[0].content_markup,
+                markdown: pageInfo[0].content_markdown,
                 widgets: pageInfo[0].widgets,
                 lastUpdate: pageInfo[0].updated,
                 person: pageInfo[0].updatedBy,
@@ -172,8 +172,10 @@
                 
                 config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
                   function(err,doc) {
-                    if (err) res.json({success:false, error:"There was an error saving your information. Please try again.", debug:err});
-                    else {
+                    if (err) {
+                      log.error(err);
+                      res.json({success:false, error:"There was an error saving your information. Please try again."});
+                    } else {
                       res.json({success:true});
                       
                       config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
@@ -183,6 +185,12 @@
                           audit.log({type:"Update Page", additional:{path:wiki.path}});
                         }
                       );
+                      
+                      //e-mail subscribers indicating an update if there are any subscribers to this page
+                      wiki.emailSubscribers({template:"pageUpdate", keys:{path:wiki.path, username:username}},function(e,mailInfo) {
+                        if (e) log.info(e);
+                        else if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
+                      });
                     }
                   }
                 );

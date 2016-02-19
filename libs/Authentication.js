@@ -112,6 +112,7 @@ Authentication.prototype.login = function(upn,cb) {
           self.session[p] = userInfo[p];
         });
         
+        self.session.username = self.session.sAMAccountName.toLowerCase();
         self.session.loggedIn = true;
         self.session.save();
         cb(null);
@@ -129,7 +130,19 @@ Authentication.prototype.login = function(upn,cb) {
 |RETURNS:    <string or false>: string if logged in with username, else false
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.username = function() {
-  return (this.isLoggedIn()) ? this.session.sAMAccountName.toLowerCase() : false;
+  return (this.isLoggedIn()) ? (this.session.username || this.session.sAMAccountName.toLowerCase()) : false;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getEmail (PUBLIC)
+|DESCRIPTION:  Gets an e-mail address from a logged in user
+|PARAMETERS:  None
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <string>: string of an e-mail for the logged in user
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.getEmail = function() {
+  return (this.isLoggedIn()) ? this.session.mail : false;
 }
 
 /*-----------------------------------------------------------------------------------------

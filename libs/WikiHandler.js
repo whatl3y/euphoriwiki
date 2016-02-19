@@ -1,4 +1,7 @@
 var _ = require("underscore");
+var async = require("async");
+var GetHTML = require("./GetHTML.js");
+var Mailer = require("./Mailer.js");
 var config = require('./config.js');
 var Object = require("../public/js/Object_prototypes.js");
 
@@ -14,6 +17,8 @@ var Object = require("../public/js/Object_prototypes.js");
 -----------------------------------------------------------------------------------------*/
 WikiHandler=function(options) {
   options = options || {};
+  
+  this.emailtemplatepath = options.templatepath || __dirname + "/../views/emailtemplates";
   
   this.sanitizePath(options.path);
 }
@@ -372,6 +377,88 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
       else check(pageInfo[0]);
     });
   }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      emailSubscribers (PUBLIC)
+|DESCRIPTION:  Determines if a page is password protected or not
+|PARAMETERS:  1. info(OPT): object of information about the e-mail we're sending to subscribers of a page
+|             2. cb(REQ): the callback to call to return whether this is PW-protected or not
+|                     cb(err,<boolean success>)
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.emailSubscribers=function(info,cb) {
+  var templateName = info.template;
+  var templateKeys = info.keys || {};
+  
+  var self = this;
+  
+  async.parallel([
+    function(callback) {
+      self.getPage({fields:{subscribers:1}},function(e,pageInfo) {
+        callback(e,pageInfo);
+      });
+    },
+    function(callback) {
+      config.mongodb.db.collection("emailtemplates").find({name:templateName}).toArray(function(e,template) {
+        callback(e,template);
+      });
+    },
+  ],
+    function(err,results) {
+      if (err) cb(err);
+      else {
+        var pageInfo = results[0];
+        var template = results[1];
+        
+        if (!pageInfo.length) cb(null,false);
+        else if (!template.length) cb(null,false);
+        else {
+          var send = function(body) {
+            new Mailer({
+              send: true,
+              bcc: pageInfo[0].subscribers,
+              template: {
+                templateInfo: {
+                  subject: template[0].subject,
+                  html: body
+                },
+                
+                keys: templateKeys,
+                
+                cb: function(e,info) {
+                  cb(e,info);
+                }
+              }
+            });
+          };
+          
+          var gH = new GetHTML({fullpath:self.emailtemplatepath + "/" + template[0].file});
+          
+          if (template[0].file) {
+            var templateExtension = gH.extension(template[0].file);
+            
+            if (typeof gH[templateExtension.substring(1)]!=="undefined") {
+              gH[templateExtension.substring(1)](function(e,h) {
+                if (e) cb(e);
+                else {
+                  var templateHtml = h;
+                  send(templateHtml);
+                }
+              })
+            } else {
+              cb(null,false);
+            }
+          } else {
+            var templateHtml = template[0].html;
+            send(templateHtml);
+          }
+        }
+      }
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------

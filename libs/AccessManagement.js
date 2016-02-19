@@ -1,5 +1,6 @@
 var config = require('./config.js');
 var _ = require("underscore");
+var async = require("async");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    AccessManagement.js
@@ -15,6 +16,44 @@ AccessManagement = function(options) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      isAdmin (PUBLIC)
+|DESCRIPTION:  Determines if the user specified is an administrator within the scope of a page path.
+|             This method will return true in the callback if the user is a page OR wiki admin, false otherwise
+|PARAMETERS:  1. options(REQ): options to check if a user is an administrator on a particular page.
+|                     options.username
+|                     options.path: path for the page we're checking.
+|             2. cb(REQ): callback function to return back whether the user successfully authenticated.
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+AccessManagement.prototype.isAdmin = function(options,cb) {
+  var username = options.username;
+  var path = options.path;
+  
+  async.parallel([
+    function(callback) {
+      this.isPageAdmin({username:username, path:path},function(e,isAdmin) {
+        callback(e,isAdmin);
+      });
+    },
+    function(callback) {
+      this.isWikiAdmin(username,function(e,isAdmin) {
+        callback(e,isAdmin);
+      });
+    }
+  ],
+    function(err,results) {
+      if (err) cb(null,false);
+      else {
+        var isAdmin = results[0] || results[1] || false;
+        cb(null,isAdmin);
+      }
+    }
+  );
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      isWikiAdmin (PUBLIC)
 |DESCRIPTION:  Determines if the user specified is a wiki administrator.
 |PARAMETERS:  1. username(REQ): the username of the user we're checking for wiki admin access
@@ -24,11 +63,14 @@ AccessManagement = function(options) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.isWikiAdmin = function(username,cb) {
-  this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
-    if (e) cb(e);
-    else if (admin.length) cb(null,true);
-    else cb(null,false);
-  });
+  if (!username) cb(null,false);
+  else {
+    this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
+      if (e) cb(e);
+      else if (admin.length) cb(null,true);
+      else cb(null,false);
+    });
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -46,7 +88,9 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
   
-  if (path && username) {    
+  if (!username || !path) {
+    cb(null,false);
+  } else {
     var pathAry = path.split("/");
     pathAry.shift();
     
@@ -77,9 +121,7 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
         } else cb(null,true);
       }
     });
-  } else {
-    cb("No path provided.");
-  }  
+  }
 }
 
 //-------------------------------------------------------

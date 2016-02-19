@@ -125,6 +125,51 @@ var self = module.exports = {
     }
   },
   
+  smtp: {
+    core: {
+      pool: process.env.SMTP_POOL,
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: process.env.SMTP_SECURE,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD
+      },
+      
+      defaultEmail: process.env.SMTP_DEFAULTEMAIL,
+      defaultName: process.env.SMTP_DEFAULTNAME
+    },
+    
+    nodemailerconfig: function() {
+      if (this.core.host) {
+        /*var o = {
+          //pool: this.core.pool,
+          host: this.core.host,
+          port: Number(this.core.port || 587),
+          secure: this.core.secure || false,
+          authMethod: this.core.authMethod || "PLAIN"
+        };
+        
+        if (typeof this.core.auth==="object") o.auth = {
+          user: this.core.auth.user,
+          pass: this.core.auth.pass
+        };*/
+        
+        var o = {
+          service: "gmail",
+          auth: {
+            user: "whatl3y@gmail.com",
+            pass: "guessit960192089"
+          }
+        }
+        
+        return o;
+      } else {
+        return null;
+      }
+    }
+  },
+  
   ldap: {
     protocol: process.env.LDAP_PROTOCOL,
     url: process.env.LDAP_URL,
