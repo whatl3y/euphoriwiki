@@ -226,7 +226,7 @@
                       res.json({success:false, error:"There was an error saving your information. Please try again."});
                     } else {
                       var mailInfo = results[4];
-                      if (!mailInfo) log.info("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
+                      if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
                       
                       res.json({success:true});
                     }
