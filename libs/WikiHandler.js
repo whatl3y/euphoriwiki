@@ -83,6 +83,7 @@ WikiHandler.prototype.getSubPages=function(cb,returnAry) {
 |PARAMETERS:  1. options(OPT): Either a string, which represents the page of the page we're
 |          retrieving information about, or an object to help us filter on information
 |          for the query to get the page information.
+|              options.archive: optional boolean indicating if we should pull from wikicontent collection or wikicontent_archive (history
 |              options.path
 |              options.filters: optional filter object to be used in mongodb query
 |              options.fields: object of fields we want to return
@@ -94,12 +95,13 @@ WikiHandler.prototype.getPage=function(options,cb) {
   cb = (typeof options==="function") ? options : cb;
   options = (typeof options==="function") ? {} : (options || {});
   
+  var coll = (typeof options==="string") ? "wikicontent" : ((options.archive) ? "wikicontent_archive" : "wikicontent");
   var path = (typeof options==="string") ? options : (options.path || this.path);
   var filters = (typeof options==="string") ? {path:path} : (options.filters || {path:path});
   var fields = (typeof options==="string") ? {} : (options.fields || {});
   var sort = (typeof options==="string") ? {} : (options.sort || {});
   
-  config.mongodb.db.collection("wikicontent").find(filters,fields).sort(sort).toArray(function(_e,pageInfo) {
+  config.mongodb.db.collection(coll).find(filters,fields).sort(sort).toArray(function(_e,pageInfo) {
     if (_e) cb(_e);
     else cb(null,pageInfo);
   });

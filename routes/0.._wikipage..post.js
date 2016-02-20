@@ -47,7 +47,12 @@
           Access.isWikiAdmin(username,function(e,isAdmin) {
             callback(e,isAdmin);
           });
-        }
+        },
+        function(callback) {
+          wiki.getPage({archive:true, filters:{path:wiki.path}},function(e,pageInfo) {
+            callback(e,pageInfo);
+          })
+        },
       ],
         function(err,results) {
           if (err) res.json({success:false, error:err});
@@ -57,6 +62,7 @@
             var templates = results[2];
             var oPages = results[3];
             var canUpdate = results[4] || results[5] || false;
+            var pageArchive = results[6];
             
             if (!validated) res.json({success:false, protected:true});
             else {
@@ -72,7 +78,7 @@
                 widgets: pageInfo[0].widgets,
                 lastUpdate: pageInfo[0].updated,
                 person: pageInfo[0].updatedBy,
-                versions: pageInfo[0].history,
+                versions: pageArchive,
                 tags: pageInfo[0].tags,
                 pageFiles: pageInfo[0].files,
                 password: pageInfo[0].password,
@@ -168,29 +174,61 @@
                   }
                 };
                 
-                if (current.length) saveData["$push"] = {history: current[0]};
-                
-                config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
-                  function(err,doc) {
+                //save the data, pull any drafts the user may
+                //have had for this page, archive the former page, write
+                //an entry in the audit log,
+                //and call the event handler for updating a page.
+                async.parallel([
+                  function(callback) {
+                    config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
+                      function(err,doc) {
+                        callback(err,doc);
+                      }
+                    );
+                  },
+                  function(callback) {
+                    config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+                      function(e,result) {
+                        callback(e,result);
+                      }
+                    );
+                  },
+                  function(callback) {
+                    if (current.length) {
+                      var oArchive = current[0];
+                      delete(oArchive["_id"]);
+                      
+                      config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
+                        callback(err,result);
+                      });
+                    }
+                  },
+                  function(callback) {
+                    try {
+                      audit.log({type:"Update Page", additional:{path:wiki.path}});
+                      callback(null,true);
+                    } catch(err) {
+                      callback(err,null);
+                    }
+                  },
+                  function(callback) {
+                    //------------------------
+                    //TO DO: call the event handler instead of directly subscribe
+                    //------------------------
+                    wiki.emailSubscribers({template:"pageUpdate", keys:{path:wiki.path, username:username}},function(e,mailInfo) {
+                      callback(e,mailInfo);
+                    });
+                  }
+                ],
+                  function(err,results) {
                     if (err) {
                       log.error(err);
                       res.json({success:false, error:"There was an error saving your information. Please try again."});
                     } else {
+                      var mailInfo = results[4];
+                      if (!mailInfo) log.info("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
+                      
                       res.json({success:true});
-                      
-                      config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
-                        function(e,result) {
-                          if (e) log.error(e);
-                          
-                          audit.log({type:"Update Page", additional:{path:wiki.path}});
-                        }
-                      );
-                      
-                      //e-mail subscribers indicating an update if there are any subscribers to this page
-                      wiki.emailSubscribers({template:"pageUpdate", keys:{path:wiki.path, username:username}},function(e,mailInfo) {
-                        if (e) log.info(e);
-                        else if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
-                      });
                     }
                   }
                 );

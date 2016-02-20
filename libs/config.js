@@ -158,8 +158,8 @@ var self = module.exports = {
         var o = {
           service: "gmail",
           auth: {
-            user: "whatl3y@gmail.com",
-            pass: "guessit960192089"
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
           }
         }
         
