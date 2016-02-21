@@ -12,5 +12,5 @@ block main
         div(class="row")
           div(class="col-xs-12 text-right")
             a(href="javascript:void(0)",data-ng-click="functions.changePageState('view');editState=!editState") {{ (editState) ? "Hide Page Options" : "Edit Your Page" }}
+      include include_pageextras.jade
       include include_editpage.jade
-      include include_pagelikes.jade

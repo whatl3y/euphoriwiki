@@ -45,7 +45,7 @@
         var directory = info.directory;
         
         if (D.fileOrDirExists(directory)) {
-          D.processDir(directory,true,function(err,obj) {
+          D.processDir({dirpath:directory, recurse:true},function(err,obj) {
             if (err) res.json({success:false, error:err});
             else {
               var now = Date.now();

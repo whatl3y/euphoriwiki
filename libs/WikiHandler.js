@@ -2,6 +2,7 @@ var _ = require("underscore");
 var async = require("async");
 var GetHTML = require("./GetHTML.js");
 var Mailer = require("./Mailer.js");
+var CodeRunner = require("./CodeRunner.js");
 var config = require('./config.js');
 var Object = require("../public/js/Object_prototypes.js");
 
@@ -379,6 +380,94 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
       else check(pageInfo[0]);
     });
   }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      event (PUBLIC)
+|DESCRIPTION:  Handles getting events of a particular type and executing them.
+|PARAMETERS:  1. options(REQ): The type of events we're fetching and running.
+|                     options.type: type of event
+|                     options.params: object of additional parameters to include.
+|             2. cb(REQ): the callback function
+|                 cb(err,true/false);
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.event=function(options,cb) {
+  options = options || {};
+  
+  var type = (typeof options==="string") ? options : (options.type || "");
+  var params = (typeof options==="string") ? {} : (options.params || {});
+  
+  var self = this;
+  
+  if (!type) {
+    cb("No type provided");
+    return;
+  }
+  
+  async.parallel([
+    function(callback) {
+      config.mongodb.db.collection("wikicontent").aggregate([
+        {
+          $match: {path:self.path}
+        },
+        {
+          $project: {
+            _id: 0,
+            events: {
+              $filter: {
+                input: "$events",
+                as: "event",
+                cond: {
+                  $eq: ["$$event.type",type]
+                }
+              }
+            }
+          }
+        }
+      ],function(e,doc) {
+        callback(e,doc);
+      });
+    },
+    function(callback) {
+      config.mongodb.db.collection("defaultevents").find({type:type}).toArray(function(e,events) {
+        callback(e,events);
+      });
+    },
+  ],
+    function(err,results) {
+      if (err) cb(err);
+      else {
+        var pageEvents = (results[0].length && typeof results[0][0]==="object") ? results[0][0].events : [];
+        var defaultEvents = results[1] || [];
+        
+        var aggregatedEvents = [].concat(pageEvents,defaultEvents);
+        
+        if (aggregatedEvents.length) {
+          var asyncParallel = aggregatedEvents.map(function(event) {
+            event = event || {};
+            var parameters = Object.merge(params,event.params || {});
+            
+            return function(callback) {
+              var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
+              
+              if (result===true) callback(null,true);
+              else callback(result);
+            }
+          });
+          
+          async.parallel(asyncParallel,function(err,results) {
+            if (err) cb(err);
+            else cb(null,true);
+          });
+        } else {
+          cb(null,true);
+        }
+      }
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------

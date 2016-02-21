@@ -25,18 +25,22 @@ DirectoryProcessor=function(options) {
 |NAME:      processDir (PUBLIC)
 |DESCRIPTION:  Takes the directory and "processes" it, effectively hashing all files and optionally
 |           descending in all directories recursively hashing all nested files.
-|PARAMETERS:  1. dirpath(REQ): the file path we're starting with
-|             2. recurse(OPT): boolean indicating if we're descending in all subdirectories to process those files as well
-|             3. cb(REQ): the callback to call after finished processing with an object of all processed files.
-|             4. encoding(OPT): an optional encoding to save the file information if we want to save the file data
-|                 If omitted, we will not get the file data for each file.
+|PARAMETERS:  1. options(REQ): options for the processing
+|                   options.dirpath(REQ):  the file path we're starting with
+|                   options.recurse(OPT): boolean indicating if we're descending in all subdirectories to process those files as well
+|                   options.encoding(OPT): an optional encoding to save the file information if we want to save the file data
+|                           If omitted, we will not get the file data for each file.
+|             2. cb(REQ): the callback to call after finished processing with an object of all processed files.
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.processDir=function(dirpath,recurse,cb,encoding) {
-  dirpath = dirpath || this.dirpath;
-  recurse = recurse || false;
+DirectoryProcessor.prototype.processDir=function(options,cb) {
+  options = options || {};
+  
+  var dirpath = options.dirpath || this.dirpath;
+  var recurse = options.recurse || false;
+  var encoding = options.encoding || null;
   
   var self = this;
   var ret = [];
@@ -49,13 +53,13 @@ DirectoryProcessor.prototype.processDir=function(dirpath,recurse,cb,encoding) {
         
         fs.stat(fp,function(err,stats) {
           if (stats.isDirectory()) {
-            if (recurse) self.processDir(fp,true,function(_e,r) {
+            if (recurse) self.processDir({dirpath:fp, recurse:true, encoding:encoding},function(_e,r) {
               if (_e) callback(_e)
               else {
                 ret = ret.concat(r);
                 callback();
               }
-            },encoding);
+            });
             else callback();
           } else {
             var o = {

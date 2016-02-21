@@ -1,4 +1,4 @@
-function wikiPageCtrl($scope,$http,$sce,Upload) {
+function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   $scope.pathname = decodeURI(location.pathname);
   $scope.newPathname = decodeURI(location.pathname);
   
@@ -204,6 +204,12 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
       tabState: function(isActive) {
         return (isActive) ? "active" : "";
       }
+    },
+    
+    modals: {
+      cancel: function() {
+        //$modalInstance.dismiss('cancel');
+      }
     }
   };
   
@@ -317,6 +323,43 @@ function wikiPageCtrl($scope,$http,$sce,Upload) {
           console.log(data,err);
           angular.element( '#loader' ).remove();
         });
+      }
+    },
+    
+    subscribe: {
+      subscribeModal: function() {
+        $scope.modalInstance = $modal.open({
+          animation: true,
+          templateUrl: 'subscribeContent.html',
+          controller: 'wikiPageCtrl',
+          size: "md"
+        });
+      },
+      
+      subscribeToPage: function(email) {
+        delete($scope.subscribeError);
+        delete($scope.subscribeSuccess);
+        
+        if (email && /^.+@.+\.[\w\d]{1,10}$/.test(email)) {
+          $http.post('/wikipage',{
+            type: "subscribe",
+            page: $scope.pathname,
+            email: email
+          })
+          .success(function(ret) {
+            if (ret.success) $scope.subscribeSuccess = "You were successfully subscribed to this page! You will now receive notifications when the page is updated.";
+            else {
+              $scope.subscribeError = ret.error || "There was an issue entering your password. Please try again.";
+              console.log(ret);
+            }
+          })
+          .error(function(data,err) {
+            $scope.subscribeError = err;
+            console.log(data,err);
+          });
+        } else {
+          $scope.subscribeError = "Please enter a valid e-mail address above (e.g. email@company.com)";
+        }
       }
     },
     

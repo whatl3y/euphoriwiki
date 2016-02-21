@@ -13,7 +13,7 @@ div(class="row padding-large")
             li(data-ng-repeat="item in widget.items")
               div(class="separate-vert-small")
                 div
-                  a(data-ng-href="{{ item.path }}",target="_blank") {{ item.path }} 
+                  a(data-ng-href="{{ item.path }}") {{ item.path }} 
                   small(class="soft-text text-xsmall") {{ item.pageViews }} views
                   span(data-ng-show="item.extraText") {{ item.extraText }}
                 div

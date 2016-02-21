@@ -67,23 +67,26 @@
             if (!validated) res.json({success:false, protected:true});
             else {
               var oRet;
-              if (!pageInfo.length) oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
-              else oRet = {
-                success: true,
-                exists: true,
-                updateable: canUpdate,
-                description: pageInfo[0].description,
-                html: pageInfo[0].content_html,
-                markdown: pageInfo[0].content_markdown,
-                widgets: pageInfo[0].widgets,
-                lastUpdate: pageInfo[0].updated,
-                person: pageInfo[0].updatedBy,
-                versions: pageArchive,
-                tags: pageInfo[0].tags,
-                pageFiles: pageInfo[0].files,
-                password: pageInfo[0].password,
-                pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : []
-              };
+              if (!pageInfo.length) {
+                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
+              } else {
+                oRet = {
+                  success: true,
+                  exists: true,
+                  updateable: canUpdate,
+                  description: pageInfo[0].description,
+                  html: pageInfo[0].content_html,
+                  markdown: pageInfo[0].content_markdown,
+                  widgets: pageInfo[0].widgets,
+                  lastUpdate: pageInfo[0].updated,
+                  person: pageInfo[0].updatedBy,
+                  versions: pageArchive,
+                  tags: pageInfo[0].tags,
+                  pageFiles: pageInfo[0].files,
+                  password: pageInfo[0].password,
+                  pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : []
+                };
+              }
               
               //get like information and determine if the current logged in user
               //is allowed to like (i.e. whether they've already liked the page)
@@ -118,6 +121,8 @@
               } else {
                 res.json(oRet);
               }
+              
+              wiki.event("visitpage",function(e,result) {if (e) log.error(e);});
             }
           }
         }
@@ -212,12 +217,12 @@
                     }
                   },
                   function(callback) {
-                    //------------------------
-                    //TO DO: call the event handler instead of directly subscribe
-                    //------------------------
-                    wiki.emailSubscribers({template:"pageUpdate", keys:{path:wiki.path, username:username}},function(e,mailInfo) {
-                      callback(e,mailInfo);
-                    });
+                    try {
+                      wiki.event({type:"updatepage", params:{username:username}},function(e,result) {if (e) log.error(e);});
+                      callback(null,true);
+                    } catch(err) {
+                      callback(err);
+                    }
                   }
                 ],
                   function(err,results) {
@@ -264,6 +269,22 @@
           audit.log({type:"Update Page Password", additional:{path:wiki.path}});
         }
       );
+      
+      break;
+      
+    case "subscribe":
+      var unsubscribe = info.unsubscribe || false;
+      var updateData = {};
+      updateData[(unsubscribe)?"$pull":"$push"] = {subscribers:info.email};
+      
+      config.mongodb.db.collection("wikicontent").update({ path:wiki.path },updateData,{upsert:true},function(e,doc) {
+        if (e) {
+          log.error(e);
+          res.json({success:false, error:e});
+        } else {
+          res.json({success:true});
+        }
+      });
       
       break;
     

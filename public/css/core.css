@@ -268,6 +268,10 @@ ul.nav > li {
   margin-right: 10px;
 }
 
+li.switch-grey {
+  background: #F8F8F8;
+}
+
 .nav-affix {
   top: 0px;
   z-index: 9;
