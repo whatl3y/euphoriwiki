@@ -10,7 +10,7 @@ function adminEventsCtrl($scope,$http) {
       });
     },
     
-    updateEventLength(which) {
+    updateEventLength: function(which) {
       which = which || "inc";
       
       switch(which) {

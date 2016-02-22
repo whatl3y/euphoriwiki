@@ -206,6 +206,9 @@
                       config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
                         callback(err,result);
                       });
+                    } else {
+                      wiki.event({type:"createpage", params:{username:username}},function(e,result) {if (e) log.error(e);});
+                      callback(err,true);
                     }
                   },
                   function(callback) {
@@ -293,6 +296,9 @@
           res.json({success:false, error:e});
         } else {
           res.json({success:true});
+          
+          audit.log({type:"New Subscriber", additional:{path:wiki.path, email:info.email}});
+          wiki.event({type:"newpagesubscriber", params:{email:info.email}},function(e,result) {if (e) log.error(e);});
         }
       });
       
@@ -308,6 +314,7 @@
               else res.json({success:true});
               
               audit.log({type:"Unlike", additional:{path:wiki.path}});
+              wiki.event({type:"pageunliked", params:{username:username}},function(e,result) {if (e) log.error(e);});
             }
           );
         } else {
@@ -320,6 +327,7 @@
               else res.json({success:true});
               
               audit.log({type:"Like", additional:{path:wiki.path}});
+              wiki.event({type:"pageliked", params:{username:username}},function(e,result) {if (e) log.error(e);});
             }
           );
         }
@@ -505,7 +513,8 @@
                   if (err) res.json({success:false, error:err});
                   else res.json({success:true});
                   
-                  audit.log({type:"Update Page Path", additional:{formerPath:wiki.path,newPath:newPath}});
+                  audit.log({type:"Update Page Path", additional:{formerPath:wiki.path, newPath:newPath}});
+                  wiki.event({type:"updatepagepath", params:{username:username, formerPath:wiki.path, newPath:newPath}},function(e,result) {if (e) log.error(e);});
                 });
               }
             }
