@@ -3,37 +3,23 @@ extends layout
 block main  
   div(class="row",data-ng-controller="adminEventsCtrl")
     div(class="col-xs-12")
+      include include_adminnav.jade
+    div(class="col-xs-12 col-md-10 col-md-offset-1")
       div(class="padding-medium")
         h1 Default Wiki Events
+        div.
+          Events are fired in the wiki at particular times in the standard wiki "workflow". 
+          For example, you can fire an event at the time someone visits a page, updates a page, etc. 
+          Use the form below to add and remove default events below.
+        br
+        div
+          strong.
+            Keep in mind these will be default events that will fire
+            at any time the event fires for any wiki page. You can also create custom events at the page level
+            that will only fire for that particular page.
         div(class="separate-vert-large")
           div(class="padding-small text-center")
             form
               div(class="separate-vert-small")
                 button(class="btn btn-success",data-ng-click="handlers.saveEvents(defaultEvents)") Save Events
-              div(class="separate-vert-small")
-                button(class="btn btn-default",data-ng-click="functions.updateEventLength()",popover-trigger="mouseenter",popover="Add new event.")
-                  span(class="glyphicon glyphicon-plus")
-                button(class="btn btn-default margin-left-small",data-ng-click="functions.updateEventLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
-                  span(class="glyphicon glyphicon-minus")
-          div(class="padding-small text-center",data-ng-show="!defaultEvents.length")
-            alert There are no default events configured in the wiki.
-          ul(class="list-unstyled")
-            li(class="switch-grey separate-vert-small",data-ng-show="defaultEvents.length",data-ng-repeat="event in defaultEvents")
-              div(class="row padding-medium")
-                h2(class="col-xs-12") {{ $index+1 }}. Wiki Event
-                form
-                  div(class="col-xs-12 col-sm-4")
-                    div(class="padding-small")
-                      div(class="form-group")
-                        label Event Name
-                        input(type="text",class="form-control",data-ng-model="event.name")
-                      div(class="form-group")
-                        label Event Description
-                        textarea(class="form-control",data-ng-model="event.description")
-                      div(class="form-group")
-                        label Event Type
-                        select(class="form-control",data-ng-model="event.type",data-ng-options="type for type in eventTypes")
-                  div(class="col-xs-12 col-sm-8")
-                    div(class="form-group")
-                        label Event Code
-                        textarea(class="form-control",rows="10",data-ng-model="event.code")
+          include include_eventupdates.jade

@@ -1,0 +1,34 @@
+- var aryEvents = aryEvents || "defaultEvents"
+
+div(class="separate-vert-small text-center")
+  button(class="btn btn-default",data-ng-click="functions.updateEventLength()",popover-trigger="mouseenter",popover="Add new event.")
+    span(class="glyphicon glyphicon-plus")
+  button(class="btn btn-default margin-left-small",data-ng-click="functions.updateEventLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
+    span(class="glyphicon glyphicon-minus")
+div(class="padding-small text-center",data-ng-show="!" + aryEvents + ".length")
+  alert There are no default events configured in the wiki.
+ul(class="list-unstyled")
+  li(class="switch-grey separate-vert-small",data-ng-show=aryEvents+".length",data-ng-repeat="event in "+aryEvents)
+    div(class="row padding-medium")
+      div(class="col-xs-12")
+        div(class="row")
+          div(class="text-xlarge col-xs-6") {{ $index+1 }}. Wiki Event
+          div(class="text-right col-xs-6")
+            small
+              a(href="javascript:void(0)",data-ng-click=aryEvents+".splice($index,1)") (remove)
+      form
+        div(class="col-xs-12 col-sm-4")
+          div(class="padding-small")
+            div(class="form-group")
+              label Event Name
+              input(type="text",class="form-control",data-ng-model="event.name")
+            div(class="form-group")
+              label Event Description
+              textarea(class="form-control",data-ng-model="event.description")
+            div(class="form-group")
+              label Event Type
+              select(class="form-control",data-ng-model="event.type",data-ng-options="type for type in eventTypes")
+        div(class="col-xs-12 col-sm-8")
+          div(class="form-group")
+              label Event Code
+              textarea(class="form-control",rows="10",data-ng-model="event.code")

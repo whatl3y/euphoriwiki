@@ -269,6 +269,25 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
+    prettifyHtml: function() {
+      var loader = new Core.Modals().asyncLoader({message:"Prettifying your HTML!."});
+      $http.post('/wikipage',{type:"prettify", html:$scope.content.html})
+      .success(function(ret) {
+        if (ret.success) {
+          $scope.content.html = ret.html || "";
+          $scope.functions.htmlToMarkdown( $scope.content.html );
+        } else {
+          alert("ERROR: " + ret.error || "There was an issue. Please try again.");
+        }
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        loader.remove();
+      });
+    },
+    
     updatePagePassword: function(pw,clear) {
       if (pw) {
         var info = {

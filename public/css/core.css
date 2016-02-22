@@ -113,6 +113,27 @@ input.emphasize {
 	/* Cleaner, but slightly less support: use "50%" as value */
 }
 
+colgroup col.gray {
+  background-color: #F5F5F5;
+}
+
+colgroup col.success {
+  background-color: #dff0d8;
+}
+
+colgroup col.error,
+colgroup col.danger {
+  background-color: #f2dede;
+}
+
+colgroup col.warning {
+  background-color: #fcf8e3;
+}
+
+colgroup col.info {
+  background-color: #d9edf7;
+}
+
 .circ10 {
   width: 10px;
   height: 10px;

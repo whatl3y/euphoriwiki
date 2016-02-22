@@ -244,6 +244,16 @@
       }
       break;
     
+    case "prettify":
+      var h = info.html || "";
+      h = h.replace(/^[\s\t]*(\r\n|\n)/g,"");
+      
+      var newHtml = new GetHTML().prettify(h);
+      if (typeof newHtml==="string") res.json({success:true, html:newHtml});
+      else res.json({success:false, error:"There was an issue prettifying your HTML."});
+      
+      break;
+    
     case "password":
       var password = info.password;
       wiki.validatePassword({session:req.session, password:password},function(e,validated) {

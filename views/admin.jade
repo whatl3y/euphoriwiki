@@ -1,13 +1,14 @@
 extends layout
 
 block main  
-  div(class="padding-large",data-ng-controller="adminSettingsCtrl")
+  include include_adminnav.jade
+  div(class="row padding-large",data-ng-controller="adminSettingsCtrl")
     div(class="col-xs-3 hidden-xs sidenav-affix",data-spy="affix",data-offset-top="60")
       small
         ul(class="list-unstyled")
           li(data-ng-repeat="setting in settings")
             a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
-    div(class="col-xs-12 col-sm-9 pull-right")
+    div(class="col-xs-9 pull-right")
       h1 Global Settings
       div(class="col-xs-12 separate-vert-medium",data-ng-repeat="setting in settings")
         div(class="shadowsmall-subtle wrapper light gray padding-small")
