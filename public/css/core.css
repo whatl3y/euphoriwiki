@@ -233,11 +233,16 @@ input.emphasize {
   margin: 30px 0;
 }
 
+.modal-header {
+	background: #333333;
+	color: white;
+}
+
 .header {
 
 }
 
-.panel-#333333 {
+.panel-header {
   border-color: #333333 !important;
 }
 

@@ -1,2 +1,25 @@
-h1 E-mail Header
-div some of the body yo
+- var host = "http://pmglap1126"
+- var imgsrc = "http://pmglap1126/public/images/marketing/pmg.net_white.png"
+
+html(xmlns="http://www.w3.org/1999/xhtml")
+  head
+  body(style="-webkit-text-size-adjust: none;font-family:Arial, Helvetica, sans-serif;margin-left:0px;margin-top:0px;min-width:100%;")
+    div(id="bodywrapper",style="color:#000000;margin-left:auto;margin-right:auto;width:600px;")
+      div(id="homeheader",style='overflow:hidden;background:#000000;color:#FFFFFF;border-bottom:2px solid;padding:25px;')
+        a(href=host)
+          div(class="logo",style="text-align:center")
+            img(src=imgsrc,width="150",height="75",style="width:150px,height:75px")
+      div(id="main",style="text-align:center")
+        div(id="homecontent",style='overflow:hidden;border:4px solid;padding:0px;margin-top:20px;margin-bottom:20px')
+          div(id="titlewrapper",style='overflow:hidden')
+            div(id="title",style="overflow:hidden;background:#000000;color:#FFFFFF;font-size:18px;font-weight:bold;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;")
+              span Page, 
+              b  {{path}}, 
+              span has been updated!
+          div(id="content")
+            div(id="maincontent",style='margin:20px;padding:10px;text-align:center;')
+              a(href=host+"{{path}}") {{path}} 
+              span was updated by {{username}}. Go check out the updates made now!
+      div(id="footerwrapper",style='overflow:hidden;background:black;color:white;padding:10px;')
+        div(id="topfooter",style="overflow:hidden")
+          div PMG Wiki
