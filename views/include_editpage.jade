@@ -24,7 +24,7 @@ div(class="wrapper separate-vert-medium")
               div Please contact the page administrator to get access to update this page.
       div(data-ng-show="updateable")
         div(class="text-center padding-medium")
-          button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Changes
+          button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Content Changes
           button(class="btn btn-info margin-left-medium",data-ng-click="handlers.saveChanges(true)") Save Draft To Finish Later
           button(class="btn btn-default margin-left-medium",data-ng-click="functions.reloadPage()") Cancel Changes
         div(class="padding-medium")
@@ -51,6 +51,8 @@ div(class="wrapper separate-vert-medium")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.wikiEvents)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('wikiEvents')") Custom Page Events
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
@@ -210,6 +212,18 @@ div(class="wrapper separate-vert-medium")
                   a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'user')") Delete
           div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
             alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
+      div(data-ng-show="pageState.wikiEvents")
+        h2 Custom Page Events
+        div.
+          You can configure custom events that are fired for a page at particular times in the standard page evolution or "workflow". 
+          For example, you can fire an event at the time someone visits a page, updates a page, likes a page, subscribes to a page, etc. 
+          Use the form below to add and remove events that are specific to this page below.
+        div(class="col-xs-12 col-sm-8 col-sm-offset-2")
+          form
+            div(class="separate-vert-small text-center")
+              button(class="btn btn-primary",data-ng-click="handlers.savePageEvents(pageEvents)") Save Page Events
+          - aryEvents = "pageEvents"
+          include include_eventupdates.jade
       div(data-ng-show="pageState.settings")
         h2 Page Settings
         include include_wikipagesettings.jade

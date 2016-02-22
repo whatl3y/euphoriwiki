@@ -53,6 +53,11 @@
             callback(e,pageInfo);
           })
         },
+        function(callback) {
+          config.mongodb.db.collection("event_types").find({}).sort({type:1}).toArray(function(e,types) {
+            callback(e,types);
+          });
+        }
       ],
         function(err,results) {
           if (err) res.json({success:false, error:err});
@@ -63,6 +68,7 @@
             var oPages = results[3];
             var canUpdate = results[4] || results[5] || false;
             var pageArchive = results[6];
+            var eventTypes = results[7];
             
             if (!validated) res.json({success:false, protected:true});
             else {
@@ -84,7 +90,9 @@
                   tags: pageInfo[0].tags,
                   pageFiles: pageInfo[0].files,
                   password: pageInfo[0].password,
-                  pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : []
+                  pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
+                  pageEvents: pageInfo[0].events,
+                  eventTypes: eventTypes.map(function(t) {return t.type;})
                 };
               }
               
@@ -245,6 +253,43 @@
           }
         );
       }
+      break;
+    
+    case "updatePageEvents":
+      var events = info.events || [];
+      events = events.map(function(e) {
+        return Object.removeDollarKeys(e);
+      });
+      
+      async.parallel([
+        function(callback) {
+          Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) {
+            log.error(err);
+            res.json({success:false, error:err});
+          } else {
+            var isAdmin = results[0];
+            
+            if (!isAdmin) res.json({success:false, error:"You need to be a page admin to perform this function."});
+            else {
+              config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $unset:{events:1} },function(_e) {
+                config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $set:{events:events} },function(__e) {
+                  var error = _e || __e || null;
+                  
+                  if (error) res.json({success:false, error:error});
+                  else res.json({success:true});
+                });
+              });
+            }
+          }
+        }
+      );
+    
       break;
     
     case "prettify":

@@ -293,9 +293,8 @@ WikiHandler.prototype.createInheritanceFilter=function(path) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.allowedPath=function(path) {
   var invalid = [
-    /^\/user$/,
-    /^\/user[\/]{1}.*/,
-    /^\/admin[\/]*$/,
+    /^\/user[\/]*.*/,
+    /^\/admin[\/]*.*$/,
     /^\/login[\/]*$/,
     /^\/logout[\/]*$/,
     /^\/search[\/]*.*/,

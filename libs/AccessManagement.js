@@ -31,20 +31,22 @@ AccessManagement.prototype.isAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
   
+  var self = this;
+  
   async.parallel([
     function(callback) {
-      this.isPageAdmin({username:username, path:path},function(e,isAdmin) {
+      self.isPageAdmin({username:username, path:path},function(e,isAdmin) {
         callback(e,isAdmin);
       });
     },
     function(callback) {
-      this.isWikiAdmin(username,function(e,isAdmin) {
+      self.isWikiAdmin(username,function(e,isAdmin) {
         callback(e,isAdmin);
       });
     }
   ],
     function(err,results) {
-      if (err) cb(null,false);
+      if (err) cb(err);
       else {
         var isAdmin = results[0] || results[1] || false;
         cb(null,isAdmin);

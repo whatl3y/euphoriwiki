@@ -6,7 +6,7 @@ div(class="separate-vert-small text-center")
   button(class="btn btn-default margin-left-small",data-ng-click="functions.updateEventLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
     span(class="glyphicon glyphicon-minus")
 div(class="padding-small text-center",data-ng-show="!" + aryEvents + ".length")
-  alert There are no default events configured in the wiki.
+  alert There are no page events configured in the wiki.
 ul(class="list-unstyled")
   li(class="switch-grey separate-vert-small",data-ng-show=aryEvents+".length",data-ng-repeat="event in "+aryEvents)
     div(class="row padding-medium")

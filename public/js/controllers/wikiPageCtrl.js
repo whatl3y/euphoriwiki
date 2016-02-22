@@ -15,6 +15,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   $scope.pageState = {
     view: true,
     settings: false,
+    wikiEvents: false,
     editHtml: false,
     editMarkup: false,
     uploadDocx: false,
@@ -78,6 +79,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
+          $scope.eventTypes = ret.eventTypes || [];
+          $scope.pageEvents = ret.pageEvents || [];
         }
         
         $scope.functions.rteInit(true);
@@ -120,6 +123,20 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
             $scope.functions.rteInit();
           }
         }});
+      }
+    },
+    
+    updateEventLength: function(which) {
+      which = which || "inc";
+      
+      switch(which) {
+        case "inc":
+          $scope.pageEvents = $scope.pageEvents.concat({});
+          break;
+          
+        case "dec":
+          $scope.pageEvents.pop();
+          break;
       }
     },
     
@@ -284,6 +301,23 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       })
       .error(function(data,err) {
         console.log(data,err);
+        loader.remove();
+      });
+    },
+    
+    savePageEvents: function(events) {
+      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      $http.post('/wikipage',{type:"updatePageEvents", page: $scope.pathname, events:events})
+      .success(function(ret) {
+        if (ret.success) console.log("Successfully saved page events!");
+        else {
+          alert(ret.error || "There was an error save your events. Please try again.");
+        }
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        alert(ret.error || "There was an error save your events. Please try again.");
         loader.remove();
       });
     },
