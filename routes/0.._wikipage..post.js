@@ -57,7 +57,12 @@
           config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
             callback(e,types);
           });
-        }
+        },
+        function(callback) {
+          wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {
+            callback(e,aliases);
+          })
+        },
       ],
         function(err,results) {
           if (err) res.json({success:false, error:err});
@@ -69,6 +74,7 @@
             var canUpdate = results[4] || results[5] || false;
             var pageArchive = results[6];
             var eventTypes = results[7];
+            var aliases = results[8];
             
             if (!validated) res.json({success:false, protected:true});
             else {
@@ -92,7 +98,8 @@
                   password: pageInfo[0].password,
                   pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
                   pageEvents: pageInfo[0].events,
-                  eventTypes: eventTypes.map(function(t) {return t.type;})
+                  eventTypes: eventTypes.map(function(t) {return t.type}),
+                  pageAliases: aliases.map(function(t) {return t.path})
                 };
               }
               
@@ -145,7 +152,7 @@
           function(callback) {
             wiki.getPage(function(_e,current) {
               callback(_e,current);
-            })
+            });
           },
           function(callback) {
             wiki.validatePassword({session:req.session},function(e,validated) {
@@ -179,11 +186,7 @@
                     content_html: info.html,
                     content_markdown: info.markdown,
                     updated: new Date(),
-                    updatedBy: {
-                      firstname: req.session.givenName,
-                      lastname: req.session.sn,
-                      username: username
-                    }
+                    updatedBy: {username: username}
                   }
                 };
                 
@@ -286,6 +289,67 @@
         );
       }
     
+      break;
+      
+    case "aliases":
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to delete a wiki page."});
+      else {
+        var aliases = info.aliases || [];
+        aliases = aliases.map(function(a){return {path:((a[0]=="/") ? a : "/"+a)}});
+        
+        var check = {$or:aliases};
+        
+        async.parallel([
+          function(callback) {
+            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
+          },
+          function(callback) {
+            wiki.getPage({filters:check,fields:{path:1,aliasfor:1,_id:0}},function(_e,pages) {
+              callback(_e,pages);
+            });
+          }
+        ],
+          function(err,results) {
+            if (err) {
+              res.json({success:false, error:err});
+              log.error(err);
+            } else {
+              var isAdmin = results[0];
+              var alreadyUsed = results[1];
+              
+              if (alreadyUsed.length) {
+                aliases = aliases.filter(function(a){return _.findIndex(alreadyUsed,function(used){return a.path == used.path}) == -1});
+                alreadyUsed = alreadyUsed.filter(function(a){return a.aliasfor != wiki.path});
+              }
+              
+              if (!isAdmin) res.json({success:false, error:"You must be a page admin to update the page aliases."});
+              else {
+                if (aliases.length) {
+                  if (alreadyUsed.length) {
+                    var inUseString = alreadyUsed.map(function(p){return p.path}).join(", ");
+                    res.json({success:false, error:"Your aliases were not saved because the following are already in use: " + inUseString});
+                  } else {
+                    var docs = aliases.map(function(a) {
+                      a.aliasfor = wiki.path;
+                      return a;
+                    });
+                    
+                    config.mongodb.db.collection("wikicontent").insert(docs,function(err,result) {
+                      if (err) {
+                        res.json({success:false, error:err});
+                        log.error(err);
+                      } else res.json({success:true});
+                    });
+                  }
+                } else res.json({success:true});
+              }
+            }
+          }
+        );
+      }
+      
       break;
     
     case "updatePageEvents":

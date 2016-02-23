@@ -30,20 +30,28 @@ DirectoryProcessor=function(options) {
 |                   options.recurse(OPT): boolean indicating if we're descending in all subdirectories to process those files as well
 |                   options.encoding(OPT): an optional encoding to save the file information if we want to save the file data
 |                           If omitted, we will not get the file data for each file.
+|                   options.processIndividually(OPT): boolean determining if we're going to use an individual callback or append info to an array
 |             2. cb(REQ): the callback to call after finished processing with an object of all processed files.
+|             3. cbIndividual(OPT): an optional callback function that will be used to process each file instead of appending its contents to an array
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.processDir=function(options,cb) {
+DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
   options = options || {};
   
   var dirpath = options.dirpath || this.dirpath;
   var recurse = options.recurse || false;
   var encoding = options.encoding || null;
+  var individual = options.processIndividually || false;
   
   var self = this;
   var ret = [];
+  
+  var process = function(data,foo) {
+    if (individual) cbIndividual(data);
+    else ret = ret[foo](data);
+  }
   
   fs.readdir(dirpath,function(err,files) {
     if (err) cb(err);
@@ -53,13 +61,17 @@ DirectoryProcessor.prototype.processDir=function(options,cb) {
         
         fs.stat(fp,function(err,stats) {
           if (stats.isDirectory()) {
-            if (recurse) self.processDir({dirpath:fp, recurse:true, encoding:encoding},function(_e,r) {
-              if (_e) callback(_e)
-              else {
-                ret = ret.concat(r);
-                callback();
-              }
-            });
+            if (recurse) {
+              self.processDir(Object.merge(options,{dirpath:fp}),
+                function(_e,r) {
+                  if (_e) callback(_e)
+                  else {
+                    process(r,"concat");
+                    callback();
+                  }
+                },
+              cbIndividual);
+            }
             else callback();
           } else {
             var o = {
@@ -76,14 +88,14 @@ DirectoryProcessor.prototype.processDir=function(options,cb) {
               else {
                 o.info = Object.merge(o.info,r);
                 
-                ret.push(o);
+                process(o,"push");
                 callback()
               }
             },encoding);
           }
         });
       },function(e) {
-        cb(e,ret);
+        cb(e,(ret.length) ? ret : true);
       });
     }
   });

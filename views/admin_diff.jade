@@ -13,6 +13,7 @@ block main
           div(class="form-group text-center")
             button(class="btn btn-default",data-ng-click="handlers.checkDir(dirPath)") Check Directory
             button(class="btn btn-success margin-left-small",data-ng-click="handlers.processDir(dirPath)") Process Directory
+            button(class="btn btn-info margin-left-small",data-ng-click="handlers.processDir(dirPath,'createPages')") Create Pages From Directory
           div(class="form-group text-center text-large",data-ng-show="message")
             alert(type="{{ message.type }}") {{ message.content }}
         div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1",data-ng-show="previousProcesses.length")

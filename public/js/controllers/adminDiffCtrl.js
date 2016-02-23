@@ -64,11 +64,12 @@ function adminDiffCtrl($scope,$http,$sce) {
       }
     },
     
-    processDir: function(dir) {
+    processDir: function(dir,type) {
+      type = type || "process";
       delete($scope.message);
       
       if (dir) {
-        $scope.functions.ajax("process",{directory:dir},function(e,ret) {
+        $scope.functions.ajax(type,{directory:dir},function(e,ret) {
           if (e) {
             $scope.message = {
               type: "danger",

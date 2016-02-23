@@ -6,6 +6,7 @@
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   var username = A.username;
+  var wiki = new WikiHandler({path:"/directory"});
   
   switch(info.type) {
     case "init":
@@ -73,6 +74,55 @@
               );*/
             }
           });
+        } else {
+          res.json({success:false, error:"We could not find the directory you entered."});
+        }
+      }
+      
+      break;
+      
+    case "createPages":
+      if (!A.isLoggedIn()) res.json({success:false, error:"You need to be logged in to process a directory."});
+      else {
+        var directory = info.directory;
+        var now = Date.now();
+        
+        if (D.fileOrDirExists(directory)) {
+          D.processDir({dirpath:directory, recurse:true, processIndividually:true, encoding:"binary"},
+            function(err,result) {
+              if (err) {
+                log.error(err);
+                res.json({success:false, error:err});
+              } else res.json({success:true, message:"Successfully processed your directory at: " + directory});
+            },
+            function(file) {
+              var gH = new GetHTML();
+              
+              if (typeof file.info!=="undefined") {
+                var pageData = "<div>" + gH.normalStringToHtml(file.info.data) + "</div>";
+                var pagePath = wiki.path + "/" + now + "/" + file.parentdir.replace(/\\/g,"/") + "/" + file.filename;
+                
+                var saveData = {
+                  "$set": {
+                    path: pagePath,
+                    content_html: pageData,
+                    updated: new Date(),
+                    updatedBy: {username: username}
+                  }
+                };
+                
+                //create/update page
+                config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
+                  function(err,doc) {
+                    if (err) log.error(err);
+                    else log.debug("Successfully created page dynamically: " + pagePath);
+                  }
+                );
+              } else {
+                log.info("File not processed:",file);
+              }
+            }
+          );
         } else {
           res.json({success:false, error:"We could not find the directory you entered."});
         }

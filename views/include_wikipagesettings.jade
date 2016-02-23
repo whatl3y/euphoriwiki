@@ -18,6 +18,30 @@ div(class="row separate-vert-medium")
   div(class="col-xs-12 col-md-8 col-md-offset-2")
     div(class="shadowsmall-subtle wrapper light gray padding-medium")
       div(class="text-large header padding-small")
+        div Page Aliases
+      div Page aliases are additional wiki paths that, if users try to navigate to them, it will redirect them to this page. Aliases can only be configured if those paths are available and not already used as other pages or aliases.
+      div(class="separate-vert-small")
+        div
+          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="alias in aliases")
+            span {{ alias }}
+            small(class="margin-left-small")
+              a(href="javascript:void(0)",data-ng-click="aliases.splice($index,1)")
+                em x
+        div(class="row separate-vert-small")
+          div(class="text-center")
+            form(class="form-inline",data-ng-submit="aliases.push(tempAlias);tempAlias=''")
+              div(class="form-group")
+                label(for="tempAliases") New Page Alias
+                input(type="text",id="tempAliases",name="tempAliases",class="form-control margin-left-small",data-ng-model="tempAlias")
+                button(type="submit",class="btn btn-default margin-left-small") Add Alias
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updateAliases(aliases)") Update Page Aliases
+          div(class="separate-vert-medium",data-ng-show="aliasError")
+            alert(type="danger") {{ aliasError }}
+div(class="row separate-vert-medium")
+  div(class="col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+      div(class="text-large header padding-small")
         div Short Page Description
       div
         small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.

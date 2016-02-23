@@ -76,6 +76,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.pageLikes = Number(ret.pageLikes || 0);
           $scope.canLike = (ret.canLike == false) ? false : true;
           $scope.pageadmins = ret.pageadmins || [];
+          $scope.aliases = ret.pageAliases || [];
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
@@ -322,9 +323,30 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
+    updateAliases: function(aliases) {
+      aliases = aliases || [];
+      
+      var loader = new Core.Modals().asyncLoader({message:"Updating your page's aliases!."});
+      $http.post('/wikipage',{type:"aliases", page:$scope.pathname, aliases:aliases})
+      .success(function(ret) {
+        if (ret.success) {
+          
+        } else {
+          
+        }
+        console.log(ret);
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        loader.remove();
+      });
+    },
+    
     savePageEvents: function(events) {
       var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
-      $http.post('/wikipage',{type:"updatePageEvents", page: $scope.pathname, events:events})
+      $http.post('/wikipage',{type:"updatePageEvents", page:$scope.pathname, events:events})
       .success(function(ret) {
         if (ret.success) console.log("Successfully saved page events!");
         else {

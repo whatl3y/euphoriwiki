@@ -582,7 +582,7 @@ WikiHandler.prototype.deletePage=function(cb) {
       });
     },
     function(callback) {
-      config.mongodb.db.collection("wikicontent").remove({ path:self.path },function(e,result) {
+      config.mongodb.db.collection("wikicontent").remove({ $or:[{path:self.path},{aliasfor:self.path}] },function(e,result) {
         callback(e,result);
       });
     }
@@ -604,7 +604,7 @@ WikiHandler.prototype.deletePage=function(cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.sanitizePath=function(path) {
   path = (path || this.path || "");
-  return this.path = ((path[path.length-1]=="/") ? path.substring(0,path.length-1) : path).toLowerCase()
+  return this.path = ((path[path.length-1]=="/") ? path.substring(0,path.length-1) : path).toLowerCase();
 }
 
 /*-----------------------------------------------------------------------------------------

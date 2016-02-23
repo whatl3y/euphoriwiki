@@ -124,6 +124,18 @@ GetHTML.prototype.prettify = function(htmlString) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      normalFileToHtml (PUBLIC)
+|DESCRIPTION:  Converts plain text (with \r\n, \n, \t, etc) to use HTML
+|PARAMETERS:  1. string(REQ): the name of a file
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <string>: extension as a string
+-----------------------------------------------------------------------------------------*/
+GetHTML.prototype.normalStringToHtml=function(string) {
+  return string.replace(/(\r\n|\n|\r)/gm,'<br />').replace(/\t/gm,"&nbsp;&nbsp;").replace(/\s\s/gm,"&nbsp;&nbsp;");
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      extension (PUBLIC)
 |DESCRIPTION:  Gets and returns the file extension
 |PARAMETERS:  1. file(REQ): the name of a file
