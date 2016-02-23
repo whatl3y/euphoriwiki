@@ -639,8 +639,10 @@
         
         var o = {};
         o[key] = val;
+        var saveData = {}
+        saveData[(val)?"$set":"$unset"] = o;
         
-        config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:o},{ upsert:true },function(err) {
+        config.mongodb.db.collection("wikicontent").update({path:wiki.path},saveData,{ upsert:true },function(err) {
           if (err) res.json({success:false, error:err});
           else res.json({success:true});
           

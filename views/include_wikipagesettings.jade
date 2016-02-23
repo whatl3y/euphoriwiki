@@ -98,7 +98,7 @@ div(class="row separate-vert-medium")
                 input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
                 button(type="submit",class="btn btn-default margin-left-small") Add Username
           div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins)") Save Page Admins
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
 div(class="row separate-vert-medium")
   div(class="col-xs-12 col-md-8 col-md-offset-2")
     div(class="shadowsmall-subtle wrapper light gray padding-medium")
