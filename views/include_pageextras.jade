@@ -15,12 +15,21 @@ script(type="text/ng-template" id="subscribeContent.html")
     div(class="modal-header")
       h1(class="modal-title") Subscribe to Page
     div(class="modal-body")
-      div Enter your e-mail address below to subscribe to this page.
-      div(class="separate-vert-small")
-        input(type="text",class="form-control",placeholder="Enter E-mail Address...",data-ng-model="emailAddress")
+      - if (data.external.EXTRA.loggedIn)
+        div(class="separate-vert-medium")
+          div Would you like to use the e-mail address associated with your account (this was automatically populated when you first logged in)?
+          div(class="separate-vert-small text-center")
+            input(type="radio",id="subAccYes",name="subAcc",data-ng-model="subscribeUseAccount",data-ng-value="'yes'")
+            label(for="subAccYes") Yes
+            input(type="radio",id="subpagesWidgetDisabled",name="subAcc",data-ng-model="subscribeUseAccount",data-ng-value="'no'")
+            label(for="subpagesWidgetDisabled") No
+      div(data-ng-show="!subscribeUseAccount || subscribeUseAccount=='no'")
+        div Enter your e-mail address below to subscribe to this page.
+        div(class="separate-vert-small")
+          input(type="text",class="form-control",placeholder="Enter E-mail Address...",data-ng-model="emailAddress")
       div(data-ng-show="subscribeError")
         alert {{ subscribeError }}
       div(data-ng-show="subscribeSuccess")
         alert(type="success") {{ subscribeSuccess }}
     div(class="modal-footer")
-      button(class="btn btn-success",data-ng-click="handlers.subscribe.subscribeToPage(emailAddress)") Subscribe
+      button(class="btn btn-success",data-ng-click="handlers.subscribe.subscribeToPage(emailAddress,subscribeUseAccount)") Subscribe

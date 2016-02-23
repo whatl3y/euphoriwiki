@@ -113,6 +113,7 @@ Authentication.prototype.login = function(upn,cb) {
         });
         
         self.session.username = self.session.sAMAccountName.toLowerCase();
+        self.session.email = self.session.mail.toLowerCase();
         self.session.loggedIn = true;
         self.session.save();
         cb(null);
@@ -142,7 +143,7 @@ Authentication.prototype.username = function() {
 |RETURNS:    <string>: string of an e-mail for the logged in user
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.getEmail = function() {
-  return (this.isLoggedIn()) ? this.session.mail : false;
+  return (this.isLoggedIn()) ? this.session.email : false;
 }
 
 /*-----------------------------------------------------------------------------------------

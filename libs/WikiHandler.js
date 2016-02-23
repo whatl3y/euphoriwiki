@@ -503,13 +503,18 @@ WikiHandler.prototype.emailSubscribers=function(info,cb) {
         var pageInfo = results[0];
         var template = results[1];
         
-        if (!pageInfo.length) cb(null,false);
+        if (!pageInfo.length || typeof pageInfo[0].subscribers==="undefined" || !pageInfo[0].subscribers.length) cb(null,false);
         else if (!template.length) cb(null,false);
         else {
+          var subscribers = pageInfo[0].subscribers;
+          subscribers = subscribers.map(function(sub) {
+            return sub.email;
+          });
+          
           var send = function(body) {
             new Mailer({
               send: true,
-              bcc: pageInfo[0].subscribers,
+              bcc: subscribers,
               template: {
                 templateInfo: {
                   subject: template[0].subject,

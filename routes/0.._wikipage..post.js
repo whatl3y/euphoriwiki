@@ -332,8 +332,35 @@
       
     case "subscribe":
       var unsubscribe = info.unsubscribe || false;
+      var useaccount = info.useaccount || 'no';
+      var email = info.email || "";
+      
       var updateData = {};
-      updateData[(unsubscribe)?"$pull":"$push"] = {subscribers:info.email};
+      
+      if (unsubscribe) {
+        if (useaccount=="yes") {
+          updateData["$pull"] = {"subscribers.username":username};
+        } else {
+          updateData["$pull"] = {"subscribers.email":email};
+        }
+      } else {
+        if (useaccount=="yes") {
+          if (!A.isLoggedIn()) {
+            res.json({success:false, error:"You must be logged in to subscribe using your account information."});
+            return;
+          } else {
+            email = A.getEmail();
+            updateData["$push"] = {subscribers: {username:username, email:email}};
+          }
+        } else {
+          if (email) {
+            updateData["$push"] = {subscribers: {email:email}};
+          } else {
+            res.json({success:false, error:"Please enter a valid e-mail address to continue."});
+            return;
+          }
+        }
+      }
       
       config.mongodb.db.collection("wikicontent").update({ path:wiki.path },updateData,{upsert:true},function(e,doc) {
         if (e) {
@@ -342,8 +369,8 @@
         } else {
           res.json({success:true});
           
-          audit.log({type:"New Subscriber", additional:{path:wiki.path, email:info.email}});
-          wiki.event({type:"newpagesubscriber", params:{email:info.email}},function(e,result) {if (e) log.error(e);});
+          audit.log({type:"New Subscriber", additional:{path:wiki.path, email:email}});
+          wiki.event({type:"newpagesubscriber", params:{email:email}},function(e,result) {if (e) log.error(e);});
         }
       });
       

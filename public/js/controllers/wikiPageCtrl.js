@@ -389,14 +389,18 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         });
       },
       
-      subscribeToPage: function(email) {
+      subscribeToPage: function(email,useAccount) {
+        email = email || "";
+        useAccount = useAccount || 'no';
+        
         delete($scope.subscribeError);
         delete($scope.subscribeSuccess);
         
-        if (email && /^.+@.+\.[\w\d]{1,10}$/.test(email)) {
+        if (useAccount=='yes' || (email && /^.+@.+\.[\w\d]{1,10}$/.test(email))) {
           $http.post('/wikipage',{
             type: "subscribe",
             page: $scope.pathname,
+            useaccount: useAccount, 
             email: email
           })
           .success(function(ret) {
@@ -411,7 +415,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
             console.log(data,err);
           });
         } else {
-          $scope.subscribeError = "Please enter a valid e-mail address above (e.g. email@company.com)";
+          $scope.subscribeError = "Please select to use your account e-mail address (if you're logged in) or enter a valid e-mail address above (e.g. email@company.com)";
         }
       }
     },
