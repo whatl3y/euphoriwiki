@@ -557,6 +557,44 @@ WikiHandler.prototype.emailSubscribers=function(info,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      deletePage (PUBLIC)
+|DESCRIPTION:  Deletes a page.
+|PARAMETERS:  1. cb(OPT): the callback function to call once finished
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <string>
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.deletePage=function(cb) {
+  var self = this;
+  
+  async.series([
+    function(callback) {
+      self.getPage(function(e,page) {
+        if (e) callback(e);
+        else {
+          var oArchive = page[0];
+          delete(oArchive["_id"]);
+          
+          config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
+            callback(err,result);
+          });
+        }
+      });
+    },
+    function(callback) {
+      config.mongodb.db.collection("wikicontent").remove({ path:self.path },function(e,result) {
+        callback(e,result);
+      });
+    }
+  ],
+    function(err,results) {
+      if (err) cb(err);
+      else cb(null);
+    }
+  );
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      sanitizePath (PUBLIC)
 |DESCRIPTION:  Cleans up a path to be used in the DB.
 |PARAMETERS:  1. path(OPT): an optional path to return sanitized

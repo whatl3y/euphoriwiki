@@ -2,16 +2,17 @@ extends layout
 
 block main
   div(class="row",data-ng-controller="wikiPageCtrl")
-    div(class="padding-small text-large",data-ng-show="pagePieces.length")
-      span(class="margin-right-small",data-ng-repeat="page in pagePieces")
-        a(data-ng-href="{{ page.link }}") {{ page.text }}
-        span(data-ng-show="$index < pagePieces.length-1")  >
-    div(class="wrapper col-xs-12")
-      div
-        - if (data.external.EXTRA.loggedIn)
-          div(class="row",data-ng-if="!protected")
-            div(class="col-xs-12 text-right")
-              h5
-                a(href="javascript:void(0)",data-ng-click="handlers.initializeEdit();") {{ (editState) ? "Hide Page Options" : "Edit Page" }}
-        include include_pageextras.jade
-        include include_editpage.jade
+    div(data-ng-show="initcomplete")
+      div(class="padding-small text-large",data-ng-show="pagePieces.length")
+        span(class="margin-right-small",data-ng-repeat="page in pagePieces")
+          a(data-ng-href="{{ page.link }}") {{ page.text }}
+          span(data-ng-show="$index < pagePieces.length-1")  >
+      div(class="wrapper col-xs-12")
+        div
+          - if (data.external.EXTRA.loggedIn)
+            div(class="row",data-ng-if="!protected")
+              div(class="col-xs-12 text-right")
+                h5
+                  a(href="javascript:void(0)",data-ng-click="handlers.initializeEdit();") {{ (editState) ? "Hide Page Options" : "Edit Page" }}
+          include include_pageextras.jade
+          include include_editpage.jade

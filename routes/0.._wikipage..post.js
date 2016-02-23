@@ -54,7 +54,7 @@
           })
         },
         function(callback) {
-          config.mongodb.db.collection("event_types").find({}).sort({type:1}).toArray(function(e,types) {
+          config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
             callback(e,types);
           });
         }
@@ -74,7 +74,7 @@
             else {
               var oRet;
               if (!pageInfo.length) {
-                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
+                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:"", versions:pageArchive};
               } else {
                 oRet = {
                   success: true,
@@ -253,6 +253,39 @@
           }
         );
       }
+      break;
+      
+    case "delete":
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to delete a wiki page."});
+      else {
+        async.parallel([
+          function(callback) {
+            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+              callback(e,isAdmin);
+            });
+          }
+        ],
+          function(err,results) {
+            if (err) {
+              res.json({success:false, error:err});
+              log.error(err);
+            } else {
+              var isAdmin = results[0];
+              
+              if (!isAdmin) res.json({success:false, error:"You must be a page admin to delete a wiki page."});
+              else {
+                wiki.deletePage(function(e) {
+                  if (e) {
+                    res.json({success:false, error:e});
+                    log.error(err);
+                  } else res.json({success:true});
+                });
+              }
+            }
+          }
+        );
+      }
+    
       break;
     
     case "updatePageEvents":

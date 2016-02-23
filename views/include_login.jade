@@ -1,23 +1,22 @@
-div(class="loginwrapper padding-small text-right",data-ng-controller="loginCtrl")
-  div(class="col-xs-12")
-      div(class="padding-small")
-        - //div(class="text-left text-large")
-        - //  span(class="glyphicon glyphicon-ok-sign")
-        - //  span(class="padding-left-medium") Login (pmgnet.dev domain)
-        form(class="form-inline",data-ng-submit="handlers.loginSubmission(data)")
-          div(class="form-group",data-ng-class="functions.returnClassHasData(data.username)")
-            label(for="loginUsername") Username
-            div(class="input-group margin-left-small")
-              span(class="input-group-addon")
-                span(class="glyphicon glyphicon-user")
-              input(type="text",id="loginUsername",placeholder="Username...",class="form-control",data-ng-model="data.username")
-          div(class="form-group",data-ng-class="functions.returnClassHasData(data.password)")
-            label(for="loginPassword",class="margin-left-small") Password
-            div(class="input-group margin-left-small")
-              span(class="input-group-addon")
-                span(class="glyphicon glyphicon-link")
-              input(type="password",id="loginPassword",placeholder="Password...",class="form-control",data-ng-model="data.password")
-          div(class="form-group margin-left-small")
-            button(type="submit",class="btn btn-default") Login
-        div(class="padding-medium text-center col-xs-12 col-sm-8 col-sm-offset-4 col-md-6 col-md-offset-6 col-lg-4 col-lg-offset-8",data-ng-if="error")
-          alert(type="danger") {{ error }}
+div(class="loginwrapper padding-small text-right col-xs-12",data-ng-controller="loginCtrl")
+  div(class="padding-small")
+    - //div(class="text-left text-large")
+    - //  span(class="glyphicon glyphicon-ok-sign")
+    - //  span(class="padding-left-medium") Login (pmgnet.dev domain)
+    form(class="form-inline",data-ng-submit="handlers.loginSubmission(data)")
+      div(class="form-group",data-ng-class="functions.returnClassHasData(data.username)")
+        label(for="loginUsername") Username
+        div(class="input-group margin-left-small")
+          span(class="input-group-addon")
+            span(class="glyphicon glyphicon-user")
+          input(type="text",id="loginUsername",placeholder="Username...",class="form-control",data-ng-model="data.username")
+      div(class="form-group",data-ng-class="functions.returnClassHasData(data.password)")
+        label(for="loginPassword",class="margin-left-small") Password
+        div(class="input-group margin-left-small")
+          span(class="input-group-addon")
+            span(class="glyphicon glyphicon-link")
+          input(type="password",id="loginPassword",placeholder="Password...",class="form-control",data-ng-model="data.password")
+      div(class="form-group margin-left-small")
+        button(type="submit",class="btn btn-default") Login
+    div(class="padding-medium text-center col-xs-12 col-sm-8 col-sm-offset-4 col-md-6 col-md-offset-6 col-lg-4 col-lg-offset-8",data-ng-if="error")
+      alert(type="danger") {{ error }}
