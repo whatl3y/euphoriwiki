@@ -8,9 +8,8 @@ block main
         span(data-ng-show="$index < pagePieces.length-1")  >
     div(class="wrapper col-xs-12")
       h1= data.external.EXTRA.pageHeader
-      - if (data.external.EXTRA.loggedInUsersPage)
-        div(class="row")
-          div(class="col-xs-12 text-right")
-            a(href="javascript:void(0)",data-ng-click="functions.changePageState('view');editState=!editState") {{ (editState) ? "Hide Page Options" : "Edit Your Page" }}
+      - //for include_wikipageeditpagelink.jade
+      - var editkey = "loggedInUsersPage"
+      include include_wikipageeditpagelink.jade
       include include_pageextras.jade
       include include_editpage.jade

@@ -235,6 +235,7 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
               } else {
                 var docs = aliases.map(function(a) {
                   a.aliasfor = self.path;
+                  a.description = "Page alias for " + self.path;
                   return a;
                 });
                 

@@ -9,10 +9,8 @@ block main
           span(data-ng-show="$index < pagePieces.length-1")  >
       div(class="wrapper col-xs-12")
         div
-          - if (data.external.EXTRA.loggedIn)
-            div(class="row",data-ng-if="!protected")
-              div(class="col-xs-12 text-right")
-                h5
-                  a(href="javascript:void(0)",data-ng-click="handlers.initializeEdit();") {{ (editState) ? "Hide Page Options" : "Edit Page" }}
+          - //for include_wikipageeditpagelink.jade
+          - var editkey = "loggedIn"
+          include include_wikipageeditpagelink.jade
           include include_pageextras.jade
           include include_editpage.jade

@@ -1,8 +1,8 @@
 - //requires being included directly within globalCtrl scope for handlers.search() to run
 
-div(class="separate-vert-small col-xs-12")
-  div(class="separate-vert-large col-xs-12 col-md-10 col-md-offset-1")
+div(class="separate-vert-large col-xs-12")
+  div(class="col-xs-12 col-md-10 col-md-offset-1")
     div(class="text-center")
       form(method="post",data-ng-submit="handlers.search(query)")
         div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-          input(type="text",class="input-xlg emphasize form-control center",placeholder="What are you looking for?",id="query",name="query",data-ng-model="query")
+          input(type="text",class="input-xlg emphasize form-control center",placeholder="Search for what are you looking for...",id="query",name="query",data-ng-model="query")
