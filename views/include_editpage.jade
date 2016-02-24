@@ -232,4 +232,4 @@ div(class="wrapper separate-vert-medium")
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")
           div(class="separate-vert-small")
             alert(class="text-center",data-ng-show="!content.versions.length") There are no older versions of this page to review.
-            select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by '+version.updatedBy.firstname+' '+version.updatedBy.lastname for version in content.versions")
+            select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by user '+version.updatedBy.username for version in content.versions")
