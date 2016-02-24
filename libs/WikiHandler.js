@@ -151,6 +151,127 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
 /*-----------------------------------------------------------------------------------------
 |NAME:      getTemplates (PUBLIC)
 |DESCRIPTION:  Gets all the active templates in the DB that users can use.
+|PARAMETERS:  1. options(REQ): options for this method
+|                    options.aliases: array of aliases 
+|                       ['alias1','alias2',...]
+|                    options.Access: instance of AccessManagement
+|                    options.username: username of user logged in
+|             2. cb(REQ): the callback function once we are done updating the aliases
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.updateAliases=function(options,cb) {
+  options = options || {};
+  
+  var aliases = options.aliases || [];
+  var Access = options.Access;
+  var username = options.username;
+  var self = this;
+  
+  var aliasesOrig = aliases.map(function(a){return (a[0]=="/") ? a : "/"+a});;
+  aliases = aliasesOrig.map(function(a){return {path:a}});
+  
+  var check = {$or:aliases};
+  
+  if (aliases.length) {
+    async.parallel([
+      function(callback) {
+        Access.isAdmin({username:username, path:self.path},function(e,isAdmin) {
+          callback(e,isAdmin);
+        });
+      },
+      function(callback) {
+        self.getPage({filters:check,fields:{path:1,aliasfor:1,_id:0}},function(_e,pages) {
+          callback(_e,pages);
+        });
+      },
+      function(callback) {
+        self.getPage({filters:{aliasfor:self.path},fields:{path:1,aliasfor:1,_id:0}},function(_e,pages) {
+          callback(_e,pages);
+        });
+      },
+      function(callback) {
+        try {
+          var notAllowed = false;
+          async.each(aliasesOrig,function(a) {
+            if (!self.allowedPath(a)) {
+              notAllowed = a;
+              return;
+            }
+          });
+          
+          callback(null,notAllowed);
+        } catch(e) {
+          callback(e)
+        }
+        
+      }
+    ],
+      function(err,results) {
+        if (err) cb(err)
+        else {
+          var isAdmin = results[0];
+          var alreadyUsed = results[1];
+          var currentAliases = results[2];
+          var notAllowedPath = results[3];
+          
+          var currentAliasesOnlyPaths = currentAliases.map(function(c){return c.path});
+          var aliasesToDelete = _.difference(currentAliasesOnlyPaths,aliasesOrig).map(function(a){return {path:a}});
+          
+          if (alreadyUsed.length) {
+            aliases = aliases.filter(function(a){return _.findIndex(alreadyUsed,function(used){return a.path == used.path}) == -1});
+            alreadyUsed = alreadyUsed.filter(function(a){return typeof a.aliasfor==="undefined" || a.aliasfor != self.path});
+          }
+          
+          if (!isAdmin) cb("You must be a page admin to update the page aliases.");
+          else {
+            if (notAllowedPath) {
+              cb("Your aliases were not saved because the following path is not allowed: " + notAllowedPath);
+            } else if (aliases.length || alreadyUsed.length) {
+              if (alreadyUsed.length) {
+                var inUseString = alreadyUsed.map(function(p){return p.path}).join(", ");
+                cb("Your aliases were not saved because the following are already in use: " + inUseString);
+              } else {
+                var docs = aliases.map(function(a) {
+                  a.aliasfor = self.path;
+                  return a;
+                });
+                
+                config.mongodb.db.collection("wikicontent").insert(docs,function(err,result) {
+                  if (err) cb(err);
+                  else {
+                    //delete aliases we no longer want
+                    if (aliasesToDelete.length) {
+                      config.mongodb.db.collection("wikicontent").remove({$or:aliasesToDelete},function(e) {
+                        cb(e);
+                      });
+                    } else cb(null)
+                  }
+                });
+              }
+            } else {
+              if (aliasesToDelete.length) {
+                config.mongodb.db.collection("wikicontent").remove({$or:aliasesToDelete},function(e) {
+                  cb(e);
+                });
+              } else cb(null);
+            }
+          }
+        }
+      }
+    );
+  } else {
+    //delete all aliases since there are none now
+    config.mongodb.db.collection("wikicontent").remove({aliasfor:self.path},function(e) {
+      cb(e);
+    });
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getTemplates (PUBLIC)
+|DESCRIPTION:  Gets all the active templates in the DB that users can use.
 |PARAMETERS:  1. cb(REQ): the callback functions after we get the templates
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
