@@ -325,15 +325,12 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     
     updateAliases: function(aliases) {
       aliases = aliases || [];
+      delete($scope.aliasError);
       
       var loader = new Core.Modals().asyncLoader({message:"Updating your page's aliases!."});
       $http.post('/wikipage',{type:"aliases", page:$scope.pathname, aliases:aliases})
       .success(function(ret) {
-        if (ret.success) {
-          
-        } else {
-          
-        }
+        if (!ret.success) $scope.aliasError = ret.error;
         console.log(ret);
         
         loader.remove();
