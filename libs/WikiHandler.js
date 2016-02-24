@@ -236,6 +236,8 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
                 var docs = aliases.map(function(a) {
                   a.aliasfor = self.path;
                   a.description = "Page alias for " + self.path;
+                  a.updated = new Date();
+                  a.updatedBy = {username: username};
                   return a;
                 });
                 

@@ -14,7 +14,7 @@ div(class="col-xs-12")
               li(data-ng-repeat="item in widget.items")
                 div(class="separate-vert-small")
                   div
-                    a(data-ng-href="{{ item.path }}",title="{{ item.path }}") {{ ((item.path.length-55 < 0) ? "" : "...") + item.path.substring((item.path.length-55 < 0) ? 0 : item.path.length-55) }} 
+                    a(data-ng-href="{{ item.path }}",title="{{ item.path }}") {{ ((item.path.length-45 < 0) ? "" : "...") + item.path.substring((item.path.length-45 < 0) ? 0 : item.path.length-45) }} 
                     small(class="soft-text text-xsmall") {{ item.pageViews }} views
                     span(data-ng-show="item.extraText") {{ item.extraText }}
                   div
