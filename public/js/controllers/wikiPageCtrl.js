@@ -101,7 +101,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       
       if (bind) {
         $('#rte-editor').wysiwyg({},function($editor,saveRange) {
-          $scope.content.html = $editor.html();
+          $scope.content.html = ((($editor.html() || "").length && ($editor.html() || "")[0] != "<") ? "<div>" + $editor.html() + "</div>" : $editor.html()) || "";
           $scope.functions.htmlToMarkdown( $scope.content.html );
           $scope.COPYPASTE = {
             editor: $editor,
