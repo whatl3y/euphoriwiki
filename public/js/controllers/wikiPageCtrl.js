@@ -49,6 +49,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         if (!ret.success) {
           if (ret.protected) {
             $scope.protected = true;
+          } else if (ret.outofscope) {
+            location.href = "/?auth=" + $scope.pathname;
           } else {
             $scope.error = ret.error;
           }
@@ -578,7 +580,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     
     getTemplate: function(template,append) {
       append = append || false;
-      console.log(template,append);
+      
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{type:"getTemplate", template:template})
       .success(function(ret) {

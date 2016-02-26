@@ -75,9 +75,51 @@ Authentication.prototype.find = function(options,cb) {
   if (!options.value) {
     cb("No value was provided for the " + options.attribute + " attribute. Please provide a value.");
   } else {
-    this.ad.find(options.attribute + "=" + options.value,function(err,info) {
-      cb(err,info);
-    });
+    this.ad.find(options.attribute + "=" + options.value,cb);
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getGroupMembershipForUser (PUBLIC)
+|DESCRIPTION:  Returns all groups the user specified is a member of.
+|PARAMETERS:  1. options(REQ): 
+|               options.username: sAMAccountName, UPN, or DN of user
+|             2. cb(REQ): callback function to return back whether the user successfully authenticated.
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
+  options = options || {};
+  
+  var username = (typeof options==="string") ? options : (options.username || "");
+  
+  if (!(username)) {
+    cb("Please provide a username.");
+  } else {
+    this.ad.getGroupMembershipForUser(username,cb);
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      isUserMemberOf (PUBLIC)
+|DESCRIPTION:  Determine if a user is a member of a group.
+|PARAMETERS:  1. options(REQ): 
+|               options.username: sAMAccountName, UPN, or DN of user
+|               options.groupName: cn or dn of group
+|             2. cb(REQ): callback function to return back whether the user successfully authenticated.
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.isUserMemberOf = function(options,cb) {
+  options = options || {};
+  
+  var username = options.username;
+  var group = options.groupName || options.group;
+  
+  if (!(username && group)) {
+    cb("Please provide both a username and group name.");
+  } else {
+    this.ad.isUserMemberOf(username,group,cb);
   }
 }
 
@@ -155,7 +197,7 @@ Authentication.prototype.getEmail = function() {
 |RETURNS:    <boolean>: true/false if user is logged in
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.isLoggedIn = function() {
-  return !!this.session.loggedIn;
+  return (typeof this.session!=="undefined") ? !!this.session.loggedIn : false;
 }
 
 //-------------------------------------------------------

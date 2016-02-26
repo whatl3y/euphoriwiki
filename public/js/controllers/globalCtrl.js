@@ -21,6 +21,13 @@ function globalCtrl($scope,$http) {
         $scope.global.error = "There are some components your browser doesn't support that we use to validate tickets. Please use another browser.";
       }
       
+      //check if there was an out of scope issue with viewing the page
+      //and give feedback to the user if so.
+      var notAuth = new Core.QueryString("auth").keyInQueryString();
+      if (notAuth) {
+        $scope.global.error = "You are not authorized to view page: " + notAuth + ". If you think this is an error please reach out to the wiki administrator(s) for assistance."
+      }
+      
       //go get all pages to be used in the quick search
       $http.post('/global',{type:"init"})
       .success(function(ret) {

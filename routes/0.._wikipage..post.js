@@ -61,8 +61,13 @@
         function(callback) {
           wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {
             callback(e,aliases);
-          })
+          });
         },
+        function(callback) {
+          Access.canViewPage({session:req.session, username:username, path:wiki.path},function(e,canView) {
+            callback(e,canView);
+          });
+        }
       ],
         function(err,results) {
           if (err) res.json({success:false, error:err});
@@ -75,8 +80,10 @@
             var pageArchive = results[6];
             var eventTypes = results[7];
             var aliases = results[8];
+            var canViewPage = canUpdate || results[9];
             
             if (!validated) res.json({success:false, protected:true});
+            else if (!canViewPage) res.json({success:false, outofscope:true});
             else {
               var oRet;
               if (!pageInfo.length) {

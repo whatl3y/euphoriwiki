@@ -10,7 +10,7 @@
     var A = new Auth({session:req.session});
     A.auth({username:loginUsername, password:info.password},function(err,authenticated) {
       if (err) {
-        res.json({success:false, error:"There was an issue trying to log you in. Please try again."});
+        res.json({success:false, error:"There was an issue trying to log you in. Please make sure your username and password are correct, then try again."});
         log.error(err);
       } else if (!authenticated) {
         res.json({success:false, error:"Bad username/password combination. Please try again."});

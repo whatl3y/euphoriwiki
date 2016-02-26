@@ -8,11 +8,15 @@ div(class="separate-vert-small")
         alert(type="danger") NOTE: Be careful when changing these settings, as it can prevent users from being able to access the wiki.
       div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
         div(class="form-group")
+          label(for="ldap_netbios") (Optional) AD NETBIOS Name
+          input(type="text",class="form-control",id="ldap_netbios",name="ldap_netbios",data-ng-model="setting.value.netbios")
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group")
           label(for="ldap_protocol") LDAP Protocol
           input(type="text",class="form-control",id="ldap_protocol",name="ldap_protocol",data-ng-model="setting.value.protocol")
       div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
         div(class="form-group")
-          label(for="ldap_url") LDAP URL
+          label(for="ldap_url") Domain Controller
           input(type="text",class="form-control",id="ldap_url",name="ldap_url",data-ng-model="setting.value.url")
       div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
         div(class="form-group")

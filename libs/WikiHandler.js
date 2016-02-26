@@ -380,34 +380,6 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      createInheritanceFilter (PUBLIC)
-|DESCRIPTION:  This will create and return an object that can be included in a mongodb query
-|             to look for information within the current path OR any of the parent paths. This is
-|             relevant for looking for whether a particular condition exists in the current path
-|             or any parents for inheritance
-|PARAMETERS:  1. path(OPT): the path we're creating the filter for
-|SIDE EFFECTS:  None
-|ASSUMES:    Nothing
-|RETURNS:    <object>: and $or mongodb filter object to be appended to other filters.
------------------------------------------------------------------------------------------*/
-WikiHandler.prototype.createInheritanceFilter=function(path) {
-  path = path || "";
-  
-  var pathAry = path.split("/");
-  pathAry.shift();
-  
-  var pathString = "";
-  var oFilter = {$or:[]};
-  
-  oFilter["$or"] = _.map(pathAry,function(piece) {
-    pathString += "/" + piece;
-    return {path:pathString};
-  });
-  
-  return oFilter;
-}
-
-/*-----------------------------------------------------------------------------------------
 |NAME:      allowedPath (PUBLIC)
 |DESCRIPTION:  Takes a path provided and determines if it's allowed for a page to have this path.
 |PARAMETERS:  1. path(OPT): 
