@@ -158,28 +158,31 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
         pages = self.sortWikiResults(pages);
         
         var canView = null;
-        _.each(pages,function(p) {
+        async.each(pages,function(p,callback1) {
           var scopes = p.settings.viewscope;
           
-          async.each(scopes,function(scope,callback) {
+          async.each(scopes,function(scope,callback2) {
             var evalFunction = self.getMemberScopeEvalFunction(scope.type);
             
-            evalFunction(username,scope.data || session,function(err,result) {
-              if (!err) {
+            evalFunction(username,path,scope.data || session,function(__err,result) {
+              if (!__err) {
                 if (canView == null && !result) canView = false;
                 else if (result) canView = true;
               }
               
-              callback(err);
+              callback2(__err);
             });
           },
-          function(err) {
-            if (err) cb(err);
+          function(_err) {
+            if (_err) callback1(_err);
             else {
               canView = (canView == null) ? true : canView;
-              cb(null,canView);
+              callback1();
             }
           });          
+        },
+        function(err) {
+          cb(err,canView);
         });
         
       } else cb(null,true);
@@ -197,9 +200,11 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
 |RETURNS:    <function>: function that will be executed with arguments from data to evaluate member scope.
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
+  var self = this;
+  
   switch (type) {
     case "loggedin":
-      return function(username,session,cb) {
+      return function(username,path,session,cb) {
         var Auth = require("./Authentication.js");
         
         try {
@@ -213,7 +218,7 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
       break;
       
     case "groupmembership":
-      return function(username,aGroupDNs,cb) {
+      return function(username,path,aGroupDNs,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -249,7 +254,7 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
       break;
       
     case "username":
-      return function(username,aUsers,cb) {
+      return function(username,path,aUsers,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -268,6 +273,34 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
         } catch(err) {
           cb(err);
         }
+      }
+      
+      break;
+      
+    case "wikiadmin":
+      return function(username,path,temp,cb) {
+        if (!username) {
+          cb(null,false);
+          return;
+        }
+        
+        self.isWikiAdmin(username,function(e,isAdmin) {
+          cb(e,isAdmin);
+        });
+      }
+      
+      break;
+      
+    case "pageadmin":
+      return function(username,path,temp,cb) {
+        if (!username) {
+          cb(null,false);
+          return;
+        }
+        
+        self.isPageAdmin({username:username, path:path},function(e,isAdmin) {
+          cb(e,isAdmin);
+        });
       }
       
       break;

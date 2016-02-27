@@ -51,7 +51,7 @@
         function(callback) {
           wiki.getPage({archive:true, filters:{path:wiki.path}},function(e,pageInfo) {
             callback(e,pageInfo);
-          })
+          });
         },
         function(callback) {
           config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
@@ -80,7 +80,7 @@
             var pageArchive = results[6];
             var eventTypes = results[7];
             var aliases = results[8];
-            var canViewPage = canUpdate || results[9];
+            var canViewPage = results[5] || results[9];   //if wiki admin then true, otherwise check view access scope
             
             if (!validated) res.json({success:false, protected:true});
             else if (!canViewPage) res.json({success:false, outofscope:true});
