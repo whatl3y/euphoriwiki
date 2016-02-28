@@ -79,8 +79,8 @@ Authentication.prototype.find = function(options,cb) {
   if (!query && !value) {
     cb("No value was provided for the " + attribute + " attribute. Please provide a value.");
   } else {
-    if (query) this.ad.find(query,cb);
-    else this.ad.find(attribute + "=" + value,cb);
+    if (query) this.ad.find({timeout:10000, filter:query},cb);
+    else this.ad.find({timeout:10000, filter:attribute + "=" + value},cb);
   }
 }
 
