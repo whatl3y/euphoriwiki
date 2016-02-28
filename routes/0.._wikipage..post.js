@@ -67,6 +67,11 @@
           Access.canViewPage({session:req.session, username:username, path:wiki.path},function(e,canView) {
             callback(e,canView);
           });
+        },
+        function(callback) {
+          config.mongodb.db.collection("memberscope_types").find({}).sort({type:1}).toArray(function(e,scopetypes) {
+            callback(e,scopetypes);
+          });
         }
       ],
         function(err,results) {
@@ -81,6 +86,7 @@
             var eventTypes = results[7];
             var aliases = results[8];
             var canViewPage = results[5] || results[9];   //if wiki admin then true, otherwise check view access scope
+            var viewScopeTypes = results[10];
             
             if (!validated) res.json({success:false, protected:true});
             else if (!canViewPage) res.json({success:false, outofscope:true});
@@ -104,9 +110,11 @@
                   pageFiles: pageInfo[0].files,
                   password: pageInfo[0].password,
                   pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
+                  viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
                   pageEvents: pageInfo[0].events,
                   eventTypes: eventTypes.map(function(t) {return t.type}),
-                  pageAliases: aliases.map(function(t) {return t.path})
+                  pageAliases: aliases.map(function(t) {return t.path}),
+                  scopeTypes: viewScopeTypes
                 };
               }
               
@@ -649,6 +657,7 @@
         var val = info.value;
         
         if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
+        if (key=="settings.viewscope") for (var _k in val) val[_k] = Object.removeDollarKeys(val[_k]);
         
         var o = {};
         o[key] = val;
@@ -663,6 +672,32 @@
         });
       }
       
+      break;
+    
+    case "adfind":
+      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      else {
+        var objType = info.objType || "user";
+        var queryText = info.search;
+        
+        if (queryText.length) {
+          A.find({query:"(|(sAMAccountName=*" + queryText + "*)(cn=*" + queryText + "*)(givenName=*" + queryText + "*)(surName=*" + queryText + "*)(email=*" + queryText + "*))"},function(err,results) {
+            if (err) {
+              log.error(err);
+              res.json({success:false});
+            } else {
+              results = (objType == "user" && typeof results==="object") 
+                ? results.users
+                : ((objType == "group" && typeof results==="object")
+                  ? results.groups
+                  : results);
+                  
+              res.json({success:true, objects:results});
+            }
+          });
+        } else res.json({success:false, error:"Please provide search text to search for an AD object."});
+      }
+    
       break;
     
     case "spreadsheetToTable":

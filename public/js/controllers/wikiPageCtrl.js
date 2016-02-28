@@ -79,11 +79,13 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.canLike = (ret.canLike == false) ? false : true;
           $scope.pageadmins = ret.pageadmins || [];
           $scope.aliases = ret.pageAliases || [];
+          $scope.viewscopes =  ret.viewscopes || [];
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
           $scope.eventTypes = ret.eventTypes || [];
           $scope.pageEvents = ret.pageEvents || [];
+          $scope.scopeTypes = ret.scopeTypes || [];
         }
         
         $scope.functions.rteInit(true);
@@ -129,18 +131,42 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       }
     },
     
-    updateEventLength: function(which) {
+    updateAryLength: function(scopeKey,which) {
+      scopeKey = scopeKey || "";
       which = which || "inc";
       
       switch(which) {
         case "inc":
-          $scope.pageEvents = $scope.pageEvents.concat({});
+          $scope[scopeKey] = $scope[scopeKey].concat({});
           break;
           
         case "dec":
-          $scope.pageEvents.pop();
+          $scope[scopeKey].pop();
           break;
       }
+    },
+    
+    findAdObj: function(search,type,cb) {
+      search = search || "";
+      type = type || "user";
+      
+      if (search.length) {
+        var loader = new Core.Modals().asyncLoader({message:"Finding your AD search results..."});
+        $http.post('/wikipage',{type:"adfind", objType:type, search:search})
+        .success(function(ret) {
+          if (!ret.success) cb(ret.error || "There was an error trying to find this search text. Please try again.");
+          else cb(null,ret.objects || []);
+            
+          loader.remove();
+        })
+        .error(function(data,err) {
+          cb(err);
+          console.log(data,err);
+          loader.remove();
+        });
+      } else {
+        cb("Please provide search text to search AD.");
+      }      
     },
     
     objSize: function(obj) {
@@ -493,6 +519,30 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       $scope.functions.htmlToMarkdown();
       $scope.functions.rteInit();
       delete($scope.content.draft);
+    },
+    
+    viewGroupSearch: function(search) {
+      delete($scope.pageViewScopeGroupMembershipDone);
+      
+      $scope.functions.findAdObj(search,'group',function(err,results) {
+        if (err) console.log(err);
+        else {
+          $scope.pageViewScopeGroupMembershipDone = true;
+          $scope.pageViewScopeGroupMembershipResults = results || [];
+        }
+      });
+    },
+    
+    viewUsernameSearch: function(search) {
+      delete($scope.pageViewScopeUsernameDone);
+      
+      $scope.functions.findAdObj(search,'user',function(err,results) {
+        if (err) console.log(err);
+        else {
+          $scope.pageViewScopeUsernameDone = true;
+          $scope.pageViewScopeUsernameResults = results || [];
+        }
+      });
     },
     
     uploadFile: function(file) {

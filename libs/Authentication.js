@@ -61,6 +61,7 @@ Authentication.prototype.auth = function(options,cb) {
 |NAME:      find (PUBLIC)
 |DESCRIPTION:  Gets a user's information either in a DB or AD/LDAP store
 |PARAMETERS:  1. options(REQ): 
+|            options.query: if provided, is a full LDAP query to search AD for, otherwise need options.attribute and options.value populated
 |            options.attribute
 |            options.value
 |        2. cb(REQ): callback function to return back whether the user successfully authenticated.
@@ -70,12 +71,16 @@ Authentication.prototype.auth = function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.find = function(options,cb) {
   options = options || {};
-  options.attribute = options.attribute || "sAMAccountName";
   
-  if (!options.value) {
-    cb("No value was provided for the " + options.attribute + " attribute. Please provide a value.");
+  var query = options.query || "";
+  var attribute = options.attribute || "sAMAccountName";
+  var value = options.value || "";
+  
+  if (!query && !value) {
+    cb("No value was provided for the " + attribute + " attribute. Please provide a value.");
   } else {
-    this.ad.find(options.attribute + "=" + options.value,cb);
+    if (query) this.ad.find(query,cb);
+    else this.ad.find(attribute + "=" + value,cb);
   }
 }
 

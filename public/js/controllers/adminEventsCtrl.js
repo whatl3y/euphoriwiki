@@ -10,16 +10,17 @@ function adminEventsCtrl($scope,$http) {
       });
     },
     
-    updateEventLength: function(which) {
+    updateAryLength: function(scopeKey,which) {
+      scopeKey = scopeKey || "";
       which = which || "inc";
       
       switch(which) {
         case "inc":
-          $scope.defaultEvents = $scope.defaultEvents.concat({});
+          $scope[scopeKey] = $scope[scopeKey].concat({});
           break;
           
         case "dec":
-          $scope.defaultEvents.pop();
+          $scope[scopeKey].pop();
           break;
       }
     },

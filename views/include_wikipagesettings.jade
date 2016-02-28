@@ -1,22 +1,25 @@
 - //20160204: included in include_editpage.jade
 - //has access to properties in wikiPageCtrl controller
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+div(class="row")
+  div(class="col-xs-12 col-md-10 col-md-offset-1")
+    h1 Non-inherited Settings
+    small The following settings will only be applied to the current page, {{ pathname }}, and will not affect lower child pages.
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Page Path
       div
         small
           alert IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
       div
-        div
-          input(type="text",class="form-control",data-ng-model="newPathname")
+        div(class="row")
+          div(class="col-xs-12 col-md-6 col-md-offset-3")
+            input(type="text",class="form-control input-lg",data-ng-model="newPathname")
         div(class="separate-vert-small form-group text-center")
           button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
         alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Page Aliases
       div Page aliases are additional wiki paths that, if users try to navigate to them, it will redirect them to this page. Aliases can only be configured if those paths are available and not already used as other pages or aliases.
@@ -38,9 +41,8 @@ div(class="row separate-vert-medium")
             button(class="btn btn-success",data-ng-click="handlers.updateAliases(aliases)") Update Page Aliases
           div(class="padding-medium",data-ng-show="aliasError")
             alert(type="danger") {{ aliasError }}
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Short Page Description
       div
@@ -50,9 +52,8 @@ div(class="row separate-vert-medium")
           textarea(class="form-control",data-ng-model="content.description")
         div(class="separate-vert-small form-group text-center")
           button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Page Tags
       div
@@ -73,9 +74,8 @@ div(class="row separate-vert-medium")
                 button(type="submit",class="btn btn-default margin-left-small") Add Tag
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Widgets
       div
@@ -96,9 +96,28 @@ div(class="row separate-vert-medium")
                 label(for="subpagesWidgetRight") Aligned Right
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
+      div(class="text-large header padding-small")
+        div Password Protect Page
+      div
+        form
+          div(class="form-group")
+            div Password protect your page so users will be required to enter a password to enter the page and see its content.
+            div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+              div(class="col-xs-11")
+                input(type="{{ (pagepw.show) ? 'text' : 'password' }}",class="form-control",data-ng-model="password")
+              div(class="col-xs-1 text-center")
+                a(href="javascript:void(0)",data-ng-click="pagepw.show=!pagepw.show") {{ (pagepw.show) ? "Hide" : "Show" }} Password
+            div(class="text-center col-xs-12")
+              button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
+              button(class="btn btn-warning margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
+  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
+  div(class="col-xs-12 col-md-10 col-md-offset-1")
+    h1 Inherited Settings
+    small The following settings will be inherited at lower child page levels to this one unless overridden at that page.
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
         div Page Administrators
       div
@@ -123,28 +142,20 @@ div(class="row separate-vert-medium")
                 button(type="submit",class="btn btn-default margin-left-small") Add Username
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
-        div Password Protect Page
-      div
-        form
-          div(class="form-group")
-            div Password protect your page so users will be required to enter a password to enter the page and see its content.
-            div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-              div(class="col-xs-11")
-                input(type="{{ (pagepw.show) ? 'text' : 'password' }}",class="form-control",data-ng-model="password")
-              div(class="col-xs-1 text-center")
-                a(href="javascript:void(0)",data-ng-click="pagepw.show=!pagepw.show") {{ (pagepw.show) ? "Hide" : "Show" }} Password
-            div(class="text-center col-xs-12")
-              button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
-              button(class="btn btn-warning margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
-div(class="row separate-vert-medium")
-  div(class="col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-medium")
+        div Who Can View This and Child Pages?
+      div(class="padding-small")
+        - var scopeAry = "viewscopes"
+        include include_viewscopeConfigModule.jade
+  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
+  div(class="col-xs-12 col-md-10 col-md-offset-1")
+    h1 Delete Page
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
-        div Delete Page
+        div Delete {{ pathname }}
       div(class="separate-vert-small text-theme-color")
           em
             strong This will delete this page from the wiki. We will archive its content so it can be retrieved later.

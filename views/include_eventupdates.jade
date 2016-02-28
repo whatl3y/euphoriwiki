@@ -1,9 +1,9 @@
 - var aryEvents = aryEvents || "defaultEvents"
 
 div(class="separate-vert-small text-center")
-  button(class="btn btn-default",data-ng-click="functions.updateEventLength()",popover-trigger="mouseenter",popover="Add new event.")
+  button(class="btn btn-default",data-ng-click="functions.updateAryLength('" + aryEvents + "')",popover-trigger="mouseenter",popover="Add new event.")
     span(class="glyphicon glyphicon-plus")
-  button(class="btn btn-default margin-left-small",data-ng-click="functions.updateEventLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
+  button(class="btn btn-default margin-left-small",data-ng-click="functions.updateAryLength('" + aryEvents + "','dec')",popover-trigger="mouseenter",popover="Delete last event.")
     span(class="glyphicon glyphicon-minus")
 div(class="padding-small text-center",data-ng-show="!" + aryEvents + ".length")
   alert There are no page events configured in the wiki.
