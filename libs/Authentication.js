@@ -22,8 +22,7 @@ Authentication = function(options) {
     url: (config.ldap.protocol || "ldap")+"://"+config.ldap.url,
     baseDN: config.ldap.basedn,
     username: config.ldap.username,
-    password: config.ldap.password,
-    timeout: config.ldap.timeout || 30000
+    password: config.ldap.password
   };
   
   this.ad = new ActiveDirectory(this.config);
