@@ -17,7 +17,7 @@ AccessManagement = function(options) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isAdmin (PUBLIC)
-|DESCRIPTION:  Determines if the user specified is an administrator within the scope of a page path.
+|DESCRIPTION:  Determines if the user specified is allowed to edit the page within the scope of a page path or if administrator.
 |             This method will return true in the callback if the user is a page OR wiki admin, false otherwise
 |PARAMETERS:  1. options(REQ): options to check if a user is an administrator on a particular page.
 |                     options.username
@@ -30,12 +30,13 @@ AccessManagement = function(options) {
 AccessManagement.prototype.isAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
+  var editOnly = (options.editOnly===false) ? false : true;
   
   var self = this;
   
   async.parallel([
     function(callback) {
-      self.isPageAdmin({username:username, path:path},function(e,isAdmin) {
+      self.isPageAdmin({username:username, path:path, editOnly:editOnly},function(e,isAdmin) {
         callback(e,isAdmin);
       });
     },
@@ -78,10 +79,14 @@ AccessManagement.prototype.isWikiAdmin = function(username,cb) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isPageAdmin (PUBLIC)
-|DESCRIPTION:  Determines if the user specified is a wiki administrator.
+|DESCRIPTION:  Determines if the user specified is a page admin.
 |PARAMETERS:  1. options(REQ): options to check if a user is an administrator on a particular page.
 |                     options.username
 |                     options.path: path for the page we're checking.
+|                     options.editOnly: If true, only returns back if the user is allowed to edit
+|                             the page, but not necessarily whether he is truly a page administrator.
+|                             If not provided, this will return only whether the user can edit the page.
+|                             Example is if there are no page administrators specified up the page tree
 |              2. cb(REQ): callback function to return
 |                           cb(<err>,<true/false>)
 |SIDE EFFECTS:  Nothing
@@ -91,6 +96,7 @@ AccessManagement.prototype.isWikiAdmin = function(username,cb) {
 AccessManagement.prototype.isPageAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
+  var editOnly = options.editOnly || false;
   
   var self = this;
   
@@ -118,12 +124,84 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
             }            
           });
           
-          cb(null,((isAdmin == null) ? true : isAdmin));
+          cb(null,((isAdmin == null) ? editOnly : isAdmin));
           
-        } else cb(null,true);
+        } else cb(null,editOnly);
       }
     });
   }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      onlyViewablePaths (PUBLIC)
+|DESCRIPTION:  Takes an array of paths and username and filters the list of paths based on whether 
+|             the specified user is either an administrator or can view these pages.
+|PARAMETERS:  1. options(REQ): options to check if a user is an administrator on a particular page.
+|                     options.username
+|                     options.paths: EITHER an array of paths we're filtering, or an array of objects where
+|                           the 'path' field is the key where the path lives.
+|                     options.session: session object to check logged in status
+|                     options.adminOnly: instead of determining if the user can view the page, if this
+|                           is set we will only see if the user is an administrator of the page
+|             2. cb(REQ): callback function to return back whether the user successfully authenticated.
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
+  var username = options.username;
+  var paths = options.paths || [];
+  var session = options.session;
+  var adminOnly = options.adminOnly || false;
+  
+  var self = this;
+  
+  if (paths.length) {
+    var asyncParallel = [];
+    _.each(paths,function(pageOrPath,_i) {
+      var path = (typeof pageOrPath==="object") ? pageOrPath.path : pageOrPath;
+      
+      if (path) {
+        asyncParallel.push(function(callback1) {
+          async.parallel([
+            function(callback2) {
+              self.isAdmin({username:username, path:path, editOnly:false},function(e,isAdmin) {
+                callback2(e,isAdmin);
+              });
+            },
+            function(callback2) {
+              self.canViewPage({session:session, username:username, path:path},function(e,canView) {
+                callback2(e,canView);
+              });
+            }
+          ],
+            function(err,results) {
+              callback1(err,{
+                path: pageOrPath,
+                canView: results[0] || results[1]
+              });
+            }
+          );
+        });
+      }
+    });
+    
+    async.parallel(asyncParallel,
+      function(err,results) {
+        if (err) cb(err);
+        else {
+          var filteredPages = results.filter(function(_p) {
+            return _p.canView;
+          }).map(function(__p) {
+            return __p.path;
+          });
+          
+          cb(null,filteredPages);
+        }
+      }
+    );
+    
+  } else cb(null,[]);  
 }
 
 /*-----------------------------------------------------------------------------------------

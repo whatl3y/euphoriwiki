@@ -23,7 +23,7 @@
         });
       },
       function(callback) {
-        Access.isAdmin({username:username, path:path},function(e,isAdmin) {
+        Access.isAdmin({username:username, path:path, editOnly:false},function(e,isAdmin) {
           callback(e,isAdmin);
         });
       },
@@ -37,8 +37,7 @@
         if (err) log.error(err);
         else {
           var page = results[0] || {};
-          var isAdmin = results[1];
-          var canViewPage = isAdmin || results[2];
+          var canViewPage = results[1] || results[2];
           
           if (!canViewPage) res.redirect("/?auth=" + path);
           else if (page.aliasfor) res.redirect(page.aliasfor);

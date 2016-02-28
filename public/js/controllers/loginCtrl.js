@@ -15,7 +15,8 @@ function loginCtrl($scope,$http) {
         $http.post('/login',{username:data.username, password:data.password})
         .success(function(ret) {
           if (ret.success) {
-            location.reload();
+            if (location.pathname == "/") location.href = "/";
+            else location.reload();
           } else {
             $scope.error = ret.error;
             console.log(ret.debug);

@@ -39,7 +39,7 @@
           });
         },
         function(callback) {
-          Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+          Access.isPageAdmin({username:username, path:wiki.path, editOnly:true},function(e,isAdmin) {
             callback(e,isAdmin);
           });
         },
@@ -167,12 +167,7 @@
             });
           },
           function(callback) {
-            Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
-              callback(e,isAdmin);
-            });
-          },
-          function(callback) {
-            Access.isWikiAdmin(username,function(e,isAdmin) {
+            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
               callback(e,isAdmin);
             });
           }
@@ -182,7 +177,7 @@
             else {
               var current = results[0];
               var validated = results[1];
-              var canUpdate = results[2] || results[3] || false;
+              var canUpdate = results[2];
               
               if (!validated) res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
               else if (!canUpdate) res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
@@ -616,12 +611,7 @@
             });
           },
           function(callback) {
-            Access.isPageAdmin({username:username, path:wiki.path},function(e,isAdmin) {
-              callback(e,isAdmin);
-            });
-          },
-          function(callback) {
-            Access.isWikiAdmin(username,function(e,isAdmin) {
+            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
               callback(e,isAdmin);
             });
           }
@@ -631,7 +621,7 @@
             else {
               var allowed = results[0];
               var page = results[1];
-              var canUpdate = results[2] || results[3] || false;
+              var canUpdate = results[2];
               
               if (!canUpdate) res.json({success:false, error:"You cannot update the path as you do not have appropriate rights. Contact the page administrator to get access."});
               else if (!allowed) res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});

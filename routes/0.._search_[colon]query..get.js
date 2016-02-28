@@ -2,12 +2,19 @@
   var query = req.params.query;
   var wiki = new WikiHandler();
   var A = new Auth({session:req.session});
-  var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
+  var Access = new AccessManagement({db:config.mongodb.db});
+  
+  var username = A.username;
+  
+  var audit = new Audit({user:username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   wiki.searchPages(query,function(e,pages) {
     if (e) res.send(e);
     else {
-      res.render("search",config.view.send(req,{obj:{pages:pages}}));
+      Access.onlyViewablePaths({session:req.session, username:username, paths:pages},function(err,filteredPages) {
+        if (err) res.send(err);
+        else res.render("search",config.view.send(req,{obj:{pages:filteredPages}}));
+      });
       
       audit.log({type:"Wiki Search", additional:{query:query}});
     }

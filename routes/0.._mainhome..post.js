@@ -1,6 +1,11 @@
 (function(req,res) {
   var info = req.body;
   
+  var A = new Auth({session:req.session});
+  var username = A.username;
+  
+  var Access = new AccessManagement({db:config.mongodb.db});
+  
   switch(info.type) {
     case "getWidgets":
       config.mongodb.db.collection("homewidgets").find({active:true}).toArray(function(_e,widgets) {
@@ -25,23 +30,37 @@
           },function(err,oData) {
             if (err) res.json({success:false, error:err});
             else {
-              var returnedWidgets = [];
               var keys = _.keys(oData);
               
-              _.each(keys,function(k) {
-                var o = {};
-                o.items = oData[k];
-                o.name = k;
-                
-                returnedWidgets.push(o);
-              });
-              
-              res.json({success:true, widgets:returnedWidgets});
+              //filter out any paths in the widgets that the user cannot
+              //view based on admin and view scope settings.
+              async.each(keys,function(k,callback) {
+                Access.onlyViewablePaths({session:req.session, username:username, paths:oData[k]},function(err,filtered) {
+                  oData[k] = filtered;
+                  callback(err)
+                });
+              },
+                function(err) {
+                  if (err) {
+                    log.error(err);
+                    res.json({success:false, error:err});
+                  } else {
+                    var returnedWidgets = [];
+                    _.each(keys,function(k) {
+                      returnedWidgets.push({
+                        items: oData[k] || [],
+                        name: k
+                      });
+                    });
+                    
+                    res.json({success:true, widgets:returnedWidgets});
+                  }
+                }
+              );
             }
           });
         } else res.json({success:false});
       });
-      
       
       break;
       
