@@ -22,7 +22,7 @@ Authentication = function(options) {
     url: (config.ldap.protocol || "ldap")+"://"+config.ldap.url,
     baseDN: config.ldap.basedn,
     username: config.ldap.username,
-    password: config.ldap.password
+    password: config.ldap.password,
     timeout: config.ldap.timeout || 30000;
   };
   
