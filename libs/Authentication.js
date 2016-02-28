@@ -23,7 +23,7 @@ Authentication = function(options) {
     baseDN: config.ldap.basedn,
     username: config.ldap.username,
     password: config.ldap.password,
-    timeout: config.ldap.timeout || 30000;
+    timeout: config.ldap.timeout || 30000
   };
   
   this.ad = new ActiveDirectory(this.config);
