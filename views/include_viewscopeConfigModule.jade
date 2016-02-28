@@ -77,7 +77,7 @@ div(class="row")
                 div This will require the viewing user to be a wiki administrator to be able to view this page.
               div(data-ng-if="scope.type == 'pageadmin'")
                 div This will require the viewing user to be a page administrator to be able to view this page.
-        div(class="row")
-          div(class="col-xs-12")
-            div(class="form-group text-center")
-              button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.viewscope'," + scopeAry + "||[])") Save Page View Scopes
+      div(class="row")
+        div(class="col-xs-12")
+          div(class="form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.viewscope'," + scopeAry + "||[])") Save Page View Scopes
