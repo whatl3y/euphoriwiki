@@ -3,7 +3,7 @@
   var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   if (!(info.username && info.password)) {
-    res.json({success:false, error:"Please provide both a username and passowrd to log in."});
+    res.json({success:false, error:"Please provide both a username and password to log in."});
   } else {
     var loginUsername = info.username + ((info.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
     
@@ -31,7 +31,7 @@
           function(err,results) {
             if (err) res.json({success:false, error:err});
             else {
-              var userInfo = results[1].users[0];
+              var userInfo = (loginUsername == A.GLOBAL_ADMIN) ? {username: loginUsername} : results[1].users[0];
               
               var saveData = {
                 created: new Date(),

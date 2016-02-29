@@ -1,7 +1,6 @@
-var config = require('./config.js');
 var _ = require("underscore");
 var ActiveDirectory = require("activedirectory");
-var log = require("bunyan").createLogger(config.logger.options());
+var config = require('./config.js');
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Authentication.js
@@ -47,8 +46,8 @@ Authentication.prototype.auth = function(options,cb) {
   if (!(options.username && options.password)) {
     cb("Either a username or password was not provided.");
   } else {
-    if (options.username == this.GLOBAL_ADMIN && options.password == this.GLOBAL_PASSWORD) {
-      cb(null,true);
+    if (options.username == this.GLOBAL_ADMIN) {
+      cb(null,((options.password == this.GLOBAL_PASSWORD) ? true : false));
     } else {
       this.ad.authenticate(options.username,options.password,function(err,auth) {
         cb(err,auth);

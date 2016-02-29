@@ -18,7 +18,7 @@ div(class="row")
             div(class="panel-body")
               div(class="form-group")
                 label(for="scopetype{{ $index }}") Type
-                select(class="form-control",data-ng-model="scope.type",data-ng-options="t.type as t.type for t in scopeTypes",data-ng-change="handlers.changeViewScope('" + scopeAry + "',$index)")
+                select(class="form-control",data-ng-model="scope.type",data-ng-options="t.type as t.type + ' - ' + t.name for t in scopeTypes",data-ng-change="handlers.changeViewScope('" + scopeAry + "',$index)")
               div(data-ng-if="scope.type == 'username'")
                 div(class="separate-vert-medium")
                   div(class="wrapper",data-ng-show="scope.data.length")
