@@ -469,7 +469,7 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
   if (typeof info==="object" && info!=null) {
     check(info);
   } else {
-    this.getPage(function(_e,pageInfo) {
+    this.getPage({fields:{password:1}},function(_e,pageInfo) {
       if (_e) cb(_e);
       else if (!pageInfo.length) cb(null,false);
       else check(pageInfo[0]);

@@ -512,6 +512,10 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
+    changeViewScope: function(scopeKey,index) {
+      if (typeof $scope[scopeKey]!=="undefined" && $scope[scopeKey][index]) delete($scope[scopeKey][index].data);
+    },
+    
     replaceWithDraft: function() {
       var draft = $scope.content.draft.html;
       

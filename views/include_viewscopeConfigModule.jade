@@ -18,7 +18,7 @@ div(class="row")
             div(class="panel-body")
               div(class="form-group")
                 label(for="scopetype{{ $index }}") Type
-                select(class="form-control",data-ng-model="scope.type",data-ng-options="t.type as t.type for t in scopeTypes")
+                select(class="form-control",data-ng-model="scope.type",data-ng-options="t.type as t.type for t in scopeTypes",data-ng-change="handlers.changeViewScope('" + scopeAry + "',$index)")
               div(data-ng-if="scope.type == 'username'")
                 div(class="separate-vert-medium")
                   div(class="wrapper",data-ng-show="scope.data.length")
@@ -37,7 +37,7 @@ div(class="row")
                 div(class="separate-vert-small")
                   div(data-ng-show="pageViewScopeUsernameResults.length && pageViewScopeUsernameDone")
                     label Users
-                    select(class="form-control",data-ng-model="pageViewScopeUsernameResultSelect",data-ng-options="user.sAMAccountName as user.sAMAccountName for user in pageViewScopeUsernameResults")
+                    select(class="form-control",data-ng-model="pageViewScopeUsernameResultSelect",data-ng-options="user.sAMAccountName as user.sAMAccountName + ' (' + user.givenName + ' ' + (user.sn || user.surName) + ')' for user in pageViewScopeUsernameResults")
                   div(class="row")
                     div(class="col-xs-12")
                       div(class="separate-vert-small",data-ng-show="!pageViewScopeUsernameResults.length && pageViewScopeUsernameDone")
@@ -71,12 +71,16 @@ div(class="row")
                   div(data-ng-show="pageViewScopeGroupMembershipResults.length && pageViewScopeGroupMembershipResultSelect")
                     div(class="text-center")
                       button(class="btn btn-success separate-vert-small",data-ng-click="scope.data=scope.data||[];scope.data.push(pageViewScopeGroupMembershipResultSelect);pageViewScopeGroupMembershipResultSelect=''") Add Group
-              div(data-ng-if="scope.type == 'emailsuffix'")
-              div(data-ng-if="scope.type == 'upnsuffix'")
               div(data-ng-if="scope.type == 'wikiadmin'")
                 div This will require the viewing user to be a wiki administrator to be able to view this page.
               div(data-ng-if="scope.type == 'pageadmin'")
                 div This will require the viewing user to be a page administrator to be able to view this page.
+              div(data-ng-if="scope.type == 'loggedin'")
+                div This will require the viewing user to be logged into the wiki to view this page.
+              div(data-ng-if="scope.type == 'emailsuffix'")
+                div NOT SUPPORTED YET
+              div(data-ng-if="scope.type == 'upnsuffix'")
+                div NOT SUPPORTED YET
       div(class="row")
         div(class="col-xs-12")
           div(class="form-group text-center")

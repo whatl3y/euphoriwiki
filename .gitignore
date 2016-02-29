@@ -1,7 +1,7 @@
 # ignore
 /integrations
 /tests
-/logs
+/logs/*
 /files
 /documentation
 /.env_windows

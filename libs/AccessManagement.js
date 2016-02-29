@@ -398,14 +398,14 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
       
     case "upnsuffix":
       return function(username,path,data,cb) {
-        cb(null,false);
+        cb(null,true);
       }
       
       break;
       
     case "emailsuffix":
       return function(username,path,data,cb) {
-        cb(null,false);
+        cb(null,true);
       }
       
       break;
