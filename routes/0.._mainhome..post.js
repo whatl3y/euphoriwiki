@@ -42,6 +42,8 @@
               //filter out any paths in the widgets that the user cannot
               //view based on admin and view scope settings.
               async.each(keys,function(k,callback) {
+                log.debug("Looping through widgets to filter paths:",k,oData[k]);
+                
                 Access.onlyViewablePaths({session:req.session, username:username, paths:oData[k]},function(err,filtered) {
                   oData[k] = filtered;
                   callback(err)

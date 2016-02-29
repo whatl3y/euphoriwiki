@@ -104,7 +104,7 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
     cb(null,false);
   } else {
     var pathFilter = this.createInheritanceFilter(path);
-    pathFilter = (pathFilter instanceof Array) ? pathFilter : {path:path};
+    pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
     
     var oFilters = {$and: [pathFilter, {"settings.admins":{$exists:1}}]};
     
@@ -193,13 +193,17 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
       function(err,results) {
         if (err) cb(err);
         else {
-          var filteredPages = results.filter(function(_p) {
-            return _p.canView;
-          }).map(function(__p) {
-            return __p.path;
-          });
-          
-          cb(null,filteredPages);
+          try {
+            var filteredPages = results.filter(function(_p) {
+              return _p.canView;
+            }).map(function(__p) {
+              return __p.path;
+            });
+            
+            cb(null,filteredPages);
+          } catch(_err) {
+            cb(_err);
+          }
         }
       }
     );
@@ -231,7 +235,7 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
   var path = options.path;
   
   var pathFilter = this.createInheritanceFilter(path);
-  pathFilter = (pathFilter instanceof Array) ? pathFilter : {path:path};
+  pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
   
   var oFilters = {$and: [pathFilter, {"settings.viewscope":{$exists:1}}]};
     
@@ -310,29 +314,32 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
         
         aGroupDNs = aGroupDNs || [];
         
-        var Auth = require("./Authentication.js");
-        var asyncParallelFunctions = [];
-        _.each(aGroupDNs,function(dn) {
-          asyncParallelFunctions.push(function(callback) {
-            new Auth().isUserMemberOf({username:username, group:dn},function(e,result) {
-              callback(e,result);
+        if (aGroupDNs.length) {
+          var Auth = require("./Authentication.js");
+          var asyncParallelFunctions = [];
+          _.each(aGroupDNs,function(dn) {
+            asyncParallelFunctions.push(function(callback) {
+              new Auth().isUserMemberOf({username:username, group:dn},function(e,result) {
+                callback(e,result);
+              });
             });
           });
-        });
-        
-        async.parallel(asyncParallelFunctions,
-          function(err,results) {
-            if (err) cb(err);
-            else {
-              var isMember = false;
-              for (var _i=0;_i<results.length;_i++) {
-                isMember = isMember || results[_i];
+          
+          async.parallel(asyncParallelFunctions,
+            function(err,results) {
+              if (err) cb(err);
+              else {
+                var isMember = false;
+                for (var _i=0;_i<results.length;_i++) {
+                  isMember = isMember || results[_i];
+                }
+                
+                cb(null,isMember);
               }
-              
-              cb(null,isMember);
             }
-          }
-        );
+          );
+        } else cb(null,true);
+        
       }
       
       break;
@@ -390,17 +397,23 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
       break;
       
     case "upnsuffix":
-      return this.noop();
+      return function(username,path,data,cb) {
+        cb(null,false);
+      }
       
       break;
       
     case "emailsuffix":
-      return this.noop();
+      return function(username,path,data,cb) {
+        cb(null,false);
+      }
       
       break;
       
     default:
-      return this.noop();
+      return function(username,path,data,cb) {
+        cb(null,false);
+      }
   }
 }
 
