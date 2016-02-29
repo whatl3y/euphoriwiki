@@ -18,13 +18,13 @@ Authentication = function(options) {
   this.username = this.username();
   
   this.config = {
-    url: (config.ldap.protocol || "ldap")+"://"+config.ldap.url,
+    url: (config.ldap.url) ? (config.ldap.protocol || "ldap")+"://"+config.ldap.url : null,
     baseDN: config.ldap.basedn,
     username: config.ldap.username,
     password: config.ldap.password
   };
   
-  this.ad = new ActiveDirectory(this.config);
+  this.ad = (this.config.url) ? new ActiveDirectory(this.config) : null;
   this.GLOBAL_ADMIN = process.env.GLOBAL_USERNAME;
   this.GLOBAL_PASSWORD = process.env.GLOBAL_PASSWORD;
 }
@@ -49,9 +49,13 @@ Authentication.prototype.auth = function(options,cb) {
     if (options.username == this.GLOBAL_ADMIN) {
       cb(null,((options.password == this.GLOBAL_PASSWORD) ? true : false));
     } else {
-      this.ad.authenticate(options.username,options.password,function(err,auth) {
-        cb(err,auth);
-      });
+      try {
+        this.ad.authenticate(options.username,options.password,function(err,auth) {
+          cb(err,auth);
+        });
+      } catch(err) {
+        cb(err);
+      }      
     }
   }
 }
@@ -78,8 +82,13 @@ Authentication.prototype.find = function(options,cb) {
   if (!query && !value) {
     cb("No value was provided for the " + attribute + " attribute. Please provide a value.");
   } else {
-    if (query) this.ad.find({timeout:10000, filter:query},cb);
-    else this.ad.find({timeout:10000, filter:attribute + "=" + value},cb);
+    try {
+      if (query) this.ad.find({timeout:10000, filter:query},cb);
+      else this.ad.find({timeout:10000, filter:attribute + "=" + value},cb);
+      
+    } catch(err) {
+      cb(err);
+    }
   }
 }
 
@@ -100,7 +109,11 @@ Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
   if (!(username)) {
     cb("Please provide a username.");
   } else {
-    this.ad.getGroupMembershipForUser(username,cb);
+    try {
+      this.ad.getGroupMembershipForUser(username,cb);
+    } catch(err) {
+      cb(err);
+    }
   }
 }
 
@@ -123,7 +136,11 @@ Authentication.prototype.isUserMemberOf = function(options,cb) {
   if (!(username && group)) {
     cb("Please provide both a username and group name.");
   } else {
-    this.ad.isUserMemberOf(username,group,cb);
+    try {
+      this.ad.isUserMemberOf(username,group,cb);
+    } catch(err) {
+      cb(err);
+    }
   }
 }
 

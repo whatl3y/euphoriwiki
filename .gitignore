@@ -4,6 +4,6 @@
 /logs
 /files
 /documentation
+/views/emailtemplates
 /.env_windows
 /.env_linux
-/views/emailtemplates
