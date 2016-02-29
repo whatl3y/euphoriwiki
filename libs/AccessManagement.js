@@ -412,7 +412,7 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
       
     default:
       return function(username,path,data,cb) {
-        cb(null,false);
+        cb(null,true);
       }
   }
 }
