@@ -103,7 +103,10 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
   if (!username || !path) {
     cb(null,false);
   } else {
-    var oFilters = {$and: [this.createInheritanceFilter(path), {"settings.admins":{$exists:1}}]};
+    var pathFilter = this.createInheritanceFilter(path);
+    pathFilter = (pathFilter instanceof Array) ? pathFilter : {path:path};
+    
+    var oFilters = {$and: [pathFilter, {"settings.admins":{$exists:1}}]};
     
     this.db.collection("wikicontent").find(oFilters,{"settings.admins":1}).toArray(function(e,pages) {
       if (e) cb(e);
@@ -227,7 +230,10 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
   var username = options.username;
   var path = options.path;
   
-  var oFilters = {$and: [this.createInheritanceFilter(path), {"settings.viewscope":{$exists:1}}]};
+  var pathFilter = this.createInheritanceFilter(path);
+  pathFilter = (pathFilter instanceof Array) ? pathFilter : {path:path};
+  
+  var oFilters = {$and: [pathFilter, {"settings.viewscope":{$exists:1}}]};
     
   this.db.collection("wikicontent").find(oFilters,{"settings.viewscope":1}).toArray(function(e,pages) {
     if (e) cb(e);
