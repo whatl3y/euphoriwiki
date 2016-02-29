@@ -9,7 +9,12 @@
   switch(info.type) {
     case "getWidgets":
       config.mongodb.db.collection("homewidgets").find({active:true}).toArray(function(_e,widgets) {
-        if (widgets.length) {
+        if (_e) {
+          log.error(_e);
+          res.json({success:false, error:_e});
+        } else if (widgets.length) {
+          log.debug("Got widgets: ",widgets);
+          
           var aWidgets = _.map(widgets,function(widget) {
             var sortObject = {};
             if (widget.orderField) sortObject[widget.orderField] = widget.orderDirection;
@@ -30,6 +35,8 @@
           },function(err,oData) {
             if (err) res.json({success:false, error:err});
             else {
+              log.debug("Got data for widgets: ",oData);
+              
               var keys = _.keys(oData);
               
               //filter out any paths in the widgets that the user cannot
@@ -54,6 +61,7 @@
                     });
                     
                     res.json({success:true, widgets:returnedWidgets});
+                    log.debug("Widgets returning to client: ",returnedWidgets);
                   }
                 }
               );
