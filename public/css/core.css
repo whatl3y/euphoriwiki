@@ -196,6 +196,14 @@ colgroup col.info {
   overflow: hidden;
 }
 
+.module-placeholder {
+  border: 4px dashed;
+  border-radius: 5px;
+  background: #F5F5F5;
+  min-height: 300px;
+  margin: 10px;
+}
+
 .dark {
   background: #333333;
   color: #FFFFFF;

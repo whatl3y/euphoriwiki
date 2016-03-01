@@ -45,6 +45,7 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
 })
 .directive('fileread',fileread)
 .directive('compileHtml',compileHtml)
+.directive('wikiModule',wikiModuleDir)
 .directive('subpage',subpageDir)
 .directive('subpageMember',subpageMemberDir)
 .controller('globalCtrl',globalCtrl)
@@ -53,4 +54,5 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
 .controller('wikiPageCtrl',wikiPageCtrl)
 .controller('adminSettingsCtrl',adminSettingsCtrl)
 .controller('adminDiffCtrl',adminDiffCtrl)
+.controller('adminModulesCtrl',adminModulesCtrl)
 .controller('adminEventsCtrl',adminEventsCtrl);

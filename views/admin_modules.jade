@@ -1,0 +1,52 @@
+extends layout
+
+block main  
+  div(class="row",data-ng-controller="adminModulesCtrl")
+    div(class="col-xs-12")
+      include include_adminnav.jade
+    div(class="col-xs-12 col-md-10 col-md-offset-1")
+      div(class="separate-vert-small")
+        div(data-ng-if="modules.length")
+          table(class="table table-striped table-responsive table-bordered")
+            tr
+              th Module Key
+              th Name
+              th Description
+              th View Template
+              th Configuration Options
+              th Date Created
+              th Delete Module
+            tr(data-ng-repeat="module in modules")
+              td {{ module.key }}
+              td {{ module.name }}
+              td {{ module.description }}
+              td
+                a(data-ng-href="/file/{{ module.template }}",target="_blank") {{ module.template }}
+              td {{ module.config.join(", ") }}
+              td {{ functions.formatDateTime(module.updated) }}
+              td
+                a(href="javascript:void(0)",data-ng-click="handlers.deleteModule(module.key,module.template,$index)") Delete
+        h2(class="text-center",data-ng-if="!modules.length")
+          alert There are no modules available to review.
+    div(class="col-xs-12")
+      h1 Create New Module
+      div(class="row")
+        div(class="col-xs-12 col-md-8 col-md-offset-2")
+          form
+            div(class="form-group")
+              label(for="key") Module Key
+              input(type="text",class="form-control",id="key",name="key",data-ng-model="newModule.key")
+            div(class="form-group")
+              label(for="name") Module Name
+              input(type="text",class="form-control",id="name",name="name",data-ng-model="newModule.name")
+            div(class="form-group")
+              label(for="description") Module Description
+              textarea(class="form-control",id="description",name="description",data-ng-model="newModule.description")
+            div(class="form-group")
+              label(for="template") Module Template File
+              input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
+            div(class="form-group")
+              label Module Configuration Options
+              input(type="text",class="form-control",id="config",name="config",data-ng-model="newModule.config")
+            div(class="form-group text-center")
+              button(class="btn btn-primary",data-ng-click="handlers.createModule('templateFile')") Create Module

@@ -25,6 +25,7 @@ var AccessManagement = require("./libs/AccessManagement");
 var RouteHandler = require("./libs/RouteHandler.js");
 var WikiHandler = require("./libs/WikiHandler.js");
 var FileHandler = require("./libs/FileHandler.js");
+var SQLHandler = require("./libs/SQLHandler.js");
 var DirectoryProcessor = require("./libs/DirectoryProcessor.js");
 var config = require("./libs/config.js");
 var log = require("bunyan").createLogger(config.logger.options());

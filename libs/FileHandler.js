@@ -52,11 +52,14 @@ FileHandler.prototype.findFiles=function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.uploadFile=function(options,cb) {
+  options = options || {};
+  
   var filePath = options.path;
   var fileName = options.filename;
+  var newFileName = (options.exactname) ? fileName : false;
   
   var lastPeriod = fileName.lastIndexOf(".");
-  var newFileName = fileName.substring(0,lastPeriod) + "_" + Date.now() + fileName.substring(lastPeriod);
+  newFileName = newFileName || fileName.substring(0,lastPeriod) + "_" + Date.now() + fileName.substring(lastPeriod);
   
   var writeStream = this.gfs.createWriteStream({filename: newFileName});
   
@@ -65,6 +68,42 @@ FileHandler.prototype.uploadFile=function(options,cb) {
   writeStream.on("close",function(file) {cb(null,newFileName);});
   
   fs.createReadStream(filePath).pipe(writeStream);
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getFile (PUBLIC)
+|DESCRIPTION:  Gets a file from GridFS based on file name
+|PARAMETERS:  1. options(OPT): options
+|                   options.filename
+|                   options.encoding: if specified, will return the data based on encoding type (common, 'binary', 'utf8', etc.)
+|             2. cb(REQ): the callback to call after uploading a file
+|                     cb(err,<varies based on encoding>)
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+FileHandler.prototype.getFile=function(options,cb) {
+  options = options || {};
+  
+  var filename = options.filename || "";
+  var encoding = options.encoding || "";
+  
+  try {
+    var readStream = this.gfs.createReadStream({filename:filename});
+    if (encoding) readStream.setEncoding(encoding);
+    
+    var data = "";
+    readStream.on("data",function(chunk) {
+      data += chunk;
+    });
+    
+    readStream.on("end",function() {
+      cb(null,data);
+    });
+    
+  } catch(err) {
+    cb(err);
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -80,9 +119,7 @@ FileHandler.prototype.uploadFile=function(options,cb) {
 FileHandler.prototype.deleteFile=function(options,cb) {
   var fileName = options.filename;
   
-  this.gfs.remove({filename:fileName},function(err) {
-    cb(err);
-  });
+  this.gfs.remove({filename:fileName},cb);
 }
 
 //-------------------------------------------------------
