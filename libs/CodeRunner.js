@@ -31,7 +31,7 @@ CodeRunner = function(options) {
 |PARAMETERS:  None
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
-|RETURNS:    <boolean/Error>: true if executed successfully, Error with error otherwise
+|RETURNS:    <result/true/Error>: true if executed successfully, Error with error otherwise
 -----------------------------------------------------------------------------------------*/
 CodeRunner.prototype.eval = function() {
   if (typeof this.params==="object") {
@@ -44,7 +44,7 @@ CodeRunner.prototype.eval = function() {
   
   try {
     var result = eval(this.codestring);
-    return true;
+    return result || true;
   } catch(err) {
     return err;
   }

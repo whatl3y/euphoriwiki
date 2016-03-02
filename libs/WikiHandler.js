@@ -548,7 +548,7 @@ WikiHandler.prototype.event=function(options,cb) {
             return function(callback) {
               var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
               
-              if (result===true) callback(null,true);
+              if (!(result instanceof Error)) callback(null,true);
               else callback(result);
             }
           });
@@ -684,8 +684,7 @@ WikiHandler.prototype.deletePage=function(cb) {
     }
   ],
     function(err,results) {
-      if (err) cb(err);
-      else cb(null);
+      cb(err);
     }
   );
 }

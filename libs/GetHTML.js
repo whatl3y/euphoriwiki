@@ -44,31 +44,41 @@ GetHTML.prototype.initialize = function() {
 /*-----------------------------------------------------------------------------------------
 |NAME:      html (PUBLIC)
 |DESCRIPTION:  Takes HTML and returns it prettified
-|PARAMETERS:  1. cb(REQ): the callback that will return an error or converted HTML string.
+|PARAMETERS:  1. string(OPT): an optional string of html to prettify
+|             2. cb(REQ): the callback that will return an error or converted HTML string.
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.html = function(cb) {
+GetHTML.prototype.html = function(string,cb) {
+  cb = (typeof string==="function") ? string : cb;
+  
   var self = this;
   
-  fs.readFile(this.fullpath,{encoding:"utf8"},function(e,retHtml) {
-    if (e) cb(e);
-    else cb(null,self.prettify(retHtml));
-  });
+  if (typeof string==="function") {
+    fs.readFile(this.fullpath,{encoding:"utf8"},function(e,retHtml) {
+      if (e) cb(e);
+      else cb(null,self.prettify(retHtml));
+    });
+  } else cb(null,self.prettify(string || ""));
 }
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      jade (PUBLIC)
 |DESCRIPTION:  Converts a jade template to html;
-|PARAMETERS:  1. cb(REQ): the callback that will return an error or converted HTML string.
+|PARAMETERS:    1. string(OPT): an optional string of jade to render
+|               2. cb(REQ): the callback that will return an error or converted HTML string.
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.jade = function(cb) {
+GetHTML.prototype.jade = function(string,cb) {
+  cb = (typeof string==="function") ? string : cb;
+  method = (typeof string==="function") ? "renderFile" : "render";
+  methodParam = (typeof string==="function") ? this.fullpath : (string || "");
+  
   try {
-    var retHtml = jade.renderFile(this.fullpath);
+    var retHtml = jade[method](methodParam);
     cb(null,this.prettify(retHtml));
   } catch(e) {
     cb(e);

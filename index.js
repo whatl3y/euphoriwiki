@@ -12,6 +12,7 @@ var mongoStore = require("connect-mongo")(session);
 var path = require("path");
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
+var uuid = require('node-uuid');
 var _ = require("underscore");
 var async = require("async");
 var jade = require("jade");

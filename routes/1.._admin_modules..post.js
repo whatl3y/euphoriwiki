@@ -44,10 +44,13 @@
             
             case "uploadModule":
               var fh = new FileHandler({db:config.mongodb.db});
-              var moduleKey = info.key;
-              var moduleName = info.name;
-              var moduleDescription = info.description;
-              var moduleConfig = (typeof info.config==="string") ? info.config.split(",") : [];
+              
+              info.module = JSON.parse(info.module);
+              var moduleKey = info.module.key;
+              var moduleName = info.module.name;
+              var moduleDescription = info.module.description;
+              var moduleConfig = (typeof info.module.config==="string") ? info.module.config.split(",") : [];
+              var moduleCode = info.module.code || "";
               
               var createOrModify = function(newFileName) {
                 var data = {
@@ -55,6 +58,7 @@
                   name: moduleName,
                   description: moduleDescription,
                   config: moduleConfig,
+                  code: moduleCode,
                   updated: new Date()
                 };
                 if (newFileName) data.template = newFileName;
@@ -91,7 +95,8 @@
               
               async.parallel([
                 function(callback) {
-                  fh.deleteFile({filename:moduleTemplate},callback);
+                  if (moduleTemplate) fh.deleteFile({filename:moduleTemplate},callback);
+                  else callback();
                 },
                 function(callback) {
                   config.mongodb.db.collection("wiki_modules").remove({ key:moduleKey },callback);

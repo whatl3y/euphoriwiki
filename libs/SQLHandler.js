@@ -2,16 +2,16 @@ var mysql = require("mysql");
 var mssql = require("mssql");
 
 /*-----------------------------------------------------------------------------------------
-|TITLE:			SQLHandler.js
-|PURPOSE:		Handles serving pages to particular routes stored in the DB.
-|AUTHOR:		Lance Whatley
+|TITLE:      SQLHandler.js
+|PURPOSE:    Handles serving pages to particular routes stored in the DB.
+|AUTHOR:    Lance Whatley
 |CALLABLE TAGS:
-|ASSUMES:		mysql, mssql
-|REVISION HISTORY:	
-|				*LJW 3/1/2016 - created
+|ASSUMES:    mysql, mssql
+|REVISION HISTORY:  
+|        *LJW 3/1/2016 - created
 -----------------------------------------------------------------------------------------*/
 SQLHandler = function(opts) {
-	opts = opts || {};
+  opts = opts || {};
   
   this.config = opts.config || {};
   this.driver = opts.driver || "mssql";
@@ -27,13 +27,13 @@ SQLHandler = function(opts) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:			connect (PUBLIC)
-|DESCRIPTION:	
-|PARAMETERS:	1. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:	
-|SIDE EFFECTS:	Nothing
-|ASSUMES:		Nothing
-|RETURNS:		Nothing
+|NAME:      connect (PUBLIC)
+|DESCRIPTION:  
+|PARAMETERS:  1. cb(REQ): the function we would like to call with results from messages
+|CALLED FROM:  
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.init = function() {
   var self = this;
@@ -84,76 +84,76 @@ SQLHandler.prototype.init = function() {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:			connect (PUBLIC)
-|DESCRIPTION:	
-|PARAMETERS:	1. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:	
-|SIDE EFFECTS:	Nothing
-|ASSUMES:		Nothing
-|RETURNS:		Nothing
+|NAME:      connect (PUBLIC)
+|DESCRIPTION:  
+|PARAMETERS:  1. cb(REQ): the function we would like to call with results from messages
+|CALLED FROM:  
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.connect = function(cb) {
   this.map.connect[this.driver](cb);
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:			query (PUBLIC)
-|DESCRIPTION:	Get all data from a query stored in the DB
-|PARAMETERS:	1. options(REQ): options for the query
-|							options.query: the query to run
-|							options.close: true/false whether to close the connection
-|				2. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:	
-|SIDE EFFECTS:	Nothing
-|ASSUMES:		Nothing
-|RETURNS:		Nothing
+|NAME:      query (PUBLIC)
+|DESCRIPTION:  Get all data from a query stored in the DB
+|PARAMETERS:  1. options(REQ): options for the query
+|              options.query: the query to run
+|              options.close: true/false whether to close the connection
+|        2. cb(REQ): the function we would like to call with results from messages
+|CALLED FROM:  
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.query = function(options,cb) {
-	options = options || {};
+  options = options || {};
   var q = (typeof options==="string") ? options : options.query;
   
   var self = this;
-	
-	self.map.query[self.driver](q,function(__e,data) {
-		if (typeof options==="object" && options.close) self.map.close[self.driver]();
-		cb(__e,data);
-	});
+  
+  self.map.query[self.driver](q,function(__e,data) {
+    if (typeof options==="object" && options.close) self.map.close[self.driver]();
+    cb(__e,data);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:			queriesRecursive (PUBLIC)
-|DESCRIPTION:	Runs multiple queries and returns all the results back in a single object to the callback function.
-|PARAMETERS:	1. options(REQ): options for the query
-|							options.array: array of objects that contains the key that the data will be
-|									returned in options.object and the query we'll be
-|										options.array[i].Query: query to run
-|										options.array[i].ObjectKey: key in the object where data will go
-|							options.index: the current 0 start index of the query we're running
-|							options.object: object that we'll be returning the data from the multiple
-|									queries will be returned in.
-|				2. cb(REQ): the function we would like to call with results from the queries
-|CALLED FROM:	
-|SIDE EFFECTS:	Nothing
-|ASSUMES:		Nothing
-|RETURNS:		Nothing
+|NAME:      queriesRecursive (PUBLIC)
+|DESCRIPTION:  Runs multiple queries and returns all the results back in a single object to the callback function.
+|PARAMETERS:  1. options(REQ): options for the query
+|              options.array: array of objects that contains the key that the data will be
+|                  returned in options.object and the query we'll be
+|                    options.array[i].Query: query to run
+|                    options.array[i].ObjectKey: key in the object where data will go
+|              options.index: the current 0 start index of the query we're running
+|              options.object: object that we'll be returning the data from the multiple
+|                  queries will be returned in.
+|        2. cb(REQ): the function we would like to call with results from the queries
+|CALLED FROM:  
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.queriesRecursive = function(options,cb) {
-	options.index = options.index || 0;
-	options.object = options.object || {};
-	
-	var self=this;
-	
-	if (options.array[options.index]) {
-		self.query({query:options.array[options.index].Query},function(_e,data) {
-			if (_e) cb(_e,options.object);
-			else {
-				options.object[options.array[options.index].ObjectKey] = data;
-				options.index++;
-				
-				self.queriesRecursive(options,cb);
-			}
-		})
-	} else cb(null,options.object);
+  options.index = options.index || 0;
+  options.object = options.object || {};
+  
+  var self=this;
+  
+  if (options.array[options.index]) {
+    self.query({query:options.array[options.index].Query},function(_e,data) {
+      if (_e) cb(_e,options.object);
+      else {
+        options.object[options.array[options.index].ObjectKey] = data;
+        options.index++;
+        
+        self.queriesRecursive(options,cb);
+      }
+    })
+  } else cb(null,options.object);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -172,6 +172,6 @@ SQLHandler.prototype.noop=function(cb1,cb2) {
 //-------------------------------------------------------
 //NodeJS
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports=SQLHandler;
+  module.exports=SQLHandler;
 }
 //-------------------------------------------------------

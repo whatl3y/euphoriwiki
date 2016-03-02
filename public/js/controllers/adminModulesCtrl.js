@@ -60,7 +60,7 @@ function adminModulesCtrl($scope,$http,Upload) {
     },
     
     createModule: function(fileScopeKey) {
-      var file = $scope[fileScopeKey];
+      var file = $scope[fileScopeKey] || null;
       $scope.newModule = $scope.newModule || {};
       
       var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
@@ -69,10 +69,7 @@ function adminModulesCtrl($scope,$http,Upload) {
         file: file,
         fields: {
           type: "uploadModule",
-          key: $scope.newModule.key,
-          name: $scope.newModule.name,
-          description: $scope.newModule.description,
-          config: $scope.newModule.config
+          module: $scope.newModule
         }
       })
       .success(function(data) {
