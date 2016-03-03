@@ -9,7 +9,7 @@
   
   switch(info.type) {
     case "init":
-      wiki.getPage({filters:{},fields:{path:1,_id:0}},function(e,pages) {
+      wiki.getPage({filters:{aliasfor:{$exists:false}},fields:{path:1,_id:0},sort:{path:1}},function(e,pages) {
         if (e) {
           log.error(e);
           res.json({success:false, error:e});
