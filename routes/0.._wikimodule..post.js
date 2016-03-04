@@ -53,21 +53,23 @@
                         else {
                           var result = results[0];
                           
-                          fh.getFile({filename:module.template, encoding:"utf8"},function(__e,fileContents) {
-                            if (__e) {
-                              log.error(__e);
-                              res.json({success:false, error:__e});
-                            } else {
-                              var ext = gH.extension(module.template);
-                              gH[ext.substring(1)](fileContents,function(___e,viewHtml) {
-                                res.json({
-                                  success: true,
-                                  results: result,
-                                  template: viewHtml
+                          if (module.template) {
+                            fh.getFile({filename:module.template, encoding:"utf8"},function(__e,fileContents) {
+                              if (__e) {
+                                log.error(__e);
+                                res.json({success:false, error:__e});
+                              } else {
+                                var ext = gH.extension(module.template);
+                                gH[ext.substring(1)](fileContents,function(___e,viewHtml) {
+                                  res.json({
+                                    success: true,
+                                    results: result,
+                                    template: viewHtml
+                                  });
                                 });
-                              });
-                            }
-                          });
+                              }
+                            });
+                          } else res.json({success:false, results:result, error:"No template in module to use."});
                         }
                       }
                     );

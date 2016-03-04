@@ -15,6 +15,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   $scope.pageState = {
     view: true,
     settings: false,
+    pageModules: false,
     wikiEvents: false,
     editHtml: false,
     editMarkup: false,
@@ -85,6 +86,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
           $scope.eventTypes = ret.eventTypes || [];
           $scope.pageEvents = ret.pageEvents || [];
+          $scope.availableModules = ret.modules || [];
+          $scope.pageModules = ret.pageModules || [];
           $scope.scopeTypes = ret.scopeTypes || [];
         }
         

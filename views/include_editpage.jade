@@ -51,8 +51,10 @@ div(class="wrapper separate-vert-medium")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadFile')") File Management
+            li(role="presentation",data-ng-class="functions.style.tabState(pageState.pageModules)")
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('pageModules')") Page Modules
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.wikiEvents)")
-              a(href="javascript:void(0)",data-ng-click="functions.changePageState('wikiEvents')") Custom Page Events
+              a(href="javascript:void(0)",data-ng-click="functions.changePageState('wikiEvents')") Page Event Handlers
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.settings)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('settings')") Page Settings
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
@@ -212,6 +214,49 @@ div(class="wrapper separate-vert-medium")
                   a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'user')") Delete
           div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
             alert You haven't uploaded any files yet. As soon as you upload your first file you will be able to see and manage them here.
+      div(data-ng-show="pageState.pageModules")
+        h2 Page Modules
+        div.
+          Modules are like widgets you can embed in your page that can dynamically generate content from different sources.
+          For example, you can use a module to grab data from a database and display it in a dashboard or HTML table. Wiki Administrators
+          configure modules that are available, so if you have ideas for modules you'd like to see implemented send a note to the wiki
+          administrators!
+        div(class="col-xs-12 col-sm-10 col-sm-offset-1")
+          form
+            div(class="separate-vert-small text-center")
+              button(class="btn btn-primary",data-ng-click="handlers.savePageEvents()") Save Modules
+            div(class="separate-vert-small text-center")
+              button(class="btn btn-default",data-ng-click="functions.updateAryLength('pageModules','inc')",popover-trigger="mouseenter",popover="Add new event.")
+                span(class="glyphicon glyphicon-plus")
+              button(class="btn btn-default margin-left-small",data-ng-click="functions.updateAryLength('pageModules','dec')",popover-trigger="mouseenter",popover="Delete last event.")
+                span(class="glyphicon glyphicon-minus")
+            div(class="col-xs-12 col-md-6 col-lg-4 padding-small",data-ng-repeat="instance in pageModules")
+              div(class="wrapper light gray padding-medium")
+                div(class="text-large")
+                  div(class="text-xlarge") Module Instance
+                div
+                  h3 Module Type
+                  select(class="form-control",data-ng-options="module.key as module.name for module in availableModules",data-ng-model="instance.modulekey")
+                div
+                  h3 Module HTML
+                  small
+                    small Enter the HTML below on any page that you would like to place this module on, and it will automatically render the module whenever someone loads the page.
+                  div(class="text-center")
+                    code &lt;wiki-module id="{{ instance.uid }}"&gt;&lt;/wiki-module&gt;
+                div
+                  h4 Module Configuration
+                  div(data-ng-if="!instance.moduleConfig.length")
+                    alert If you see this notification, save this module by clicking the Save Modules button above, then you will see configuration options available to enter.
+                  div(data-ng-if="instance.moduleConfig.length")
+                    div(class="row separate-vert-small",data-ng-repeat="c in instance.moduleConfig")
+                      div(class="col-xs-6 col-md-4") {{ c.name }}
+                      div(class="col-xs-6 col-md-8")
+                        div(data-ng-if="c.type=='select'")
+                          select(class="form-control",data-ng-options="val as val for val in c.values.split(',')",data-ng-model="instance.config[c.name]")
+                        div(data-ng-if="c.type=='textbox'")
+                          input(type="text",class="form-control",data-ng-model="instance.config[c.name]")
+                        div(data-ng-if="c.type=='textarea'")
+                          textarea(class="form-control",data-ng-model="instance.config[c.name]")
       div(data-ng-show="pageState.wikiEvents")
         h2 Custom Page Events
         div.

@@ -14,6 +14,8 @@ function adminModulesCtrl($scope,$http,Upload) {
       scopeKey = scopeKey || "";
       which = which || "inc";
       
+      $scope[scopeKey] = $scope[scopeKey] || [];
+      
       switch(which) {
         case "inc":
           $scope[scopeKey] = $scope[scopeKey].concat({});
@@ -21,6 +23,23 @@ function adminModulesCtrl($scope,$http,Upload) {
           
         case "dec":
           $scope[scopeKey].pop();
+          break;
+      }
+    },
+    
+    updateNewModuleConfigLength: function(which) {
+      which = which || "inc";
+      
+      $scope.newModule = $scope.newModule || {};
+      $scope.newModule.config = $scope.newModule.config || [];
+      
+      switch(which) {
+        case "inc":
+          $scope.newModule.config = $scope.newModule.config.concat({});
+          break;
+          
+        case "dec":
+          $scope.newModule.config.pop();
           break;
       }
     },
@@ -86,6 +105,10 @@ function adminModulesCtrl($scope,$http,Upload) {
         $scope.error = "There was a problem creating your module. Please try again.";
         loader.remove();
       });
+    },
+    
+    editModule: function(oModule) {
+      $scope.newModule = oModule || {};
     },
     
     deleteModule: function(key,template,scopeAryIndex) {

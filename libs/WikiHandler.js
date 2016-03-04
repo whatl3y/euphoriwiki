@@ -566,6 +566,80 @@ WikiHandler.prototype.event=function(options,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      getModules (PUBLIC)
+|DESCRIPTION:  Gets available modules from the DB a user can configure as instances on their page(s).
+|PARAMETERS:    1. options(OPT): options to include 
+|               2. cb(REQ): the callback function
+|                 cb(err,true/false);
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getModules=function(options,cb) {
+  options = options || {};
+  
+  var filters = options.filters || {};
+  var fields = options.fields || {};
+  
+  async.parallel([
+    function(callback) {
+      config.mongodb.db.collection("wiki_modules").find(filters,fields).toArray(function(e,modules) {
+        callback(e,modules);
+      });
+    }
+  ],
+    function(err,results) {
+      var modules = results[0];
+      cb(err,modules);
+    }
+  );
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getModuleInstances (PUBLIC)
+|DESCRIPTION:  Gets all module instances and merges with module info to return back.
+|PARAMETERS:  1. path(OPT): path we want to get instances from
+|             2. cb(REQ): the callback function
+|                 cb(err,true/false);
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getModuleInstances=function(path,cb) {
+  path = path || this.path;
+  
+  var self = this;
+  
+  async.parallel([
+    function(callback) {
+      self.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
+        callback(e,modules);
+      });
+    },
+    function(callback) {
+      config.mongodb.db.collection("wiki_modules_instances").find({path:path}).toArray(function(e,modulesInstances) {
+        callback(e,modulesInstances);
+      });
+    }
+  ],
+    function(err,results) {
+      if (err) cb(err);
+      else {
+        var modules = results[0];
+        var moduleInstances = results[1];
+        
+        _.each(moduleInstances,function(instance,_index) {
+          var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
+          moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
+        });
+        
+        cb(null,moduleInstances);
+      }
+    }
+  );
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      emailSubscribers (PUBLIC)
 |DESCRIPTION:  Determines if a page is password protected or not
 |PARAMETERS:  1. info(OPT): object of information about the e-mail we're sending to subscribers of a page

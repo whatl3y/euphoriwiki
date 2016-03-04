@@ -72,6 +72,16 @@
           config.mongodb.db.collection("memberscope_types").find({}).sort({type:1}).toArray(function(e,scopetypes) {
             callback(e,scopetypes);
           });
+        },
+        function(callback) {
+          wiki.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
+            callback(e,modules);
+          });
+        },
+        function(callback) {
+          wiki.getModuleInstances(null,function(e,instances) {
+            callback(e,instances);
+          });
         }
       ],
         function(err,results) {
@@ -87,6 +97,8 @@
             var aliases = results[8];
             var canViewPage = results[5] || results[9];   //if wiki admin then true, otherwise check view access scope
             var viewScopeTypes = results[10];
+            var modules = results[11];
+            var moduleInstances = results[12];
             
             if (!validated) res.json({success:false, protected:true});
             else if (!canViewPage) res.json({success:false, outofscope:true});
@@ -112,6 +124,8 @@
                   pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
                   viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
                   pageEvents: pageInfo[0].events,
+                  modules: modules,
+                  pageModules: moduleInstances,
                   eventTypes: eventTypes.map(function(t) {return t.type}),
                   pageAliases: aliases.map(function(t) {return t.path}),
                   scopeTypes: viewScopeTypes

@@ -14,9 +14,9 @@ block main
               th Name
               th Description
               th View Template
-              th Configuration Options
+              - //th Configuration Options
               th Date Created
-              th Delete Module
+              th Edit/Delete Module
             tr(data-ng-repeat="module in modules")
               td {{ $index+1 }}
               td {{ module.key }}
@@ -24,9 +24,11 @@ block main
               td {{ module.description }}
               td
                 a(data-ng-href="/file/{{ module.template }}",target="_blank") {{ module.template }}
-              td {{ module.config.join(", ") }}
+              - //td {{ module.config.join(", ") }}
               td {{ functions.formatDateTime(module.updated) }}
               td
+                a(href="javascript:void(0)",data-ng-click="handlers.editModule(module)") Edit
+                span  / 
                 a(href="javascript:void(0)",data-ng-click="handlers.deleteModule(module.key,module.template,$index)") Delete
         h2(class="text-center",data-ng-if="!modules.length")
           alert There are no modules available to review.
@@ -53,10 +55,34 @@ block main
                     span(class="glyphicon glyphicon-info-sign")
                   input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
                 div(class="form-group")
-                  label(popover="A comma-delimited list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
-                    span Module Configuration Options 
-                    span(class="glyphicon glyphicon-info-sign")
-                  input(type="text",class="form-control",id="config",name="config",data-ng-model="newModule.config")
+                  div(class="panel")
+                    div(class="panel-heading")
+                      label(popover="A list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
+                        span Module Configuration Options 
+                        span(class="glyphicon glyphicon-info-sign")
+                    div(class="panel-body")
+                      div(class="separate-vert-small text-center")
+                        button(class="btn btn-default",data-ng-click="functions.updateNewModuleConfigLength('inc')",popover-trigger="mouseenter",popover="Add new event.")
+                          span(class="glyphicon glyphicon-plus")
+                        button(class="btn btn-default margin-left-small",data-ng-click="functions.updateNewModuleConfigLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
+                          span(class="glyphicon glyphicon-minus")
+                      div(class="padding-small text-center",data-ng-show="!newModule.config.length")
+                        alert There are no configuration options required for this module.
+                      ul(class="list-unstyled")
+                        li(class="switch-grey separate-vert-small padding-medium",data-ng-show="newModule.config.length",data-ng-repeat="conf in newModule.config")
+                          div.row
+                            div.col-xs-4
+                              label(for="cn{{ $index }}") Config Option Name
+                              input(type="text",class="form-control",id="cn{{ $index }}",name="cn{{ $index }}",data-ng-model="conf.name")
+                            div.col-xs-4
+                              label(for="ct{{ $index }}") Data Type
+                              select(class="form-control",id="ct{{ $index }}",name="ct{{ $index }}",data-ng-model="conf.type")
+                                option(value="textbox") Text Box
+                                option(value="textarea") Text Area
+                                option(value="select") Select List
+                            div.col-xs-4
+                              label(for="cv{{ $index }}") Value(s)
+                              input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
                 div(class="form-group")
                   label Module Processing Code
                   textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code")

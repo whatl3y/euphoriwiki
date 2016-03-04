@@ -45,23 +45,22 @@
             case "uploadModule":
               var fh = new FileHandler({db:config.mongodb.db});
               
-              info.module = JSON.parse(info.module);
+              info.module = JSON.parse(info.module);              
               var moduleKey = info.module.key;
               var moduleName = info.module.name;
               var moduleDescription = info.module.description;
-              var moduleConfig = (typeof info.module.config==="string") ? info.module.config.split(",") : [];
+              var moduleConfig = Object.removeDollarKeys(info.module.config || {}) || {};
               var moduleCode = info.module.code || "";
               
               var createOrModify = function(newFileName) {
-                var data = {
-                  key: moduleKey,
-                  name: moduleName,
-                  description: moduleDescription,
-                  config: moduleConfig,
-                  code: moduleCode,
-                  updated: new Date()
-                };
-                if (newFileName) data.template = newFileName;
+                var data = {$set: {updated: new Date()}};
+                
+                if (moduleKey) data["$set"].key = moduleKey;
+                if (moduleName) data["$set"].name = moduleName;
+                if (moduleDescription) data["$set"].description = moduleDescription;
+                if (moduleConfig) data["$set"].config = moduleConfig;
+                if (moduleCode) data["$set"].code = moduleCode;
+                if (newFileName) data["$set"].template = newFileName;
                 
                 config.mongodb.db.collection("wiki_modules").findAndModify({ key:moduleKey },[],data,{ upsert:true, new:true },function(e,doc) {
                   if (e) {
