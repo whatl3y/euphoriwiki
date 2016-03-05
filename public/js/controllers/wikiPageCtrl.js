@@ -65,7 +65,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.content.description = ret.description || "";
           $scope.content.person = ret.person || {};
           $scope.content.lastUpdate = ret.lastUpdate || null;
-          $scope.content.versions = ret.versions;
           $scope.content.tags = ret.tags || [];
           $scope.content.draft = ret.draft || false;
           
@@ -73,24 +72,19 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           
           $scope.password = ret.password || "";
           $scope.widgets = ret.widgets || {};
-          $scope.subpages = ret.subpages || [];
           $scope.userfiles = ret.userFiles || [];
           $scope.pagefiles = ret.pageFiles || [];
           $scope.pageLikes = Number(ret.pageLikes || 0);
           $scope.canLike = (ret.canLike == false) ? false : true;
           $scope.pageadmins = ret.pageadmins || [];
-          $scope.aliases = ret.pageAliases || [];
           $scope.viewscopes =  ret.viewscopes || [];
           
           $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
           $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
-          $scope.eventTypes = ret.eventTypes || [];
           $scope.pageEvents = ret.pageEvents || [];
-          $scope.availableModules = ret.modules || [];
-          $scope.pageModules = ret.pageModules || [];
-          $scope.scopeTypes = ret.scopeTypes || [];
         }
         
+        $scope.functions.postInitialize();
         $scope.functions.rteInit(true);
         
         $scope.initcomplete = true;
@@ -99,6 +93,30 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       .error(function(data,err) {
         console.log(data,err);
         angular.element( '#loader' ).remove();
+      });
+    },
+    
+    postInitialize: function() {
+      var loader = new Core.Modals().asyncLoader({message:"We're getting some more stuff, but you can continue working!"});
+      $http.post('/wikipage',{type:"postinit", page:$scope.pathname})
+      .success(function(ret) {
+        if (!ret.success) {
+          console.log("postinit unsuccessful",ret);
+        } else {
+          $scope.content.versions = ret.versions || [];
+          $scope.availableModules = ret.modules || [];
+          $scope.pageModules = ret.pageModules || [];
+          $scope.scopeTypes = ret.scopeTypes || [];
+          $scope.eventTypes = ret.eventTypes || [];
+          $scope.aliases = ret.pageAliases || [];
+          $scope.subpages = ret.subpages || [];
+        }
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log("postinit unsuccessful",data,err);
+        loader.remove();
       });
     },
     
@@ -272,7 +290,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       /*
       $http.post('/wikipage',{type:"edit"})
       .success(function(ret) {
-        if (ret.success) location.reload();
+        if (ret.success) $scope.functions.reloadPage();
         else {
           $scope.saveError = ret.error || "There was an issue saving your data. Please try again.";
           console.log(ret);
@@ -304,7 +322,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         markdown: $scope.content.markdown
       })
       .success(function(ret) {
-        if (ret.success) location.reload();
+        if (ret.success) $scope.functions.initialize();
         else {
           $scope.saveError = ret.error || "There was an issue saving your data. Please try again.";
           console.log(ret);
@@ -323,7 +341,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         var loader = new Core.Modals().asyncLoader({message:"Deleting your page..."});
         $http.post('/wikipage',{type:"delete", page: $scope.pathname})
         .success(function(ret) {
-          if (ret.success) location.reload()
+          if (ret.success) $scope.functions.reloadPage();
           else alert("ERROR: " + ret.error || "There was an issue. Please try again.");
           
           loader.remove();
@@ -450,7 +468,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           password: pw
         })
         .success(function(ret) {
-          if (ret.success) location.reload();
+          if (ret.success) $scope.functions.reloadPage();
           else {
             $scope.passwordError = ret.error || "There was an issue entering your password. Please try again.";
             console.log(ret);

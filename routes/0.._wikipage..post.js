@@ -21,7 +21,7 @@
         function(callback) {
           wiki.getPage(function(e,pageInfo) {
             callback(e,pageInfo);
-          })
+          });
         },
         function(callback) {
           wiki.validatePassword({session:req.session},function(e,validated) {
@@ -31,11 +31,6 @@
         function(callback) {
           wiki.getTemplates(function(e,templates) {
             callback(e,templates);
-          });
-        },
-        function(callback) {
-          wiki.getSubPages(function(e,oPages) {
-            callback(e,oPages);
           });
         },
         function(callback) {
@@ -49,38 +44,8 @@
           });
         },
         function(callback) {
-          wiki.getPage({archive:true, filters:{path:wiki.path}},function(e,pageInfo) {
-            callback(e,pageInfo);
-          });
-        },
-        function(callback) {
-          config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
-            callback(e,types);
-          });
-        },
-        function(callback) {
-          wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {
-            callback(e,aliases);
-          });
-        },
-        function(callback) {
           Access.canViewPage({session:req.session, username:username, path:wiki.path},function(e,canView) {
             callback(e,canView);
-          });
-        },
-        function(callback) {
-          config.mongodb.db.collection("memberscope_types").find({}).sort({type:1}).toArray(function(e,scopetypes) {
-            callback(e,scopetypes);
-          });
-        },
-        function(callback) {
-          wiki.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
-            callback(e,modules);
-          });
-        },
-        function(callback) {
-          wiki.getModuleInstances(null,function(e,instances) {
-            callback(e,instances);
           });
         }
       ],
@@ -90,22 +55,15 @@
             var pageInfo = results[0];
             var validated = results[1];
             var templates = results[2];
-            var oPages = results[3];
-            var canUpdate = results[4] || results[5] || false;
-            var pageArchive = results[6];
-            var eventTypes = results[7];
-            var aliases = results[8];
-            var canViewPage = results[5] || results[9];   //if wiki admin then true, otherwise check view access scope
-            var viewScopeTypes = results[10];
-            var modules = results[11];
-            var moduleInstances = results[12];
+            var canUpdate = results[3] || results[4] || false;
+            var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
             
             if (!validated) res.json({success:false, protected:true});
             else if (!canViewPage) res.json({success:false, outofscope:true});
             else {
               var oRet;
               if (!pageInfo.length) {
-                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:"", versions:pageArchive};
+                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
               } else {
                 oRet = {
                   success: true,
@@ -117,18 +75,12 @@
                   widgets: pageInfo[0].widgets,
                   lastUpdate: pageInfo[0].updated,
                   person: pageInfo[0].updatedBy,
-                  versions: pageArchive,
                   tags: pageInfo[0].tags,
                   pageFiles: pageInfo[0].files,
                   password: pageInfo[0].password,
                   pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
                   viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
-                  pageEvents: pageInfo[0].events,
-                  modules: modules,
-                  pageModules: moduleInstances,
-                  eventTypes: eventTypes.map(function(t) {return t.type}),
-                  pageAliases: aliases.map(function(t) {return t.path}),
-                  scopeTypes: viewScopeTypes
+                  pageEvents: pageInfo[0].events
                 };
               }
               
@@ -152,7 +104,6 @@
               
               //add templates to what is returned and save subpages
               oRet.pageTemplates = templates || [];
-              if (Object.size(oPages)) oRet.subpages = oPages;
               
               if (A.isLoggedIn()) {
                 config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
@@ -172,6 +123,80 @@
         }
       );
       
+      break;
+    
+    case "postinit":
+      async.parallel([
+        function(callback) {
+          wiki.getPage({fields:{_id:0, path:1}},function(e,pageInfo) {
+            callback(e,pageInfo);
+          });
+        },
+        function(callback) {
+          wiki.getPage({archive:true, filters:{path:wiki.path}},function(e,pageInfo) {
+            callback(e,pageInfo);
+          });
+        },
+        function(callback) {
+          wiki.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
+            callback(e,modules);
+          });
+        },
+        function(callback) {
+          wiki.getModuleInstances(null,function(e,instances) {
+            callback(e,instances);
+          });
+        },
+        function(callback) {
+          config.mongodb.db.collection("memberscope_types").find({}).sort({type:1}).toArray(function(e,scopetypes) {
+            callback(e,scopetypes);
+          });
+        },
+        function(callback) {
+          config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
+            callback(e,types);
+          });
+        },
+        function(callback) {
+          wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {
+            callback(e,aliases);
+          });
+        },
+        function(callback) {
+          wiki.getSubPages(function(e,oPages) {
+            callback(e,oPages);
+          });
+        },
+      ],
+        function(err,results) {
+          if (err) res.json({success:false, error:err});
+          else {
+            var pageExists = results[0];
+            var pageArchive = results[1];
+            var modules = results[2];
+            var moduleInstances = results[3];
+            var viewScopeTypes = results[4];
+            var eventTypes = results[5];
+            var aliases = results[6];
+            var oSubPages = results[7];
+            
+            if (!pageExists.length) res.json({success:true});
+            else {
+              res.json({
+                success:true,
+                versions: pageArchive,
+                modules: modules,
+                pageModules: moduleInstances,
+                scopeTypes: viewScopeTypes,
+                eventTypes: eventTypes.map(function(t) {return t.type}),
+                pageAliases: aliases.map(function(t) {return t.path}),
+                subpages: (Object.size(oSubPages)) ? oSubPages : []
+              });
+            }
+          }
+        }
+      );
+    
       break;
       
     case "update":
