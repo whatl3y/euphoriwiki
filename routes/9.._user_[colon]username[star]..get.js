@@ -31,7 +31,7 @@
           lastname: "Unknown"
         },title:path}));
         
-        log.debug(_e || "Tried to go to /user/" + username + " but couldn't find this user.");
+        log.debug(err || "Tried to go to /user/" + username + " but couldn't find this user.");
         
       } else {
         var info = results[0];

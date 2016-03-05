@@ -224,7 +224,7 @@ div(class="wrapper separate-vert-medium")
         div(class="col-xs-12 col-sm-10 col-sm-offset-1")
           form
             div(class="separate-vert-small text-center")
-              button(class="btn btn-primary",data-ng-click="handlers.savePageEvents()") Save Modules
+              button(class="btn btn-primary",data-ng-click="handlers.savePageModules(pageModules)") Save Modules
             div(class="separate-vert-small text-center")
               button(class="btn btn-default",data-ng-click="functions.updateAryLength('pageModules','inc')",popover-trigger="mouseenter",popover="Add new event.")
                 span(class="glyphicon glyphicon-plus")
@@ -242,7 +242,7 @@ div(class="wrapper separate-vert-medium")
                   small
                     small Enter the HTML below on any page that you would like to place this module on, and it will automatically render the module whenever someone loads the page.
                   div(class="text-center")
-                    code &lt;wiki-module id="{{ instance.uid }}"&gt;&lt;/wiki-module&gt;
+                    code &lt;wiki-module id="'{{ instance.uid }}'"&gt;&lt;/wiki-module&gt;
                 div
                   h4 Module Configuration
                   div(data-ng-if="!instance.moduleConfig.length")

@@ -389,6 +389,24 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
+    savePageModules: function(modules) {
+      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      $http.post('/wikipage',{type:"updatePageModules", page:$scope.pathname, modules:modules})
+      .success(function(ret) {
+        if (ret.success) $scope.functions.initialize();
+        else {
+          alert(ret.error || "There was an error save your modules. Please try again.");
+        }
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        alert(err || "There was an error save your modules. Please try again.");
+        loader.remove();
+      });
+    },
+    
     updatePagePassword: function(pw,clear) {
       if (pw) {
         var info = {

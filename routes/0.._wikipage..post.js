@@ -365,6 +365,60 @@
     
       break;
     
+    case "updatePageModules":
+      var modules = info.modules || [];
+      modules = modules.map(function(m) {
+        m.path = wiki.path;        
+        if (!m.uid) m.uid = uuid.v1();
+        
+        return Object.removeDollarKeys(m);
+      }).filter(function(_m) {
+        return !!_m.modulekey;
+      });
+      
+      async.parallel([
+        function(callback) {
+          Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) {
+            log.error(err);
+            res.json({success:false, error:err});
+          } else {
+            var isAdmin = results[0];
+            if (!isAdmin) res.json({success:false, error:"You need to be a page admin to perform this function."});
+            else {
+              
+              async.series([
+                function(callback) {
+                  config.mongodb.db.collection("wiki_modules_instances").remove({ path:wiki.path },function(_e) {
+                    callback(_e);
+                  });
+                },
+                function(callback) {
+                  config.mongodb.db.collection("wiki_modules_instances").insert(modules,function(_e) {
+                    callback(_e);
+                  });
+                }
+              ],
+                function(_err,_results) {
+                  if (_err) {
+                    log.error(_err);
+                    res.json({success:false, error:_err});
+                    
+                  } else res.json({success:true});
+                }
+              );
+            }
+          }
+        }
+      );
+    
+      break;
+    
     case "prettify":
       var h = info.html || "";
       h = h.replace(/^[\s\t]*(\r\n|\n)/g,"");
