@@ -236,7 +236,7 @@ div(class="wrapper separate-vert-medium")
                   div(class="text-xlarge") Module Instance
                 div
                   h3 Module Type
-                  select(class="form-control",data-ng-options="module.key as module.name for module in availableModules",data-ng-model="instance.modulekey")
+                  select(class="form-control",data-ng-options="module.key as module.name for module in availableModules",data-ng-model="instance.modulekey",popover="{{ functions.getModuleDescription(instance.modulekey) }}",popover-trigger="mouseenter")
                 div
                   h3 Module HTML
                   small
@@ -246,7 +246,7 @@ div(class="wrapper separate-vert-medium")
                 div
                   h4 Module Configuration
                   div(data-ng-if="!instance.moduleConfig.length")
-                    alert If you see this notification, save this module by clicking the Save Modules button above, then you will see configuration options available to enter.
+                    alert This module either has no configuration required or, if you just added this module, create and save it by clicking the Save Modules button above, then you will see configuration options available to enter.
                   div(data-ng-if="instance.moduleConfig.length")
                     div(class="row separate-vert-small",data-ng-repeat="c in instance.moduleConfig")
                       div(class="col-xs-6 col-md-4") {{ c.name }}

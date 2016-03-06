@@ -51,6 +51,7 @@
               var moduleDescription = info.module.description;
               var moduleConfig = Object.removeDollarKeys(info.module.config || {}) || {};
               var moduleCode = info.module.code || "";
+              var clientCode = info.module.clientCode || "";
               
               var createOrModify = function(newFileName) {
                 var data = {$set: {updated: new Date()}};
@@ -62,14 +63,38 @@
                 if (moduleCode) data["$set"].code = moduleCode;
                 if (newFileName) data["$set"].template = newFileName;
                 
-                config.mongodb.db.collection("wiki_modules").findAndModify({ key:moduleKey },[],data,{ upsert:true, new:true },function(e,doc) {
-                  if (e) {
-                    res.json({success:false, error:e});
-                    log.error(err);
-                  } else {
-                    res.json({success:true, module:doc});
+                data["$set"].clientCode = clientCode;
+                
+                async.series([
+                  function(callback) {
+                    config.mongodb.db.collection("wiki_modules").find({ key:moduleKey },{ template:1 }).toArray(function(e,page) {
+                      callback(e,page);
+                    });
+                  },
+                  function(callback) {
+                    config.mongodb.db.collection("wiki_modules").findAndModify({ key:moduleKey },[],data,{ upsert:true, new:true },function(e,doc) {
+                      callback(e,doc);
+                    });
                   }
-                });
+                ],
+                  function(err,results) {
+                    if (err) {
+                      res.json({success:false, error:err});
+                      log.error(err);
+                    } else {
+                      var oldModule = results[0];
+                      var updatedModule = results[1];
+                      
+                      res.json({success:true, module:updatedModule});
+                      
+                      if (oldModule.length && newFileName) {
+                        fh.deleteFile({filename:oldModule[0].template},function(e) {
+                          if (e) log.error(e);
+                        });
+                      }
+                    }
+                  }
+                );
               };
               
               if (info.file) {
@@ -81,9 +106,7 @@
                     createOrModify(newFileName);
                   }
                 });
-              } else {
-                createOrModify();
-              }
+              } else createOrModify();
             
               break;
             

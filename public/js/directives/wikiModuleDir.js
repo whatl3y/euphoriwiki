@@ -12,14 +12,23 @@ function wikiModuleDir($compile,$http) {
       var hide = $scope.hide || false;
       
       if (moduleId) {
-        var loader = new Core.Modals().asyncLoader({message:"Loading your module..."});
-        $http.post('/wikimodule',{type:"getModule", id:moduleId})
+        var loader = new Core.Modals().asyncLoader({message:"Loading module..."});
+        $http.post('/wikimodule',{type:"getModule", id:moduleId, path:decodeURI(location.pathname)})
         .success(function(ret) {
           if (ret.success) {
             $scope.results = ret.results || null;
             
             $element.html(ret.template || "");
             $compile($element.contents())($scope);
+            
+            if (typeof ret.clientCode === "string" && ret.clientCode) {
+              try {
+                var DATA = $scope.results;
+                eval(ret.clientCode);
+              } catch(err) {
+                console.log("Error evaling client code",err);
+              }
+            }
           } else {
             $element.replaceWith( "" );
             console.log(ret);

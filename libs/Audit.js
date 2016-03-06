@@ -22,7 +22,8 @@ Audit=function(options) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      log (PUBLIC)
 |DESCRIPTION:  Logs an Audit entry in the DB.
-|PARAMETERS:  1. cb(OPT): Optional callback to run after the audit log is filed.
+|PARAMETERS:  1. options(OPT):
+|             2. cb(OPT): Optional callback to run after the audit log is filed.
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -40,9 +41,24 @@ Audit.prototype.log=function(options,cb) {
     additional: options.additional || null
   };
   
-  config.mongodb.db.collection("audit").insert([doc],function(err,result) {
+  config.mongodb.db.collection("audit").insert([doc],function(err) {
     if (typeof cb==="function") cb(err);
   });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      find (PUBLIC)
+|DESCRIPTION:  Finds audit entries.
+|PARAMETERS:  1. filters(OPT): optional set of filters we want to filter the returned items to
+|             2. cb(OPT): Optional callback to run after the audit log is filed.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Audit.prototype.find=function(filters,cb) {
+  filters = filters || {};
+  
+  config.mongodb.db.collection("audit").find(filters).toArray(cb);
 }
 
 //-------------------------------------------------------

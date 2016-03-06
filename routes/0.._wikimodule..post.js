@@ -11,6 +11,7 @@
   switch(info.type) {
     case "getModule":
       var uid = info.id;
+      var path = info.path;
       var fh = new FileHandler({db:config.mongodb.db});
       var gH = new GetHTML();
       
@@ -34,7 +35,10 @@
                     async.parallel([
                       function(callback) {
                         try {
-                          new CodeRunner({code:module.code, params:Object.merge(instance.config || {},{callback:callback})}).eval();
+                          var params = Object.merge(instance.config || {},{callback:callback});
+                          params = Object.merge(params,{path:path});
+                          
+                          new CodeRunner({code:module.code, params:params}).eval();
                           
                           //if the code in module.code does not call callback after 30 seconds, do it here.
                           setTimeout(function() {
@@ -64,7 +68,8 @@
                                   res.json({
                                     success: true,
                                     results: result,
-                                    template: viewHtml
+                                    template: viewHtml,
+                                    clientCode: module.clientCode || ""
                                   });
                                 });
                               }

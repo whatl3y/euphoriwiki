@@ -167,6 +167,13 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       }
     },
     
+    getModuleDescription: function(moduleKey) {
+      moduleKey = moduleKey || null;
+      if (moduleKey) return $scope.availableModules.filter(function(m){return m.key == moduleKey})[0].description || "";
+      
+      return "";
+    },
+    
     findAdObj: function(search,type,cb) {
       search = search || "";
       type = type || "user";

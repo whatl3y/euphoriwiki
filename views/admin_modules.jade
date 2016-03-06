@@ -75,7 +75,7 @@ block main
                               label(for="cn{{ $index }}") Config Option Name
                               input(type="text",class="form-control",id="cn{{ $index }}",name="cn{{ $index }}",data-ng-model="conf.name")
                             div.col-xs-4
-                              label(for="ct{{ $index }}") Data Type
+                              label(for="ct{{ $index }}") Control Type
                               select(class="form-control",id="ct{{ $index }}",name="ct{{ $index }}",data-ng-model="conf.type")
                                 option(value="textbox") Text Box
                                 option(value="textarea") Text Area
@@ -84,7 +84,10 @@ block main
                               label(for="cv{{ $index }}") Value(s)
                               input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
                 div(class="form-group")
-                  label Module Processing Code
-                  textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code")
+                  label Data Generation Code (Server)
+                  textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code",placeholder="//the config options are exposed in this code in the PARAMS object (i.e. var {{ newModule.config[0].name || 'option1' }} = PARAMS.{{ newModule.config[0].name || 'option1' }})")
+                div(class="form-group")
+                  label (OPTIONAL) Post Processing Code (Client)
+                  textarea(class="form-control",id="clientCode",name="clientCode",data-ng-model="newModule.clientCode",placeholder="//the results from the Data Generation Code are exposed in this code using the DATA object (i.e. var result1 = DATA.myFirstPieceOfData)")
                 div(class="form-group text-center")
                   button(class="btn btn-primary",data-ng-click="handlers.createModule('templateFile')") Create Module

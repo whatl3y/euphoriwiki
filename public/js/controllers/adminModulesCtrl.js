@@ -92,8 +92,13 @@ function adminModulesCtrl($scope,$http,Upload) {
         }
       })
       .success(function(data) {
-        if (data.success) $scope.modules.push(data.module)
-        else {
+        if (data.success) {
+          $scope.modules = $scope.modules.filter(function(m) {
+            return m.key != $scope.newModule.key;
+          });
+          $scope.modules.push(data.module);
+          
+        } else {
           console.log(data);
           $scope.error = data.error || "There was a problem creating your module. Please try again.";
         }
