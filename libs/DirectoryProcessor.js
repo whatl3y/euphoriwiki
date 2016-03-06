@@ -183,6 +183,7 @@ DirectoryProcessor.prototype.fileToHash=function(filePath,cb) {
 |RETURNS:    <true/false>: whether a path is a directory AND it exists
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor.prototype.fileOrDirExists=function(dir,type) {
+  dir = dir || this.dirpath;
   type = type || "directory";
   
   try {

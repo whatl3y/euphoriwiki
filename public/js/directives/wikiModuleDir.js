@@ -1,4 +1,4 @@
-function wikiModuleDir($compile,$http) {
+function wikiModuleDir($compile,$http,$sce) {
   return {
     restrict: "E",
     replace: true,
@@ -10,6 +10,12 @@ function wikiModuleDir($compile,$http) {
     link: function($scope, $element, $attrs) {
       var moduleId = $scope.id;
       var hide = $scope.hide || false;
+      
+      $scope.functions = {
+        sanitizeHtml: function(html) {
+          return $sce.trustAsHtml(html);
+        }
+      };
       
       if (moduleId) {
         var loader = new Core.Modals().asyncLoader({message:"Loading module..."});
