@@ -22,7 +22,7 @@
             return {
               collection: widget.collection,
               key: widget.name,
-              filters: widget.filter || {},
+              filters: Object.merge(widget.filter || {},{aliasfor:{$exists:false}}),
               sort: sortObject,
               limit: widget.limit || null,
               fields: widget.fields || {}

@@ -35,17 +35,21 @@
                     async.parallel([
                       function(callback) {
                         try {
-                          var params = Object.merge(instance.config || {},{callback:callback});
-                          params = Object.merge(params,{path:path});
-                          
-                          new CodeRunner({code:module.code, params:params}).eval();
-                          
                           //if the code in module.code does not call callback after 30 seconds, do it here.
                           setTimeout(function() {
                             try {
                               callback(null,"No results were returned from the code.");
                             } catch(e) {}
                           },30000);
+                          
+                          //execute module code
+                          var params = Object.merge(instance.config || {},{callback:callback});
+                          params = Object.merge(params,{path:path});
+                          var codeResult = new CodeRunner({code:module.code, params:params}).eval();
+                          
+                          //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
+                          //go ahead and assume we need to call the callback with that result here.
+                          if (codeResult) callback(null,codeResult);
                           
                         } catch(e) {
                           callback(e);

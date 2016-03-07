@@ -85,7 +85,8 @@ Object.unserialize = function(string) {
 Object.merge = function(obj1,obj2,obj3) {
   var obj3=obj3 || {};
   var isObject = function(obj,attr) {
-    return typeof obj[attrname]==="object" && obj[attrname]!=null && !(obj[attrname] instanceof Array) && !(obj[attrname] instanceof Date);
+    var toClass = {}.toString;
+    return typeof obj[attrname]==="object" && toClass.call(obj[attrname]) == "[object Object]";
   }
   
   if (typeof obj1!=='object') {
