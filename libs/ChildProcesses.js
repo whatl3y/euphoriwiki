@@ -34,20 +34,30 @@ ChildProcesses = function(options) {
 -----------------------------------------------------------------------------------------*/
 ChildProcesses.prototype.run = function(cb) {
   var self = this;
-  this.child = fork(this.command,this.args);
   
-  this.child.on("message",function(info) {
-    if (typeof info==="object" && info.error) {
+  try {
+    this.child = fork(this.command,this.args);
+    
+    this.child.on("message",function(info) {
+      if (typeof info==="object" && info.error) {
+        self.child.kill();
+        cb(info.error);
+      } else {
+        self.data = (typeof info==="string") ? self.data + info : info;
+      }
+    });
+    
+    this.child.on("error",function(err) {
       self.child.kill();
-      cb(info.error);
-    } else {
-      self.data = (typeof info==="string") ? self.data + info : info;
-    }
-  });
-  
-  this.child.on("disconnect",function() {
-    cb(null,self.data);
-  });
+      cb(err);
+    });
+    
+    this.child.on("disconnect",function() {
+      cb(null,self.data);
+    });
+  } catch(err) {
+    cb(err);
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
