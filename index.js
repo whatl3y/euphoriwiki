@@ -23,6 +23,7 @@ var Auth = require("./libs/Authentication");
 var GetHTML = require("./libs/GetHTML");
 var Audit = require("./libs/Audit.js");
 var AccessManagement = require("./libs/AccessManagement");
+var ChildProcesses = require("./libs/ChildProcesses.js");
 var RouteHandler = require("./libs/RouteHandler.js");
 var WikiHandler = require("./libs/WikiHandler.js");
 var FileHandler = require("./libs/FileHandler.js");

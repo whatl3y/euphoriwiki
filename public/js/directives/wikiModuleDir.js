@@ -12,40 +12,58 @@ function wikiModuleDir($compile,$http,$sce) {
       var hide = $scope.hide || false;
       
       $scope.functions = {
+        loadComplete: function(oInfo,returnInfo) {
+          window.WikiModules = window.WikiModules || {};
+          window.WikiModules[moduleId] = window.WikiModules[moduleId] || ((oInfo) ? oInfo : false);
+          
+          return (returnInfo) ? window.WikiModules[moduleId] : !!window.WikiModules[moduleId];
+        },
+        
+        bindInfo: function(ret) {
+          $scope.results = ret.results;
+          $element.html(ret.template || "");
+          $compile($element.contents())($scope);
+          
+          if (typeof ret.clientCode === "string" && ret.clientCode) {
+            try {
+              var DATA = $scope.results;
+              eval(ret.clientCode);
+            } catch(err) {
+              console.log("Error evaling client code",err);
+            }
+          }
+        },
+        
         sanitizeHtml: function(html) {
           return $sce.trustAsHtml(html);
         }
       };
       
       if (moduleId) {
-        var loader = new Core.Modals().asyncLoader({message:"Loading module..."});
-        $http.post('/wikimodule',{type:"getModule", id:moduleId, path:decodeURI(location.pathname)})
-        .success(function(ret) {
-          if (ret.success) {
-            $scope.results = ret.results || null;
-            
-            $element.html(ret.template || "");
-            $compile($element.contents())($scope);
-            
-            if (typeof ret.clientCode === "string" && ret.clientCode) {
-              try {
-                var DATA = $scope.results;
-                eval(ret.clientCode);
-              } catch(err) {
-                console.log("Error evaling client code",err);
-              }
+        if (!$scope.functions.loadComplete()) {
+          var loader = new Core.Modals().asyncLoader({message:"Loading module..."});
+          $http.post('/wikimodule',{type:"getModule", id:moduleId, path:decodeURI(location.pathname)})
+          .success(function(ret) {
+            if (ret.success) {
+              $scope.functions.bindInfo(ret);
+            } else {
+              $element.replaceWith( "" );
+              console.log(ret);
             }
-          } else {
-            $element.replaceWith( "" );
-            console.log(ret);
-          }
-          
-          loader.remove();
-        })
-        .error(function(data,err) {
-          console.log(data,err);
-          loader.remove();
-        });
+            
+            $scope.functions.loadComplete(ret);
+            loader.remove();
+          })
+          .error(function(data,err) {
+            console.log(data,err);
+            $scope.functions.loadComplete({template:"<h2>Module not loaded, please provide a valid module ID.</h2>"});
+            loader.remove();
+          });
+        } else {
+          var ret = $scope.functions.loadComplete(null,true);
+          $scope.functions.bindInfo(ret);
+        }
+        
       } else {
         if (hide) {
           $element.remove();

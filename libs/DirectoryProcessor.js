@@ -49,8 +49,10 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
   var ret = [];
   
   var process = function(data,foo) {
-    if (individual) cbIndividual(data);
-    else ret = ret[foo](data);
+    try {
+      if (individual) cbIndividual(data);
+      else ret = ret[foo](data);
+    } catch(err) {}
   }
   
   fs.readdir(dirpath,function(err,files) {

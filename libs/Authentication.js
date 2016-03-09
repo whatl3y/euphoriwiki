@@ -175,8 +175,8 @@ Authentication.prototype.login = function(upn,cb) {
           self.session[p] = userInfo[p];
         });
         
-        self.session.username = self.session.sAMAccountName.toLowerCase();
-        self.session.email = self.session.mail.toLowerCase();
+        self.session.username = (self.session.sAMAccountName || "").toLowerCase();
+        self.session.email = (self.session.mail || "").toLowerCase();
         self.session.loggedIn = true;
         self.session.save();
         cb(null);

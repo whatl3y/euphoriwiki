@@ -618,14 +618,14 @@
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
-          mammoth.convertToHtml({path:filePath}).then(function(result) {
-            var returnedResult = result.value.replace(/\<table\>/g,"<table class='table table-bordered table-striped'>");
-            res.json({wordsuccess:true, html:html.prettyPrint(returnedResult,{indent_size:2}), debug: result});
-            
-            audit.log({type:"Word To HTML Conversion", additional:{filePath:filePath}});
-          }).catch(function(err) {
-            log.error(err);
-            res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});
+          new ChildProcesses({command:"processes/wordtohtml", args:filePath}).run(function(err,result) {
+            if (err) {
+              log.error(err);
+              res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});
+            } else {
+              res.json({wordsuccess:true, html:result});
+              audit.log({type:"Word To HTML Conversion", additional:{filePath:filePath}});
+            }
           });
         } else {
           res.json({wordsuccess:false, error:"Uh oh, this doesn't appear to be a valid Microsoft Word document that we can parse and convert. Please try again."});
