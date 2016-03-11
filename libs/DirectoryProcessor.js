@@ -51,7 +51,10 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
   var process = function(data,foo) {
     try {
       if (individual) cbIndividual(data);
-      else ret = ret[foo](data);
+      else {
+        if (foo == "push") ret[foo](data);
+        else ret = ret[foo](data);
+      }
     } catch(err) {}
   }
   
@@ -84,7 +87,6 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
                 birthtime: stats.birthtime
               }
             };
-            
             self.processFile(fp,function(e,r) {
               if (e) callback(e);
               else {
@@ -97,7 +99,7 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
           }
         });
       },function(e) {
-        cb(e,(ret.length) ? ret : true);
+        cb(e,(ret.length) ? ret : []);
       });
     }
   });

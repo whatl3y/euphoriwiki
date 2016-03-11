@@ -44,39 +44,36 @@
       if (!A.isLoggedIn()) res.json({success:false, error:"You need to be logged in to process a directory."});
       else {
         var directory = info.directory;
+        var fullDirectory = (path.isAbsolute(directory)) ? directory : path.join(__dirname,directory);
         
-        if (D.fileOrDirExists(directory)) {
-          D.processDir({dirpath:directory, recurse:true},function(err,obj) {
-            if (err) res.json({success:false, error:err});
-            else {
-              var now = Date.now();
-              
-              config.mongodb.db.collection("processed_directory").insert({
-                directory: directory,
-                fulldirectory: (path.isAbsolute(directory)) ? directory : path.join(__dirname,directory),
-                date: new Date(),
-                hostname: os.hostname(),
-                processed: obj
-              },function(e,result) {
+        new ChildProcesses({command:"processes/processdir", args:[fullDirectory]}).run(function(err,obj) {
+          if (err) res.json({success:false, error:e});
+          else {
+            var now = Date.now();
+            
+            config.mongodb.db.collection("processed_directory").insert({
+              directory: directory,
+              fulldirectory: fullDirectory,
+              date: new Date(),
+              hostname: os.hostname(),
+              processed: obj
+            },function(e,result) {
+              if (e) res.json({success:false, error:e});
+              else {
+                res.json({success:true, message:"Successfully processed your directory at: " + directory});
+              }
+            });
+            /*var jsonFileName = now + ".json";
+            var jsonFilePath = path.join(__dirname,"files","diff",jsonFileName);
+            
+            fs.writeFile(jsonFilePath,JSON.stringify(obj),
+              function(e) {
                 if (e) res.json({success:false, error:e});
-                else {
-                  res.json({success:true, message:"Successfully processed your directory at: " + directory});
-                }
-              });
-              /*var jsonFileName = now + ".json";
-              var jsonFilePath = path.join(__dirname,"files","diff",jsonFileName);
-              
-              fs.writeFile(jsonFilePath,JSON.stringify(obj),
-                function(e) {
-                  if (e) res.json({success:false, error:e});
-                  else res.json({success:true, message:"Your directory was successfully processed. The processed JSON file can be located at: " + jsonFileName});
-                }
-              );*/
-            }
-          });
-        } else {
-          res.json({success:false, error:"We could not find the directory you entered."});
-        }
+                else res.json({success:true, message:"Your directory was successfully processed. The processed JSON file can be located at: " + jsonFileName});
+              }
+            );*/
+          }
+        });
       }
       
       break;

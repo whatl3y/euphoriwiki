@@ -3,7 +3,7 @@ var mssql = require("mssql");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:      SQLHandler.js
-|PURPOSE:    Handles serving pages to particular routes stored in the DB.
+|PURPOSE:    Allows a wrapper for running SQL queries for different databases.
 |AUTHOR:    Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:    mysql, mssql

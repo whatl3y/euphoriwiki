@@ -1,4 +1,3 @@
-var crypto = require("crypto");
 var MDB = require('./MDB.js');
 var Object = require("../public/js/Object_prototypes.js");
 
@@ -181,24 +180,8 @@ var self = module.exports = {
   },
   
   cryptography: {
-    CONFIG: {
-      algorithm: "aes-256-ctr",
-      password: process.env.CRYPT_SECRET
-    },
-    
-    encrypt: function(text) {
-      var cipher = crypto.createCipher(this.CONFIG.algorithm,this.CONFIG.password)
-      var crypted = cipher.update(text,'utf8','hex')
-      crypted += cipher.final('hex');
-      return crypted;
-    },
-    
-    decrypt: function(text) {
-      var decipher = crypto.createDecipher(this.CONFIG.algorithm,this.CONFIG.password)
-      var dec = decipher.update(text,'hex','utf8')
-      dec += decipher.final('utf8');
-      return dec;
-    }
+    algorithm: "aes-256-ctr",
+    password: process.env.CRYPT_SECRET
   },
   
   logger: {

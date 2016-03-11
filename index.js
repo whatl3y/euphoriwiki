@@ -18,6 +18,7 @@ var async = require("async");
 var jade = require("jade");
 var html = require("html");
 var mammoth = require("mammoth");
+var Encryption = require("Encryption");
 var IOHandler = require("./libs/IOHandler.js");
 var Auth = require("./libs/Authentication");
 var GetHTML = require("./libs/GetHTML");
