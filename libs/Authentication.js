@@ -1,6 +1,7 @@
-var _ = require("underscore");
-var ActiveDirectory = require("activedirectory");
-var config = require('./config.js');
+var async = require("async");
+var Encryption = require("./Encryption.js");
+var LDAPHandler = require("./LDAPHandler.js");
+var config = require("./config.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Authentication.js
@@ -17,16 +18,100 @@ Authentication = function(options) {
   this.session = options.session;        //the session object we will be able to save for future requests
   this.username = this.username();
   
-  this.config = {
-    url: (config.ldap.url) ? (config.ldap.protocol || "ldap")+"://"+config.ldap.url : null,
-    baseDN: config.ldap.basedn,
-    username: config.ldap.username,
-    password: config.ldap.password
-  };
+  this.accountsTable = "accounts";
   
-  this.ad = (this.config.url) ? new ActiveDirectory(this.config) : null;
+  this.encryption = new Encryption();
+  this.ldap = new LDAPHandler();
   this.GLOBAL_ADMIN = process.env.GLOBAL_USERNAME;
   this.GLOBAL_PASSWORD = process.env.GLOBAL_PASSWORD;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      passportVerifyCallback (PUBLIC)
+|DESCRIPTION:  Tries to authenticate a user based on a username/password combination.
+|PARAMETERS:  1. type(REQ): The strategy type we're authenticating with
+|        2. cb(REQ): callback function to return back whether the user successfully authenticated.
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <function>: the function to bind to a passport strategy
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.passportVerifyCallback = function(type) {
+  var self = this;
+  
+  switch (type) {
+    case "local":
+      return function(username,password,done) {
+        A.findOrSaveUser({upsert:false, username:username},function(e,userRecord) {
+          if (e) return done(e);
+          else if (!userRecord) return done(null, false);
+          else {
+            if (userRecord.password) {
+              return done(null,self.validatePassword(password,userRecord.password));
+            } else {
+              self.auth({type:userRecord.type, username:username, password:password},function(err,authenticated) {
+                if (err) return done(err);
+                else return done(null,authenticated);
+              });
+            }            
+          }
+        });
+      }
+      
+    case "facebook":
+      return function(){}
+    }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      findOrSaveUser (PUBLIC)
+|DESCRIPTION:  Finds and/or saves a username to the DB.
+|PARAMETERS:  1. data(REQ): The data we're saving to the record
+|            2. cb(REQ): callback function with information
+|                 cb(<err>,<object/false>)
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.findOrSaveUser = function(data,cb) {
+  var data = data || {};
+  var username = (data.$set) ? data.$set.username : data.username;
+  var upsert = data.upsert || false;
+  var update = data.update || false;
+  
+  delete(data.upsert);
+  delete(data.update);
+  
+  async.series([
+    function(callback) {
+      config.mongodb.db.collection("accounts").find({username:username}).toArray(function(e,record) {
+          if (e) callback(e);
+          else callback(null,(record instanceof Array) ? record[0]: record);
+        }
+      );
+    },
+    function(callback) {
+      if (update || upsert) {
+        config.mongodb.db.collection("accounts").update({username:username},data,{ upsert:upsert },
+          function(e,doc) {
+            if (e) callback(e);
+            else callback(null,(doc instanceof Array) ? doc[0]: doc);
+          }
+        );
+      } else callback(null,false);
+    }
+  ],
+    function(err,results) {
+      if (err) cb(err);
+      else {
+        var origRecord = results[0];
+        var updatedOrNewRecord = results[1];
+        
+        if (origRecord && upsert) cb(null,updatedOrNewRecord);
+        else if (origRecord) cb(null,origRecord);
+        else cb(null,(origRecord instanceof Array) ? origRecord : false);
+      }
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -43,21 +128,37 @@ Authentication = function(options) {
 Authentication.prototype.auth = function(options,cb) {
   options = options || {};
   
-  if (!(options.username && options.password)) {
-    cb("Either a username or password was not provided.");
+  if (options.username == this.GLOBAL_ADMIN) {
+    cb(null,((options.password == this.GLOBAL_PASSWORD) ? true : false));
   } else {
-    if (options.username == this.GLOBAL_ADMIN) {
-      cb(null,((options.password == this.GLOBAL_PASSWORD) ? true : false));
-    } else {
-      try {
-        this.ad.authenticate(options.username,options.password,function(err,auth) {
-          cb(err,auth);
-        });
-      } catch(err) {
-        cb(err);
-      }      
+    switch (options.type) {
+      case "activedirectory":
+        options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+        this.ldap.auth(options,cb);
+        break;
+        
+      case "basic":
+      
+        break;
+        
+      default:
+        options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+        this.ldap.auth(options,cb);
     }
   }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      validatePassword (PUBLIC)
+|DESCRIPTION:  
+|PARAMETERS:  1. enteredPassword(REQ): 
+|            2. encryptedPassword(REQ): 
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <boolean>: determines if password is valid
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.validatePassword = function(enteredPassword,encryptedPassword) {
+  return enteredPassword == this.encryption.decrypt(encryptedPassword);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -73,23 +174,7 @@ Authentication.prototype.auth = function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.find = function(options,cb) {
-  options = options || {};
-  
-  var query = options.query || "";
-  var attribute = options.attribute || "sAMAccountName";
-  var value = options.value || "";
-  
-  if (!query && !value) {
-    cb("No value was provided for the " + attribute + " attribute. Please provide a value.");
-  } else {
-    try {
-      if (query) this.ad.find({timeout:10000, filter:query},cb);
-      else this.ad.find({timeout:10000, filter:attribute + "=" + value},cb);
-      
-    } catch(err) {
-      cb(err);
-    }
-  }
+  this.ldap.find(options,cb);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -102,19 +187,7 @@ Authentication.prototype.find = function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
-  options = options || {};
-  
-  var username = (typeof options==="string") ? options : (options.username || "");
-  
-  if (!(username)) {
-    cb("Please provide a username.");
-  } else {
-    try {
-      this.ad.getGroupMembershipForUser(username,cb);
-    } catch(err) {
-      cb(err);
-    }
-  }
+  this.ldap.getGroupMembershipForUser(options,cb);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -128,20 +201,7 @@ Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.isUserMemberOf = function(options,cb) {
-  options = options || {};
-  
-  var username = options.username;
-  var group = options.groupName || options.group;
-  
-  if (!(username && group)) {
-    cb("Please provide both a username and group name.");
-  } else {
-    try {
-      this.ad.isUserMemberOf(username,group,cb);
-    } catch(err) {
-      cb(err);
-    }
-  }
+  this.ldap.isUserMemberOf(options,cb);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -154,6 +214,8 @@ Authentication.prototype.isUserMemberOf = function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.login = function(upn,cb) {
+  upn = upn + ((upn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+  
   var self = this;
   
   if (upn == this.GLOBAL_ADMIN) {
@@ -171,9 +233,10 @@ Authentication.prototype.login = function(upn,cb) {
         //assuming the first user is the one we want
         var userInfo = info.users[0];
         
-        _.each(Object.keys(userInfo),function(p) {
-          self.session[p] = userInfo[p];
-        });
+        var userKeys = Object.keys(userInfo);
+        for (var _k = 0; _k < userKeys.length; _k++) {
+          self.session[userKeys[_k]] = userInfo[userKeys[_k]];
+        }
         
         self.session.username = (self.session.sAMAccountName || "").toLowerCase();
         self.session.email = (self.session.mail || "").toLowerCase();
@@ -194,7 +257,7 @@ Authentication.prototype.login = function(upn,cb) {
 |RETURNS:    <string or false>: string if logged in with username, else false
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.username = function() {
-  return (this.isLoggedIn()) ? (this.session.username || this.session.sAMAccountName.toLowerCase()) : false;
+  return (this.isLoggedIn()) ? this.session.username : false;
 }
 
 /*-----------------------------------------------------------------------------------------

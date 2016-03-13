@@ -3,7 +3,7 @@
   var Access = new AccessManagement({db: config.mongodb.db});
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
-  var username = req.params.username.toLowerCase();
+  var username = (req.params.username || "").toLowerCase();
   var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/user/"+username+req.params[0];
   
   async.parallel([
@@ -43,7 +43,7 @@
             var o;
             var userInfo = info.users[0];
             
-            if (A.isLoggedIn() && A.username == userInfo.sAMAccountName.toLowerCase()) {
+            if (A.isLoggedIn() && A.username == username) {
               o = {
                 pageHeader: "Your page!",
                 loggedInUsersPage: true,
