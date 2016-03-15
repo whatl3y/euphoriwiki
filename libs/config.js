@@ -1,3 +1,4 @@
+var path = require("path");
 var MDB = require('./MDB.js');
 var Object = require("../public/js/Object_prototypes.js");
 
@@ -193,7 +194,7 @@ var self = module.exports = {
         streams: [
           {
             level: process.env.LOGGING_LEVEL || "info",
-            path: __dirname + "\\..\\logs\\wiki.log"
+            path: path.join(__dirname,"..","logs","wiki.log")
           }
         ]
       }

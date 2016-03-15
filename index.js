@@ -12,6 +12,8 @@ var mongoStore = require("connect-mongo")(session);
 var path = require("path");
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
+var passport = require("passport");
+var LocalStrategy = require("passport-local").Strategy;
 var uuid = require('node-uuid');
 var _ = require("underscore");
 var async = require("async");
@@ -20,10 +22,10 @@ var html = require("html");
 var mammoth = require("mammoth");
 var Encryption = require("./libs/Encryption.js");
 var IOHandler = require("./libs/IOHandler.js");
-var Auth = require("./libs/Authentication");
-var GetHTML = require("./libs/GetHTML");
+var Auth = require("./libs/Authentication.js");
+var GetHTML = require("./libs/GetHTML.js");
 var Audit = require("./libs/Audit.js");
-var AccessManagement = require("./libs/AccessManagement");
+var AccessManagement = require("./libs/AccessManagement.js");
 var ChildProcesses = require("./libs/ChildProcesses.js");
 var RouteHandler = require("./libs/RouteHandler.js");
 var WikiHandler = require("./libs/WikiHandler.js");
@@ -92,6 +94,8 @@ function main(notClustering) {
     });
     
     app.use(sessionMiddleware);
+    app.use(passport.initialize());
+    app.use(passport.session());
     
     io.use(function(socket, next) {
       sessionMiddleware(socket.request,socket.request.res,next);
@@ -99,6 +103,11 @@ function main(notClustering) {
     
     //static files
     app.use("/public",express.static(path.join(__dirname,"/public")));
+    
+    //passport setup
+    passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
+    passport.serializeUser(function(user, done) {done(null, user);});
+    passport.deserializeUser(function(user, done) {done(null, user);});
     
     //go get all the routes available for express to serve and bind
     //them to listeners, then get all the links we'll need for the header

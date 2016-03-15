@@ -41,16 +41,23 @@ Authentication.prototype.passportVerifyCallback = function(type) {
   switch (type) {
     case "local":
       return function(username,password,done) {
-        A.findOrSaveUser({upsert:false, username:username},function(e,userRecord) {
+        self.findOrSaveUser({upsert:false, username:username},function(e,userRecord) {
           if (e) return done(e);
-          else if (!userRecord) return done(null, false);
-          else {
+          else if (!userRecord) {
+            self.auth({type:"activedirectory", username:username, password:password},function(err,authenticated) {
+              if (err) return done(err);
+              else if (authenticated) return done(null,username);
+              else return done(null,false);
+            });
+          } else {
             if (userRecord.password) {
-              return done(null,self.validatePassword(password,userRecord.password));
+              if (self.validatePassword(password,userRecord.password)) return done(null,username);
+              else return done(null,false);
             } else {
               self.auth({type:userRecord.type, username:username, password:password},function(err,authenticated) {
                 if (err) return done(err);
-                else return done(null,authenticated);
+                else if (authenticated) return done(null,username);
+                else return done(null,false);
               });
             }            
           }
@@ -58,8 +65,14 @@ Authentication.prototype.passportVerifyCallback = function(type) {
       }
       
     case "facebook":
-      return function(){}
-    }
+      return function(accessToken, refreshToken, profile, done){
+        console.log(accessToken, refreshToken, profile);
+        done(null,false);
+      }
+    
+    default:
+      return this.passportVerifyCallback("local");
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -137,9 +150,10 @@ Authentication.prototype.auth = function(options,cb) {
         this.ldap.auth(options,cb);
         break;
         
-      case "basic":
-      
-        break;
+      /*case "basic":
+        this.passportVerifyCallback("local")(options.username,options.password,cb);
+        
+        break;*/
         
       default:
         options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
@@ -207,18 +221,33 @@ Authentication.prototype.isUserMemberOf = function(options,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      login (PUBLIC)
 |DESCRIPTION:  Gets necessary information about a user and logs them in by saving to the session.
-|PARAMETERS:  1. upn(REQ): userPrincipalName we're going to find, then store information in the session
+|PARAMETERS:  1. objOrUpn(REQ): userPrincipalName we're going to find, then store information in the session
 |             2. cb(REQ): 
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.login = function(upn,cb) {
-  upn = upn + ((upn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+Authentication.prototype.login = function(objOrUpn,cb) {
+  objOrUpn = (typeof objOrUpn==="object") ? objOrUpn : objOrUpn + ((objOrUpn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
   
   var self = this;
   
-  if (upn == this.GLOBAL_ADMIN) {
+  //does the actual saving to the session
+  //and calls the callback function
+  var saveInfo = function(userInfo) {
+    var userKeys = Object.keys(userInfo);
+    for (var _k = 0; _k < userKeys.length; _k++) {
+      self.session[userKeys[_k]] = userInfo[userKeys[_k]];
+    }
+    
+    self.session.username = (self.session.username || self.session.sAMAccountName || "").toLowerCase();
+    self.session.email = (self.session.email || self.session.mail || "").toLowerCase();
+    self.session.loggedIn = true;
+    self.session.save();
+    cb(null);
+  }
+  
+  if (objOrUpn == this.GLOBAL_ADMIN) {
     self.session.ADMIN = true;
     self.session.username = this.GLOBAL_ADMIN;
     self.session.sAMAccountName = this.GLOBAL_ADMIN;
@@ -226,23 +255,14 @@ Authentication.prototype.login = function(upn,cb) {
     self.session.loggedIn = true;
     self.session.save();
     cb(null);
+  } else if (typeof objOrUpn === "object") {
+    saveInfo(objOrUpn);
   } else {
-    this.find({attribute:"userPrincipalName", value:upn},function(err,info) {
+    this.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
       if (err) cb(err);
       else {
         //assuming the first user is the one we want
-        var userInfo = info.users[0];
-        
-        var userKeys = Object.keys(userInfo);
-        for (var _k = 0; _k < userKeys.length; _k++) {
-          self.session[userKeys[_k]] = userInfo[userKeys[_k]];
-        }
-        
-        self.session.username = (self.session.sAMAccountName || "").toLowerCase();
-        self.session.email = (self.session.mail || "").toLowerCase();
-        self.session.loggedIn = true;
-        self.session.save();
-        cb(null);
+        saveInfo(info.users[0]);
       }
     });
   }

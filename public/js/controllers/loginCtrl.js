@@ -24,6 +24,7 @@ function loginCtrl($scope,$http) {
           }
         })
         .error(function(data,err) {
+          $scope.error = "There was an error logging you in. Please make sure your username and password are correct and try again.";
           console.log(data,err);
           angular.element( '#loader' ).remove();
         });
