@@ -37,6 +37,8 @@ RouteHandler.prototype.update=function(cb) {
         if (_err) log.error(_err);
         else {
           new MDB({config:config, callback:function(err,opts) {
+              if (err) return cb(err);
+            
               var db=opts.db;
               var MDB=opts.self;
               
