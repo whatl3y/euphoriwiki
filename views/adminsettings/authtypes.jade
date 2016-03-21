@@ -1,0 +1,17 @@
+- //access to adminSettingsCtrl functions
+- //the information saved needs to go to setting.value as either an object or other piece of data
+
+div(class="separate-vert-small")
+  div(class="row")
+    form
+      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+        div(class="form-group",data-ng-repeat="(key,val) in setting.value")
+          div
+            label {{ functions.titleCase(key) }}
+          div
+            div(class="radio-inline")
+              label(for="enabled{{ $index }}") Enabled
+                input(type="radio",id="enabled{{ $index }}",name="enabled{{ $index }}",data-ng-model="setting.value[key]",data-ng-value="'true'")
+            div(class="radio-inline")
+              label(for="disabled{{ $index }}") Disabled
+                input(type="radio",id="disabled{{ $index }}",name="disabled{{ $index }}",data-ng-model="setting.value[key]",data-ng-value="'false'")

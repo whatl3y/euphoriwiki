@@ -171,6 +171,11 @@ var self = module.exports = {
     }
   },
   
+  authtypes: {
+    local: "true",
+    facebook: "false"
+  },
+  
   ldap: {
     protocol: process.env.LDAP_PROTOCOL,
     url: process.env.LDAP_URL,
@@ -181,8 +186,8 @@ var self = module.exports = {
   },
   
   facebook: {
-    appId: "485185681667178",
-    appSecret: "04dd1a6847798707c1a84229c56fac4d",
+    appId: process.env.FACEBOOK_APP_ID,
+    appSecret: process.env.FACEBOOK_APP_SECRET,
     loginCallbackUrl: function() {
       return self.server.HOST + "/login/facebook/callback";
     }

@@ -25,6 +25,44 @@ WikiHandler=function(options) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      initQueries (PUBLIC)
+|DESCRIPTION:  When we start the wiki server, there are initial queries we run to execute code and
+|             evaluate information based on system settings. This gets the current queries,
+|             runs them, and returns them;
+|PARAMETERS:  1. cb(OPT): callback function after we get the information.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.initQueries=function(cb) {
+  async.waterfall([
+    function(_callback) {
+      config.mongodb.db.collection("initializequeries").find().toArray(function(err,queries) {
+        _callback(err,queries);
+      });
+    },
+    function(queries,_callback) {
+      config.mongodb.MDB.findRecursive({
+        db: config.mongodb.db,
+        array: queries
+      },function(err,oData) {
+        _callback(err,queries,oData);
+      });
+    }
+  ],
+    function(err,queries,oData) {
+      if (err) return cb(err);
+      
+      try {
+        cb(null,{queries:queries, oData:oData});
+      } catch(err) {
+        cb(err);
+      }
+    }
+  );
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      getSubPages (PUBLIC)
 |DESCRIPTION:  Gets all the information about a page.
 |PARAMETERS:  1. cb(OPT): callback function after we find the pages.

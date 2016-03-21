@@ -26,6 +26,10 @@ function adminSettingsCtrl($scope,$http,$sce) {
     
     pushArray: function(array,value) {
       if (value) array.push(value);
+    },
+    
+    titleCase: function(text) {
+      return text.replace(/(\w)(\w*)/,function first(x,y,z) {return y.toUpperCase() + z.toLowerCase();});
     }
   };
   

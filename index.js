@@ -85,31 +85,9 @@ function main(notClustering) {
       });
     },
     function(callback) {
-      async.waterfall([
-        function(_callback) {
-          config.mongodb.db.collection("initializequeries").find().toArray(function(err,queries) {
-            _callback(err,queries);
-          });
-        },
-        function(queries,_callback) {
-          config.mongodb.MDB.findRecursive({
-            db: config.mongodb.db,
-            array: queries
-          },function(err,oData) {
-            _callback(err,queries,oData);
-          });
-        }
-      ],
-        function(err,queries,oData) {
-          if (err) return callback(err);
-          
-          try {
-            callback(null,{queries:queries, oData:oData});
-          } catch(err) {
-            callback(err);
-          }
-        }
-      );
+      new WikiHandler().initQueries(function(err,data) {
+        callback(err,data);
+      });
     }
   ],
     function(err,results) {
@@ -150,7 +128,13 @@ function main(notClustering) {
       
       //if any of the queries stored in the DB have extra code we need to eval(), do that here
       _.each(queries,function(queryInfo) {
-        if (queryInfo.extracode) eval(queryInfo.extracode);
+        if (queryInfo.extracode) {
+          try {
+            eval(queryInfo.extracode);
+          } catch(err) {
+            log.error(err);
+          }
+        }
       });
       
       //setup route handlers in the express app
@@ -164,8 +148,9 @@ function main(notClustering) {
         clientID: config.facebook.appId,
         clientSecret: config.facebook.appSecret,
         callbackURL: config.facebook.loginCallbackUrl(),
-        passReqToCallback:true,
-        profileFields: ["id", "emails", "name"]},new Authentication().passportVerifyCallback("facebook")));
+        passReqToCallback: true,
+        profileFields: ["id", "emails", "name"]
+      }, new Authentication().passportVerifyCallback("facebook")));
       passport.serializeUser(function(user, done) {done(null, user);});
       passport.deserializeUser(function(user, done) {done(null, user);});
       

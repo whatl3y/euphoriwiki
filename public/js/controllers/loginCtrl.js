@@ -1,7 +1,31 @@
 function loginCtrl($scope,$http) {
   $scope.functions = {
+    initialize: function() {
+      $scope.functions.ajax("authTypes",null,function(err,data) {
+        if (err) return console.log(err);
+        $scope.authTypes = data.types;
+      });
+    },
+    
     returnClassHasData: function(data) {
       return ((data || "").length) ? "has-success": "";
+    },
+    
+    ajax: function(type,data,cb) {
+      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      $http.post('/login',Object.merge({type:type},(data || {})))
+      .success(function(ret) {
+        if (ret.success) cb(null,ret)
+        else {
+          cb(ret.error || "There was an issue processing your data. Please try again.");
+        }
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        cb(err || "There was an issue processing your data. Please try again.",data);
+        loader.remove();
+      });
     }
   };
   
@@ -12,7 +36,7 @@ function loginCtrl($scope,$http) {
       
       if (data.username && data.password) {
         new Core.Modals().alertPopup({loading:true});
-        $http.post('/login',{username:data.username, password:data.password})
+        $http.post('/login',{type:"loginLocal", username:data.username, password:data.password})
         .success(function(ret) {
           console.log(ret);
           if (ret.success) {
@@ -34,4 +58,6 @@ function loginCtrl($scope,$http) {
       }
     }
   };
+  
+  $scope.functions.initialize();
 }

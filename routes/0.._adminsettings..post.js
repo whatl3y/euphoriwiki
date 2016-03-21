@@ -24,16 +24,47 @@
       var value = info.value;
       value = Object.removeDollarKeys(value);
       
-      config.mongodb.db.collection("adminsettings").update({domid:settingKey},{$set:{value:value}},function(err) {
-        if (err) res.json({success:false, error:err});
-        else res.json({success:true});
-        
-        //reset config cache
-        config.mongodb.db.collection("adminsettings").find().toArray(function(e,settings) {
-          if (e) log.error(e);
-          else config.admin.SETTINGS = settings;
-        });
-      });
+      async.series([
+        function(callback) {
+          config.mongodb.db.collection("adminsettings").update({domid:settingKey},{$set:{value:value}},function(err) {
+            if (err) res.json({success:false, error:"There was an issue saving your setting. Please check the logs or try again."});
+            else res.json({success:true});
+            
+            callback(err);
+          });
+        },
+        function(callback) {
+          config.mongodb.db.collection("adminsettings").find().toArray(function(e,settings) {
+            callback(e,settings);
+          });
+        },
+        function(callback) {
+          new WikiHandler().initQueries(function(err,data) {
+            callback(err,data);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) return log.error(err);
+          
+          var settings = results[1];
+          var queries = results[2].queries;
+          var oData = results[2].oData;
+          
+          //reset config cache and execute initial queries
+          //that will reset information in config file
+          config.admin.SETTINGS = settings;
+          _.each(queries,function(queryInfo) {
+            if (queryInfo.extracode) {
+              try {
+                eval(queryInfo.extracode);
+              } catch(err) {
+                log.error(err);
+              }
+            }
+          });
+        }
+      );
       
       break;
     
