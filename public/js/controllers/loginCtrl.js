@@ -14,6 +14,7 @@ function loginCtrl($scope,$http) {
         new Core.Modals().alertPopup({loading:true});
         $http.post('/login',{username:data.username, password:data.password})
         .success(function(ret) {
+          console.log(ret);
           if (ret.success) {
             if (location.pathname == "/") location.href = "/";
             else location.reload();

@@ -1,0 +1,1 @@
+passport.authenticate("facebook", {successRedirect:'/', failureRedirect:'/login/facebook'});

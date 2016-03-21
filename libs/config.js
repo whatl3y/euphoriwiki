@@ -180,6 +180,14 @@ var self = module.exports = {
     suffix: process.env.LDAP_SUFFIX
   },
   
+  facebook: {
+    appId: "485185681667178",
+    appSecret: "04dd1a6847798707c1a84229c56fac4d",
+    loginCallbackUrl: function() {
+      return self.server.HOST + "/login/facebook/callback";
+    }
+  },
+  
   cryptography: {
     algorithm: "aes-256-ctr",
     password: process.env.CRYPT_SECRET

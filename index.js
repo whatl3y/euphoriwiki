@@ -14,6 +14,7 @@ var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var uuid = require('node-uuid');
 var _ = require("underscore");
 var async = require("async");
@@ -104,11 +105,6 @@ function main(notClustering) {
     //static files
     app.use("/public",express.static(path.join(__dirname,"/public")));
     
-    //passport setup
-    passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
-    passport.serializeUser(function(user, done) {done(null, user);});
-    passport.deserializeUser(function(user, done) {done(null, user);});
-    
     //go get all the routes available for express to serve and bind
     //them to listeners, then get all the links we'll need for the header
     //header navigation bar, then initialize web server
@@ -131,6 +127,17 @@ function main(notClustering) {
           _.each(oData.routes,function(route) {
             app[route.verb.toLowerCase()](route.path,eval(route.callback));
           });
+          
+          //passport setup
+          passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
+          passport.use("facebook", new FacebookStrategy({
+            clientID: config.facebook.appId,
+            clientSecret: config.facebook.appSecret,
+            callbackURL: config.facebook.loginCallbackUrl(),
+            passReqToCallback:true,
+            profileFields: ["id", "emails", "name"]},new Authentication().passportVerifyCallback("facebook")));
+          passport.serializeUser(function(user, done) {done(null, user);});
+          passport.deserializeUser(function(user, done) {done(null, user);});
           
           //starts the web server listening on specified port
           //if we're not clustered

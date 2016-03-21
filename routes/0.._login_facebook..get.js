@@ -1,0 +1,1 @@
+passport.authenticate("facebook",{scope: ['email']});

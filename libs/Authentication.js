@@ -65,9 +65,72 @@ Authentication.prototype.passportVerifyCallback = function(type) {
       }
       
     case "facebook":
-      return function(accessToken, refreshToken, profile, done){
-        console.log(accessToken, refreshToken, profile);
-        done(null,false);
+      return function(req, accessToken, refreshToken, profile, done) {
+        self.session = req.session;
+        
+        if (typeof profile === "object") {
+          var info = {
+            username: "fb_" + profile.id,
+            firstname: profile.name.givenName,
+            lastname: profile.name.familyName,
+            email: profile.emails[0].value,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+          };
+        } else return done(null,false);
+        
+        async.waterfall([
+          function(callback) {
+            self.findOrSaveUser({username:info.username},function(err,user) {
+              callback(err,user);
+            });
+          },
+          function(user,callback) {
+            if (user) {
+              self.login(user,function(_e) {
+                callback(_e,user);
+              });
+            } else callback(null,false);
+          },
+          function(userRecord,callback) {
+            if (!userRecord) {
+              var saveData = {
+                type: "facebook",
+                created: new Date(),
+                lastlogin: new Date(),
+                username: info.username,
+                firstname: info.firstname,
+                lastname: info.lastname,
+                email: info.email || null,
+                accessToken: info.accessToken,
+                refreshToken: info.refreshToken
+              };
+              
+              self.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
+                if (e) {
+                  callback(e);
+                } else {
+                  console.log(doc);
+                  self.login(doc,function(_e) {
+                    callback(_e,doc);
+                  });
+                }
+                
+                new WikiHandler().event({type:"login", params:{username:info.username}},function(e,result) {if (e) log.error(e);});
+                audit.log({type:"Login", user:info.username});
+              });
+            } else callback(null,userRecord);
+          }
+        ],
+          function(err,userRecord) {
+            if (err) {
+              log.error(err);
+              return done(err);
+            } else {
+              return done(null,info.username);
+            }
+          }
+        );
       }
     
     default:
