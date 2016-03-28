@@ -1,0 +1,9 @@
+Instructions to get the required default documents into the
+MongoDB instance you have running that the wiki will use as its
+data store.
+
+
+1. Start up your MongoDB daemon (>mongod ...)
+2. Add/update documents in the DB from given directory (>mongorestore --db wiki --dir <path to wiki folder with bson documents>)
+3. Configure your environment variables per the .env file
+4. Start your wiki web server (>node index [from your wiki root directory])
