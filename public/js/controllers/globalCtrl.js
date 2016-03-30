@@ -46,6 +46,14 @@ function globalCtrl($scope,$http) {
         console.log(data,err);
         //angular.element( '#loader' ).remove();
       });
+      
+      //----------------------------------------------------------------------
+      //#global-error-wrapper is in layout.jade, and initially this
+      //has a style attribute to set display property: none. As soon as the DOM
+      //loads, we will remove that style attribute. This is needed to prevent showing angular
+      //markup before all the JS has loaded on the page and the controller(s) have began initializing.
+      angular.element( "#global-error-wrapper" ).removeAttr("style");
+      //----------------------------------------------------------------------
     },
     
     setSearchQuery: function() {

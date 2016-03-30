@@ -2,14 +2,15 @@ extends layout
 
 block main
   div(class="row",data-ng-controller="wikiPageCtrl")
-    div(class="padding-small text-large",data-ng-show="pagePieces.length")
-      span(class="margin-right-small",data-ng-repeat="page in pagePieces")
-        a(data-ng-href="{{ page.link }}") {{ page.text }}
-        span(data-ng-show="$index < pagePieces.length-1")  >
-    div(class="wrapper col-xs-12")
-      h1= data.external.EXTRA.pageHeader
-      - //for include_wikipageeditpagelink.jade
-      - var editkey = "loggedInUsersPage"
-      include include_wikipageeditpagelink.jade
-      include include_pageextras.jade
-      include include_editpage.jade
+    div(id="main-wiki-wrapper",style="display:none",data-ng-show="initcomplete")
+      div(class="padding-small text-large",data-ng-show="pagePieces.length")
+        span(class="margin-right-small",data-ng-repeat="page in pagePieces")
+          a(data-ng-href="{{ page.link }}") {{ page.text }}
+          span(data-ng-show="$index < pagePieces.length-1")  >
+      div(class="wrapper col-xs-12")
+        h1= data.external.EXTRA.pageHeader
+        - //for include_wikipageeditpagelink.jade
+        - var editkey = "loggedInUsersPage"
+        include include_wikipageeditpagelink.jade
+        include include_pageextras.jade
+        include include_editpage.jade

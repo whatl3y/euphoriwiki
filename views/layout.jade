@@ -81,10 +81,11 @@ html
     div(class="container-fluid")
       include ./header.jade
       
-      alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
-        span(class="glyphicon glyphicon-warning-sign")
-        span {{ global.error }}
-        span(class="glyphicon glyphicon-warning-sign")
+      div(id="global-error-wrapper",style="display:none")
+        alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
+          span(class="glyphicon glyphicon-warning-sign")
+          span {{ global.error }}
+          span(class="glyphicon glyphicon-warning-sign")
       
       - if (!data.session.loggedIn)
         div(class="row")
