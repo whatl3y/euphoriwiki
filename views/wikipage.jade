@@ -2,7 +2,7 @@ extends layout
 
 block main
   div(class="row",data-ng-controller="wikiPageCtrl")
-    div(data-ng-show="initcomplete")
+    div(id="main-wiki-wrapper",style="display:none",data-ng-show="initcomplete")
       div(class="padding-small text-large",data-ng-show="pagePieces.length")
         span(class="margin-right-small",data-ng-repeat="page in pagePieces")
           a(data-ng-href="{{ page.link }}") {{ page.text }}
