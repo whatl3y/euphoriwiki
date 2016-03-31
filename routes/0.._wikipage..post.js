@@ -704,7 +704,9 @@
         
         async.parallel([
           function(callback) {
-            callback(null,wiki.allowedPath(newPath));
+            wiki.allowedPath(newPath,function(e,isAllowed) {
+              callback(e,isAllowed);
+            });
           },
           function(callback) {
             wiki.getPage({filters:{path:newPath},fields:{path:1}},function(e,page) {

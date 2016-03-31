@@ -232,14 +232,17 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
       function(callback) {
         try {
           var notAllowed = false;
-          async.each(aliasesOrig,function(a) {
-            if (!self.allowedPath(a)) {
-              notAllowed = a;
-              return;
-            }
+          async.each(aliasesOrig,function(a,_callback) {
+            self.allowedPath(a,function(e,isAllowed) {
+              if (e) return _callback(e);
+              if (!isAllowed) notAllowed = a;
+              _callback(null);
+            });
+          },
+          function(err) {
+            callback(err,notAllowed);
           });
           
-          callback(null,notAllowed);
         } catch(e) {
           callback(e)
         }
@@ -420,25 +423,36 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      allowedPath (PUBLIC)
 |DESCRIPTION:  Takes a path provided and determines if it's allowed for a page to have this path.
-|PARAMETERS:  1. path(OPT): 
+|PARAMETERS:  1. path(REQ): 
+|             2. cb(REQ): the callback to return an error or results of if path is okay
+|                     cb(<err>,<boolean: is allowed to use this path>)
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
-|RETURNS:    <boolean>
+|RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.allowedPath=function(path) {
-  var invalid = [
-    /^\/user[\/]*.*/,
-    /^\/admin[\/]*.*$/,
-    /^\/login[\/]*$/,
-    /^\/logout[\/]*$/,
-    /^\/search[\/]*.*/,
-    /^\/file[\/]*.*/
-  ];
-  
+WikiHandler.prototype.allowedPath=function(path,cb) {
   if (typeof path!=="string") return false;
   else {
-    path = (path.indexOf("/") == 0) ? path : "/"+path;
-    return (_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true;
+    async.waterfall([
+      function(callback) {
+        config.mongodb.db.collection("forbidden_paths").find({},{path:1}).toArray(function(_e,paths) {
+          if (_e) return callback(_e);
+          var invalid = [];
+          paths.forEach(function(p) {
+            invalid.push(new RegExp("^\/" + p.path + "[\/]*.*$"));
+          });
+          
+          callback(null,invalid);
+        });
+      },
+      function(invalid,callback) {
+        callback(null,(_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true);
+      }
+    ],
+      function(err,result) {
+        cb(err,result);
+      }
+    );
   }
 }
 
