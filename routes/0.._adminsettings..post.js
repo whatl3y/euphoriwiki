@@ -3,7 +3,7 @@
   
   switch(info.type) {
     case "init":
-      config.mongodb.db.collection("adminsettings").find({active:{$not:{$eq:false}}}).sort({order:1,name:1}).toArray(function(_e,settings) {
+      config.mongodb.db.collection("adminsettings").find({active:{$not:{$eq:false}}}).sort({name:1}).toArray(function(_e,settings) {
         if (_e) {
           log.error(_e);
           res.json({success:false});

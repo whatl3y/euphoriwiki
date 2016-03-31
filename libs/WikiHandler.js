@@ -431,29 +431,28 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.allowedPath=function(path,cb) {
-  if (typeof path!=="string") return false;
-  else {
-    async.waterfall([
-      function(callback) {
-        config.mongodb.db.collection("forbidden_paths").find({},{path:1}).toArray(function(_e,paths) {
-          if (_e) return callback(_e);
-          var invalid = [];
-          paths.forEach(function(p) {
-            invalid.push(new RegExp("^\/" + p.path + "[\/]*.*$"));
-          });
-          
-          callback(null,invalid);
+  if (typeof path!=="string") return cb(null,false);
+  
+  async.waterfall([
+    function(callback) {
+      config.mongodb.db.collection("forbidden_paths").find({},{path:1}).toArray(function(_e,paths) {
+        if (_e) return callback(_e);
+        var invalid = [];
+        paths.forEach(function(p) {
+          invalid.push(new RegExp("^\/" + p.path + "[\/]*.*$"));
         });
-      },
-      function(invalid,callback) {
-        callback(null,(_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true);
-      }
-    ],
-      function(err,result) {
-        cb(err,result);
-      }
-    );
-  }
+        
+        callback(null,invalid);
+      });
+    },
+    function(invalid,callback) {
+      callback(null,(_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true);
+    }
+  ],
+    function(err,result) {
+      cb(err,result);
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------

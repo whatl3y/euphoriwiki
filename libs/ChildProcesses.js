@@ -16,6 +16,7 @@ ChildProcesses = function(options) {
   
   this.command = (typeof options==="string") ? options : options.command;
   this.args = (typeof options==="string") ? [] : this.defineArgs(options.args);
+  this.timeout = (typeof options==="string") ? null : options.timeout;        //optional time limit in seconds to wait for child process to finish before terminating it
   
   this.child = null;
   this.data = "";
@@ -34,6 +35,7 @@ ChildProcesses = function(options) {
 -----------------------------------------------------------------------------------------*/
 ChildProcesses.prototype.run = function(cb) {
   var self = this;
+  var isDone = false;
   
   try {
     this.child = fork(this.command,this.args);
@@ -41,6 +43,7 @@ ChildProcesses.prototype.run = function(cb) {
     this.child.on("message",function(info) {
       if (typeof info==="object" && info.error) {
         self.child.kill();
+        isDone = true;
         cb(info.error);
       } else {
         self.data = (typeof info==="string") ? self.data + info : info;
@@ -49,12 +52,29 @@ ChildProcesses.prototype.run = function(cb) {
     
     this.child.on("error",function(err) {
       self.child.kill();
+      isDone = true;
       cb(err);
     });
     
     this.child.on("disconnect",function() {
-      cb(null,self.data);
+      if (!isDone) {
+        isDone = true;
+        cb(null,self.data);
+      }
     });
+    
+    //if there's a timeout we want to wait
+    //start a timer and terminate the child process
+    //if it hasn't completed by the timer.
+    if (typeof this.timeout==="number") {
+      setTimeout(function() {
+        if (!isDone) {
+          self.child.kill();
+          isDone = true;
+          cb("The alotted time for the child process to complete, " + self.timeout + " seconds, has passed.");
+        }
+      },this.timeout * 1000);
+    }
   } catch(err) {
     cb(err);
   }

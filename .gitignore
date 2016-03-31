@@ -5,6 +5,7 @@
 /files
 /documentation
 /views/emailtemplates
+/node_modules
 /modules
 /.env_windows
 /.env_linux

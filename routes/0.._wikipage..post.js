@@ -346,8 +346,10 @@
         var aliases = info.aliases || [];
         
         wiki.updateAliases({aliases:aliases, Access:Access, username:username},function(err) {
-          if (err) res.json({success:false, error:err});
-          else res.json({success:true});
+          if (err) {
+            res.json({success:false, error:(typeof err==="string") ? err : "There was an issue trying to update your page aliases. Please try again."});
+            log.error(err);
+          } else res.json({success:true});
         });
       }
       
@@ -618,10 +620,10 @@
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
-          new ChildProcesses({command:"processes/wordtohtml", args:filePath}).run(function(err,result) {
+          new ChildProcesses({command:"processes/wordtohtml", args:filePath, timeout:30}).run(function(err,result) {
             if (err) {
               log.error(err);
-              res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again."});
+              res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again. If this is a large Word file (>=1mb), it might not be a good idea to try to convert it through this tool as there is a 30 second timeout to convert the document."});
             } else {
               res.json({wordsuccess:true, html:result});
               audit.log({type:"Word To HTML Conversion", additional:{filePath:filePath}});
@@ -720,8 +722,10 @@
           }
         ],
           function(err,results) {
-            if (err) res.json({success:false, error:err});
-            else {
+            if (err) {
+              res.json({success:false, error:"There was an issue trying to update your path. Please try again."});
+              log.error(err);
+            } else {
               var allowed = results[0];
               var page = results[1];
               var canUpdate = results[2];
