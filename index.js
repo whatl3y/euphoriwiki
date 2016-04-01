@@ -144,13 +144,17 @@ function main(notClustering) {
       
       //passport setup
       passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
-      passport.use("facebook", new FacebookStrategy({
-        clientID: config.facebook.appId,
-        clientSecret: config.facebook.appSecret,
-        callbackURL: config.facebook.loginCallbackUrl(),
-        passReqToCallback: true,
-        profileFields: ["id", "emails", "name"]
-      }, new Authentication().passportVerifyCallback("facebook")));
+      
+      if (config.facebook.appId) {
+        passport.use("facebook", new FacebookStrategy({
+          clientID: config.facebook.appId,
+          clientSecret: config.facebook.appSecret,
+          callbackURL: config.facebook.loginCallbackUrl(),
+          passReqToCallback: true,
+          profileFields: ["id", "emails", "name"]
+        }, new Authentication().passportVerifyCallback("facebook")));
+      }
+      
       passport.serializeUser(function(user, done) {done(null, user);});
       passport.deserializeUser(function(user, done) {done(null, user);});
       
