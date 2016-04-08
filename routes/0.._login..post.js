@@ -38,8 +38,12 @@
                 res.json({success:false, error:"There was an issue trying to log you in. Please try again or contact your wiki admin if the problem persists."});
                 log.error(err);
               } else {
-                var userInfo = userRecord;
                 var userExists = existsAlready;
+                var userInfo = (typeof userRecord=="object" && userRecord.username) 
+                  ? userRecord
+                  : ((typeof userRecord==="object" && userRecord.users instanceof Array && userRecord.users.length) 
+                    ? userRecord.users[0] 
+                    : {});
                 
                 var saveData;
                 if (userExists) {

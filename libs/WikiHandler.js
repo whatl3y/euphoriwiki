@@ -706,72 +706,86 @@ WikiHandler.prototype.emailSubscribers=function(info,cb) {
   
   var self = this;
   
-  async.parallel([
+  async.waterfall([
     function(callback) {
       self.getPage({fields:{subscribers:1}},function(e,pageInfo) {
         callback(e,pageInfo);
       });
     },
-    function(callback) {
+    function(pageInfo,callback) {
+      if (!pageInfo.length || typeof pageInfo[0].subscribers==="undefined" || !pageInfo[0].subscribers.length) return callback("No subscribers for page: " + self.path);
+      
+      var subscribersEmails = [];
+      var subscribers = pageInfo[0].subscribers;
+      async.each(subscribers,function(subscriber,_callback) {
+        if (subscriber.email) {
+          subscribersEmails.push(subscriber.email);
+          return _callback();
+        } else if (subscriber.username) {
+          config.mongodb.db.collection("accounts").find({username:subscriber.username},{email:1}).toArray(function(_e,user) {
+            if (_e) return _callback(_e);
+            if (!user.length) return _callback();
+            if (user[0].email) {
+              subscribersEmails.push(user[0].email);
+              return _callback();
+            }
+            
+            return _callback();
+          });
+        } else return _callback();
+      },
+      function(err) {
+        if (err) return callback(err);
+        callback(null,subscribersEmails);
+      });
+    },
+    function(subscribers,callback) {
       config.mongodb.db.collection("emailtemplates").find({name:templateName}).toArray(function(e,template) {
-        callback(e,template);
+        callback(e,template,subscribers);
       });
     },
   ],
-    function(err,results) {
-      if (err) cb(err);
-      else {
-        var pageInfo = results[0];
-        var template = results[1];
-        
-        if (!pageInfo.length || typeof pageInfo[0].subscribers==="undefined" || !pageInfo[0].subscribers.length) cb(null,false);
-        else if (!template.length) cb(null,false);
-        else {
-          var subscribers = pageInfo[0].subscribers;
-          subscribers = subscribers.map(function(sub) {
-            return sub.email;
-          });
-          
-          var send = function(body) {
-            new Mailer({
-              send: true,
-              bcc: subscribers,
-              template: {
-                templateInfo: {
-                  subject: template[0].subject,
-                  html: body
-                },
-                
-                keys: templateKeys,
-                
-                cb: function(e,info) {
-                  cb(e,info);
-                }
-              }
-            });
-          };
-          
-          var gH = new GetHTML({fullpath:self.emailtemplatepath + "/" + template[0].file});
-          
-          if (template[0].file) {
-            var templateExtension = gH.extension(template[0].file);
+    function(err,template,subscribers) {
+      if (err) return cb(err);
+      
+      var send = function(body) {
+        new Mailer({
+          send: true,
+          bcc: subscribers,
+          template: {
+            templateInfo: {
+              subject: template[0].subject,
+              html: body
+            },
             
-            if (typeof gH[templateExtension.substring(1)]!=="undefined") {
-              gH[templateExtension.substring(1)](function(e,h) {
-                if (e) cb(e);
-                else {
-                  var templateHtml = h;
-                  send(templateHtml);
-                }
-              })
-            } else {
-              cb(null,false);
+            keys: templateKeys,
+            
+            cb: function(e,info) {
+              cb(e,info);
             }
-          } else {
-            var templateHtml = template[0].html;
-            send(templateHtml);
           }
+        });
+      };
+      
+      var gH = new GetHTML({fullpath:self.emailtemplatepath + "/" + template[0].file});
+      
+      if (template[0].file) {
+        var templateExtension = gH.extension(template[0].file);
+        
+        if (typeof gH[templateExtension.substring(1)]!=="undefined") {
+          gH[templateExtension.substring(1)](function(e,h) {
+            if (e) cb(e);
+            else {
+              var templateHtml = h;
+              send(templateHtml);
+            }
+          })
+        } else {
+          cb(null,false);
         }
+      } else {
+        var templateHtml = template[0].html;
+        send(templateHtml);
       }
     }
   );

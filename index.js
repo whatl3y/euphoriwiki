@@ -139,7 +139,11 @@ function main(notClustering) {
       
       //setup route handlers in the express app
       _.each(oData.routes,function(route) {
-        app[route.verb.toLowerCase()](route.path,eval(route.callback));
+        try {
+          app[route.verb.toLowerCase()](route.path,eval(route.callback));
+        } catch(err) {
+          log.error("Error binding route to express; method: " + route.verb + "; path: " + route.path,err);
+        }
       });
       
       //passport setup

@@ -143,7 +143,7 @@ var self = module.exports = {
     
     nodemailerconfig: function() {
       if (this.core.host) {
-        /*var o = {
+        var o = {
           //pool: this.core.pool,
           host: this.core.host,
           port: Number(this.core.port || 587),
@@ -151,17 +151,11 @@ var self = module.exports = {
           authMethod: this.core.authMethod || "PLAIN"
         };
         
-        if (typeof this.core.auth==="object") o.auth = {
-          user: this.core.auth.user,
-          pass: this.core.auth.pass
-        };*/
-        
-        var o = {
-          service: "gmail",
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD
-          }
+        if (typeof this.core.auth==="object" && this.core.auth.user) {
+          o.auth = {
+            user: this.core.auth.user,
+            pass: this.core.auth.pass
+          };
         }
         
         return o;
