@@ -1,8 +1,7 @@
 var fs = require("fs");
-var _ = require("underscore");
+var async = require("async");
 var MDB = require("./MDB.js");
 var config = require("./config.js");
-var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    RouteHandler.js
@@ -31,42 +30,59 @@ RouteHandler=function(options) {
 RouteHandler.prototype.update=function(cb) {
   var self=this;
   
-  fs.readdir(this.path,function(err,files) {
-    _.each(files,function(file) {
-      fs.readFile(self.path+"/"+file,{encoding:"utf8"},function(_err,content) {
-        if (_err) log.error(_err);
-        else {
-          new MDB({config:config, callback:function(err,opts) {
-              if (err) return cb(err);
-            
-              var db=opts.db;
-              var MDB=opts.self;
-              
-              var routeInfo = file.replace(/\.js/g,"").replace(/_/g,"/").replace(/\[star\]/g,"*").replace(/\[colon\]/g,":").split("..");
-              var routeOrder = Number(routeInfo[0] || 0);
-              var routePath = routeInfo[1];
-              var routeVerb = routeInfo[2] || "get";
-              
-              db.collection(self.collection).update({path:routePath,verb:routeVerb},{
-                "$set": {
-                  verb: routeVerb,
-                  path: routePath,
-                  callback: content,
-                  order: routeOrder,
-                  active: true
-                }
-              },{upsert:true},function(_e,result) {
-                log.debug(_e,result);
-                //db.close();
-              });
-            }
-          });
-        }
+  async.waterfall([
+    function(callback) {
+      fs.readdir(self.path,function(err,files) {
+        callback(err,files);
       });
-    });
-    
-    if (typeof cb==="function") setTimeout(function(){cb();},1000);
-  });
+    },
+    function(files,callback) {
+      async.each(files,function(file,_callback) {
+        async.waterfall([
+          function(__callback) {
+            fs.readFile(self.path+"/"+file,{encoding:"utf8"},function(_err,content) {
+              __callback(_err,content);
+            });
+          },
+          function(content,__callback) {
+            new MDB({config:config, callback:function(err,opts) {                
+                __callback(err,opts.db,file,content);
+              }
+            });
+          },
+          function(db,file,content,__callback) {
+            var routeInfo = file.replace(/\.js/g,"").replace(/_/g,"/").replace(/\[star\]/g,"*").replace(/\[colon\]/g,":").split("..");
+            var routeOrder = Number(routeInfo[0] || 0);
+            var routePath = routeInfo[1];
+            var routeVerb = routeInfo[2] || "get";
+            
+            db.collection(self.collection).update({path:routePath,verb:routeVerb},{
+              "$set": {
+                verb: routeVerb,
+                path: routePath,
+                callback: content,
+                order: routeOrder,
+                active: true
+              }
+            },{upsert:true},function(_e,result) {
+              __callback(_e)
+            });
+          }
+        ],
+          function(err) {
+            _callback(err);
+          }
+        );
+      },
+      function(err) {
+        callback(err);
+      });
+    }
+  ],
+    function(err) {
+      if (typeof cb==="function") cb(err);
+    }
+  );
 }
 
 //-------------------------------------------------------

@@ -57,17 +57,18 @@ FileHandler.prototype.uploadFile=function(options,cb) {
   var filePath = options.path;
   var fileName = options.filename;
   var newFileName = (options.exactname) ? fileName : false;
+  var readStream = options.readStream || fs.createReadStream(filePath);
   
   var lastPeriod = fileName.lastIndexOf(".");
   newFileName = newFileName || fileName.substring(0,lastPeriod) + "_" + Date.now() + fileName.substring(lastPeriod);
   
-  var writeStream = this.gfs.createWriteStream({filename: newFileName});
+  var writeStream = this.writeStream(newFileName);
   
   //setup event handlers for file stream
   writeStream.on("error",function(err) {cb(err);});
   writeStream.on("close",function(file) {cb(null,newFileName);});
   
-  fs.createReadStream(filePath).pipe(writeStream);
+  readStream.pipe(writeStream);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -120,6 +121,18 @@ FileHandler.prototype.deleteFile=function(options,cb) {
   var fileName = options.filename;
   
   this.gfs.remove({filename:fileName},cb);
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      writeStream (PUBLIC)
+|DESCRIPTION:  Will upload a new file to GridFS
+|PARAMETERS:  1. filename(OPT): the file name that the file will be stored as in Grid FS.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <stream>
+-----------------------------------------------------------------------------------------*/
+FileHandler.prototype.writeStream=function(newFileName) {
+  return this.gfs.createWriteStream({filename: newFileName});
 }
 
 //-------------------------------------------------------
