@@ -5,11 +5,20 @@ div(class="row",data-ng-if="!protected")
         a(href="javascript:void(0)",data-ng-click="handlers.likePage(!canLike)")
           //span(class="circle circ20 vcenter dark text-center")
           span(class="glyphicon {{ (canLike) ? 'glyphicon-thumbs-up' : 'glyphicon-thumbs-down' }}") 
-          small  {{ (canLike) ? "Like" : "Unlike" }} 
-          span ({{ pageLikes }})
+          small  {{ (canLike) ? "Like" : "Unlike" }} ({{ pageLikes }})
       a(class="margin-left-medium",href="javascript:void(0)",data-ng-click="handlers.subscribe.subscribeModal()")
         span(class="glyphicon glyphicon-tag") 
         small  Subscribe
+      a.dropdown.margin-left-medium
+        a(class="dropdown-toggle",href="javascript:void(0)",id="usersOnPage",data-toggle="dropdown",aria-haspopup="true",aria-expanded="true")
+          span(class="glyphicon glyphicon-user") 
+          small  Users Viewing Page ({{ usersOnPage.length }})
+        ul.dropdown-menu.dropdown-menu-right(aria-labelledby="usersOnPage")
+          li.text-large.padding-medium
+            u Users Viewing Page
+          li.padding-small(data-ng-repeat="user in usersOnPageSanitized")
+            a(href="#")
+              div {{ $index+1 }}. {{ (user.firstname) ? user.firstname + " " + user.lastname : "A guest" }}
 script(type="text/ng-template" id="subscribeContent.html")
   form
     div(class="modal-header")

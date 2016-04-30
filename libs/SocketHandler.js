@@ -1,6 +1,7 @@
 var async = require("async");
 var SocketGlobal = require("./SocketGlobal.js");
 var SocketWikiChat = require("./SocketWikiChat.js");
+var DateTime = require("../public/js/Core.DateTime.js");
 var config = require('./config.js');
 var log = require("bunyan").createLogger(config.logger.options());
 
@@ -88,13 +89,13 @@ SocketHandler.prototype.connectionEvent = function() {
 -----------------------------------------------------------------------------------------*/
 SocketHandler.prototype.getRoomMembers = function(room) {
   var roomMembers = [];
-    var nsp = (typeof this.namespace !== 'string') ? '/' : this.namespace;
+  var nsp = (typeof this.namespace !== 'string') ? '/' : this.namespace;
 
-    for(var socketID in this.mainIO.nsps[nsp].adapter.rooms[room]) {
-      roomMembers.push(socketID);
-    }
+  for(var socketID in this.mainIO.nsps[nsp].adapter.rooms[room]) {
+    roomMembers.push(socketID);
+  }
 
-    return roomMembers;
+  return roomMembers;
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -107,7 +108,22 @@ SocketHandler.prototype.getRoomMembers = function(room) {
 |RETURNS:    <object>: object of message information
 -----------------------------------------------------------------------------------------*/
 SocketHandler.prototype.messageInformation = function(options) {
+  var date=new DateTime({date:opts.date}).calculateDateTime('us','/');
   
+  if (typeof opts.submessages==='object' && opts.submessages.length>0) {
+    for (var _i=0;_i<opts.submessages.length;_i++) {
+      opts.submessages[_i].creationdate = new DateTime({date:opts.submessages[_i].creationdate}).calculateDateTime('us','/');
+    }
+  }
+  
+  return {
+    id: opts.id,
+    date: date,
+    name: opts.name,
+    message: opts.content,
+    links: opts.links,
+    submessages: opts.submessages
+  };
 }
 
 /*-----------------------------------------------------------------------------------------

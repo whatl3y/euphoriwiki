@@ -31,11 +31,19 @@ SocketGlobal = function(app,socket) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function subscribe(io,socket,room,SocketHandler) {
+  var self = this;
   var info = SocketHandler.addToRoom(socket.id,room,socket.request.session);
   
   if (info) {
     socket.join(room);
-    io.to(room).emit("globalCtrl_subscribe",info);
+    
+    var roomMembersSocketIDs = SocketHandler.getRoomMembers(room);
+    var roomMembers = roomMembersSocketIDs.map(function(id) {
+      return self.app.CACHE.sockets[id];
+    });
+    
+    socket.broadcast.to(room).emit("globalCtrl_subscribe",info);
+    socket.emit("globalCtrl_populateclientlist",roomMembers);
   }
 }
 

@@ -47,7 +47,8 @@ var self = module.exports = {
   
   socketio: {
     DEFAULTNAMESPACE: '/',
-    DEFAULTROOM: 'DEFAULTROOM',
+    DEFAULTROOM: '/',
+    NUM_MESSAGES: process.env.NUM_MESSAGES || 25,
     CACHE: {}
   },
   

@@ -1,3 +1,11 @@
+//-------------------------------------------------------
+//NodeJS
+if (typeof module !== 'undefined' && module.exports) {
+  Core = {};
+  module.exports=Core.DateTime;
+}
+//-------------------------------------------------------
+
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Core.DateTime.js
 |PURPOSE:  Displays information about how to contact the site if needed.

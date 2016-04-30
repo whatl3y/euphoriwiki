@@ -62,17 +62,49 @@ function globalCtrl($scope,$http) {
       return [
         {
           Name: "globalCtrl_subscribe",
-          Handler: function(data) {
-            console.log(data);
+          Handler: function(userData) {
+            //console.log(userData);
+            var name = "<strong>" + ((userData.firstname) ? userData.firstname + " " + userData.lastname : "A guest") + "</strong>";
+            var loader = new Core.Modals().asyncLoader({message: name + " just joined the page!"});
+            setTimeout(function() {
+              loader.remove();
+            }, 3000);
+            
+            $scope.usersOnPage = $scope.usersOnPage || [];
+            $scope.usersOnPage.push(userData);
+            $scope.functions.showUsersOnPage();
+          }
+        },
+        {
+          Name: "globalCtrl_populateclientlist",
+          Handler: function(clients) {
+            $scope.usersOnPage = clients;
+            $scope.functions.showUsersOnPage();
           }
         },
         {
           Name: "globalCtrl_disconnect",
           Handler: function(socketId) {
-            console.log(socketId);
+            $scope.usersOnPage = $scope.usersOnPage || [];
+            $scope.usersOnPage = $scope.usersOnPage.filter(function(user) {
+              return user.socketId != socketId;
+            });
+            
+            $scope.functions.showUsersOnPage();
           }
         }
       ]
+    },
+    
+    showUsersOnPage: function() {
+      $scope.usersOnPageSanitized = $scope.usersOnPage.map(function(u) {
+        if (u.id == EuphoriwikiSocket.id) return Object.merge(u,{
+          firstname: "You",
+          lastname: ""
+        });
+        
+        return u;
+      });
     },
     
     setSearchQuery: function() {
