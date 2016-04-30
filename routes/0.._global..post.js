@@ -9,19 +9,27 @@
   
   switch(info.type) {
     case "init":
-      wiki.getPage({filters:{aliasfor:{$exists:false}},fields:{path:1,_id:0},sort:{path:1}},function(e,pages) {
-        if (e) {
-          log.error(e);
-          res.json({success:false, error:e});
-        } else {
+      async.waterfall([
+        function(callback) {
+          wiki.getPage({filters:{aliasfor:{$exists:false}},fields:{path:1,_id:0},sort:{path:1}},function(e,pages) {
+            callback(e,pages);
+          });
+        },
+        function(pages,callback) {
           Access.onlyViewablePaths({session:req.session, username:username, paths:pages},function(err,filteredPages) {
-            if (err) {
-              log.error(err);
-              res.json({success:false, error:err});
-            } else res.json({success:true, allpages:filteredPages});
+            callback(err,filteredPages);
           });
         }
-      });
+      ],
+        function(err,filteredPages) {
+          if (err) {
+            log.error(err);
+            return res.json({success:false, error:err});
+          }
+          
+          return res.json({success:true, allpages:filteredPages});
+        }
+      );
       
       break;
     

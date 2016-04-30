@@ -6,13 +6,7 @@ div(class="wrapper separate-vert-medium")
       div(class="padding-small",data-ng-show="!functions.objSize(subpages)")
         alert No pages within {{ pathname }} yet!
       subpage(subpages="subpages",data-ng-show="functions.objSize(subpages)")
-      - //ul(class="list-unstyled",data-ng-show="subpages.length")
-      - //  li(class="separate-vert-small",data-ng-repeat="page in subpages | orderBy : 'path'")
-      - //    div
-      - //      a(data-ng-href="{{ page.path }}") {{ page.path }}
-      - //    div(class="soft-text")
-      - //      small {{ page.pageViews || 0 }} page views
-  div(data-ng-class="(widgets.subpages.enabled==true) ? 'col-xs-12 col-sm-8 col-md-9' : ''")
+  div(data-ng-class="functions.style.mainWrapperWidgetClasses()")
     div(data-ng-show="editState")
       div(class="row",data-ng-show="!updateable")
         div(class="separate-vert-small text-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3")

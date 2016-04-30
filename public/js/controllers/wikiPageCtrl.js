@@ -289,6 +289,26 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     style: {
       tabState: function(isActive) {
         return (isActive) ? "active" : "";
+      },
+      
+      mainWrapperWidgetClasses: function() {
+        var classMap = {
+          0: "",
+          1: "col-xs-12 col-sm-8 col-md-9",
+          2: "col-xs-12 col-sm-4 col-md-6"
+        };
+        
+        if (typeof $scope.widgets === "object") {
+          var numWidgets = 0;
+          
+          for (var _widget in $scope.widgets) {
+            if ($scope.widgets[_widget].enabled) numWidgets++;
+          }
+          
+          return classMap[numWidgets];
+        }
+        
+        return "";
       }
     },
     

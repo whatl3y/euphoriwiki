@@ -70,27 +70,36 @@ function globalCtrl($scope,$http) {
               loader.remove();
             }, 3000);
             
-            $scope.usersOnPage = $scope.usersOnPage || [];
-            $scope.usersOnPage.push(userData);
-            $scope.functions.showUsersOnPage();
+            $scope.$apply(function() {
+              $scope.usersOnPage = $scope.usersOnPage || [];
+              $scope.usersOnPage.push(userData);
+              $scope.functions.showUsersOnPage();
+            });
+            
           }
         },
         {
           Name: "globalCtrl_populateclientlist",
           Handler: function(clients) {
-            $scope.usersOnPage = clients;
-            $scope.functions.showUsersOnPage();
+            $scope.$apply(function() {
+              $scope.usersOnPage = clients;
+              $scope.functions.showUsersOnPage();
+            });
+            
           }
         },
         {
           Name: "globalCtrl_disconnect",
           Handler: function(socketId) {
-            $scope.usersOnPage = $scope.usersOnPage || [];
-            $scope.usersOnPage = $scope.usersOnPage.filter(function(user) {
-              return user.socketId != socketId;
+            $scope.$apply(function() {
+              $scope.usersOnPage = $scope.usersOnPage || [];
+              $scope.usersOnPage = $scope.usersOnPage.filter(function(user) {
+                return user.socketId != socketId;
+              });
+              
+              $scope.functions.showUsersOnPage();
             });
             
-            $scope.functions.showUsersOnPage();
           }
         }
       ]
