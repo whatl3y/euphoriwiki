@@ -22,7 +22,7 @@ var jade = require("jade");
 var html = require("html");
 var mammoth = require("mammoth");
 var Encryption = require("./libs/Encryption.js");
-var IOHandler = require("./libs/IOHandler.js");
+var SocketHandler = require("./libs/SocketHandler.js");
 var Auth = require("./libs/Authentication.js");
 var GetHTML = require("./libs/GetHTML.js");
 var Audit = require("./libs/Audit.js");
@@ -161,6 +161,9 @@ function main(notClustering) {
       
       passport.serializeUser(function(user, done) {done(null, user);});
       passport.deserializeUser(function(user, done) {done(null, user);});
+      
+      //initialize socket.io and socket handlers
+      new SocketHandler({io:io});
       
       //starts the web server listening on specified port
       //if we're not clustered

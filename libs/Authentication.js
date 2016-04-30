@@ -305,6 +305,9 @@ Authentication.prototype.login = function(objOrUpn,cb) {
     
     self.session.username = (self.session.username || self.session.sAMAccountName || "").toLowerCase();
     self.session.email = (self.session.email || self.session.mail || "").toLowerCase();
+    self.session.firstname = self.session.firstname || self.session.givenName || "";
+    self.session.lastname = self.session.lastname || self.session.familyName || self.session.sn || "";
+    
     self.session.loggedIn = true;
     self.session.save();
     cb(null);

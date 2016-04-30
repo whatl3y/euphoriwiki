@@ -10,11 +10,13 @@ function globalCtrl($scope,$http) {
         $scope: $scope,
         socket: EuphoriwikiSocket,
         wshost: LOCAL_DATA.wshost,
-        namespace: LOCAL_DATA.namespace,
-        events: LOCAL_DATA.socketEvents
+        namespace: LOCAL_DATA.namespace || "/",
+        events: /*LOCAL_DATA.socketEvents || */this.globalSocketEvents()
       });
       
       $scope.socketHandler.initialize();
+      EuphoriwikiSocket.emit("subscribe",decodeURI(location.pathname));
+      
       this.setSearchQuery();
       
       if (!(window.File && window.FileReader)) {
@@ -54,6 +56,23 @@ function globalCtrl($scope,$http) {
       //markup before all the JS has loaded on the page and the controller(s) have began initializing.
       angular.element( "#global-error-wrapper" ).removeAttr("style");
       //----------------------------------------------------------------------
+    },
+    
+    globalSocketEvents: function() {
+      return [
+        {
+          Name: "globalCtrl_subscribe",
+          Handler: function(data) {
+            console.log(data);
+          }
+        },
+        {
+          Name: "globalCtrl_disconnect",
+          Handler: function(socketId) {
+            console.log(socketId);
+          }
+        }
+      ]
     },
     
     setSearchQuery: function() {

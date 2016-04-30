@@ -15,8 +15,8 @@ var self = module.exports = {
   },
   
   view: {
-    NAVLINKS: [],        //placeholder where all links will be stored once we retrieve them from our persistent store
-    CLIENTSOCKETEVENTS : [],  //placeholder where all client socket event listeners will be stored and sent to the client on a request
+    NAVLINKS: [],              //placeholder where all links will be stored once we retrieve them from our persistent store
+    CLIENTSOCKETEVENTS : [],   //placeholder where all client socket event listeners will be stored and sent to the client on a request
     send: function(req,opts) {
       opts = opts || {};
       var obj = opts.obj || {};
@@ -48,10 +48,7 @@ var self = module.exports = {
   socketio: {
     DEFAULTNAMESPACE: '/',
     DEFAULTROOM: 'DEFAULTROOM',
-    CACHE: {
-      events: [],
-      ios: {}
-    }
+    CACHE: {}
   },
   
   session: {
@@ -196,14 +193,14 @@ var self = module.exports = {
     options: function(app) {
       return {
         name: app || "euphoriwiki",
-        /*level: process.env.LOGGING_LEVEL || "info",
-        stream: process.stdout*/
-        streams: [
+        level: process.env.LOGGING_LEVEL || "info",
+        stream: process.stdout
+        /*streams: [
           {
             level: process.env.LOGGING_LEVEL || "info",
             path: path.join(__dirname,"..","logs","wiki.log")
           }
-        ]
+        ]*/
       }
     }
   }

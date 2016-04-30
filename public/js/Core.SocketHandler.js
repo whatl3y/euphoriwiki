@@ -21,6 +21,7 @@ Core.SocketHandler = function(opts) {
   var self=this;
   this.socket.on('connect_error',function() {
     self.$scope.$apply(function() {
+      console.log("Socket disconnected...");
       self.$scope.error='You got disconnected!';
     });
   });
@@ -38,10 +39,6 @@ Core.SocketHandler = function(opts) {
 Core.SocketHandler.prototype.initialize = function() {
   var self=this;
   this.addSocketListeners(this.listeners);
-  
-  /*setTimeout(function() {
-    self.socket.emit('subscribe',self.room);
-  },500);*/
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -59,14 +56,21 @@ Core.SocketHandler.prototype.initialize = function() {
 Core.SocketHandler.prototype.addSocketListeners = function(events) {
   var self=this;
   var go=function(type,handler) {self.socket.on(type,handler);}
+  var createHandler = function(hand) {
+    try {
+      return (typeof hand === "string") ? eval(hand) : hand;
+    } catch(err) {
+      return err;
+    }
+  }
   
   try {
-    if (typeof events.length!=='undefined') {    //events was passed in as array, so loop over
+    if (typeof events.length !== 'undefined') {    //events was passed in as array, so loop over
       for (var _i=0;_i<events.length;_i++) {
-        go(events[_i].Name,eval(events[_i].Handler));
+        go(events[_i].Name,createHandler(events[_i].Handler));
       }
     } else if (typeof events==='object') {      //events was passed in as object
-      go(events.Name,eval(events.Handler));
+      go(events.Name,createHandler(events.Handler));
     } else {
       throw new Error('Events needs to either be an object or array.');
     }

@@ -50,7 +50,9 @@
                   saveData = {
                     $set: {
                       lastlogin: new Date(),
-                      username: info.username,
+                      username: info.username.toLowerCase(),
+                      firstname: userInfo.firstname || userInfo.givenName,
+                      lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
                       sAMAccountName: userInfo.sAMAccountName || null,
                       distinguishedName: userInfo.dn || null,
                       email: userInfo.mail || null
@@ -61,7 +63,9 @@
                     type: "activedirectory",
                     created: new Date(),
                     lastlogin: new Date(),
-                    username: info.username,
+                    username: info.username.toLowerCase(),
+                    firstname: userInfo.firstname || userInfo.givenName,
+                    lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
                     sAMAccountName: userInfo.sAMAccountName || null,
                     distinguishedName: userInfo.dn || null,
                     email: userInfo.mail || null
