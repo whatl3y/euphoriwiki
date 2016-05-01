@@ -20,8 +20,11 @@
               });
             },
             function(callback) {
-              config.mongodb.db.collection("event_types").find({}).sort({type:1}).toArray(function(e,types) {
-                callback(e,types);
+              config.mongodb.db.collection("adminsettings").find({domid:"event_types"}).toArray(function(e,types) {
+                if (e) return callback(e);
+                if (!types || !types.length || !(typeof types[0] === "object") || !(types[0].value instanceof Array)) return callback(null,[]);
+                
+                return callback(null,types[0].value.sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
               });
             }
           ],
