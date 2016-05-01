@@ -435,11 +435,13 @@ WikiHandler.prototype.allowedPath=function(path,cb) {
   
   async.waterfall([
     function(callback) {
-      config.mongodb.db.collection("forbidden_paths").find({},{path:1}).toArray(function(_e,paths) {
+      config.mongodb.db.collection("adminsettings").find({domid:"forbidden_paths"},{value:1}).toArray(function(_e,paths) {
         if (_e) return callback(_e);
+        if (!paths || !paths.length || typeof paths[0] !== "object" || !paths[0].value) return callback(null,true);
+        
         var invalid = [];
-        paths.forEach(function(p) {
-          invalid.push(new RegExp("^\/" + p.path + "[\/]*.*$"));
+        paths[0].value.forEach(function(p) {
+          invalid.push(new RegExp("^\/" + p + "[\/]*.*$"));
         });
         
         callback(null,invalid);
@@ -584,33 +586,32 @@ WikiHandler.prototype.event=function(options,cb) {
     },
   ],
     function(err,results) {
-      if (err) cb(err);
-      else {
-        var pageEvents = (results[0].length && typeof results[0][0]==="object") ? results[0][0].events : [];
-        var defaultEvents = results[1] || [];
-        
-        var aggregatedEvents = [].concat(pageEvents,defaultEvents);
-        
-        if (aggregatedEvents.length) {
-          var asyncParallel = aggregatedEvents.map(function(event) {
-            event = event || {};
-            var parameters = Object.merge(params,event.params || {});
-            
-            return function(callback) {
-              var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
-              
-              if (!(result instanceof Error)) callback(null,true);
-              else callback(result);
-            }
-          });
+      if (err) return cb(err);
+      
+      var pageEvents = (results[0].length && typeof results[0][0]==="object") ? results[0][0].events : [];
+      var defaultEvents = results[1] || [];
+      
+      var aggregatedEvents = [].concat(pageEvents,defaultEvents);
+      
+      if (aggregatedEvents.length) {
+        var asyncParallel = aggregatedEvents.map(function(event) {
+          event = event || {};
+          var parameters = Object.merge(params,event.params || {});
           
-          async.parallel(asyncParallel,function(err,results) {
-            if (err) cb(err);
-            else cb(null,true);
-          });
-        } else {
-          cb(null,true);
-        }
+          return function(callback) {
+            var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
+            
+            if (!(result instanceof Error)) callback(null,true);
+            else callback(result);
+          }
+        });
+        
+        async.parallel(asyncParallel,function(err,results) {
+          if (err) cb(err);
+          else cb(null,true);
+        });
+      } else {
+        cb(null,true);
       }
     }
   );

@@ -288,11 +288,24 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
 |RETURNS:    <function>: function that will be executed with arguments from data to evaluate member scope.
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
+  return this.memberScopeTypeFunctionMap()[type].eval;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      memberScopeTypeFunctionMap (PUBLIC)
+|DESCRIPTION:  Returns an object of type->function map to be used to get eval function.
+|PARAMETERS:  Nothing
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <object>: object of functions
+-----------------------------------------------------------------------------------------*/
+AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
   var self = this;
   
-  switch (type) {
-    case "loggedin":
-      return function(username,path,session,cb) {
+  return {
+    loggedin: {
+      name: "User is Logged In",
+      eval: function(username,path,session,cb) {
         var Auth = require("./Authentication.js");
         
         try {
@@ -302,11 +315,11 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
           cb(err);
         }
       }
-      
-      break;
-      
-    case "groupmembership":
-      return function(username,path,aGroupDNs,cb) {
+    },
+    
+    groupmembership: {
+      name: "User is in Specified Group(s)",
+      eval: function(username,path,aGroupDNs,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -341,11 +354,11 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
         } else cb(null,true);
         
       }
-      
-      break;
-      
-    case "username":
-      return function(username,path,aUsers,cb) {
+    },
+    
+    username: {
+      name: "Specific Users You Specify",
+      eval: function(username,path,aUsers,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -365,11 +378,11 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
           cb(err);
         }
       }
-      
-      break;
-      
-    case "wikiadmin":
-      return function(username,path,temp,cb) {
+    },
+    
+    wikiadmin: {
+      name: "Wiki Administrator",
+      eval: function(username,path,temp,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -379,11 +392,11 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
           cb(e,isAdmin);
         });
       }
-      
-      break;
-      
-    case "pageadmin":
-      return function(username,path,temp,cb) {
+    },
+    
+    pageadmin: {
+      name: "Page Administrator",
+      eval: function(username,path,temp,cb) {
         if (!username) {
           cb(null,false);
           return;
@@ -393,27 +406,21 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
           cb(e,isAdmin);
         });
       }
-      
-      break;
-      
-    case "upnsuffix":
-      return function(username,path,data,cb) {
+    },
+    
+    upnsuffix: {
+      name: "UPN Suffix (e.x. @upn.local)",
+      eval: function(username,path,data,cb) {
         cb(null,true);
       }
-      
-      break;
-      
-    case "emailsuffix":
-      return function(username,path,data,cb) {
+    },
+    
+    emailsuffix: {
+      name: "Email Suffix (e.x. @email.com)",
+      eval: function(username,path,data,cb) {
         cb(null,true);
       }
-      
-      break;
-      
-    default:
-      return function(username,path,data,cb) {
-        cb(null,true);
-      }
+    }
   }
 }
 

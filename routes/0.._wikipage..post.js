@@ -148,14 +148,50 @@
           });
         },
         function(callback) {
-          config.mongodb.db.collection("memberscope_types").find({}).sort({type:1}).toArray(function(e,scopetypes) {
-            callback(e,scopetypes);
-          });
+          try {
+            var scopetypes = _.mapObject(Access.memberScopeTypeFunctionMap(),function(val,t) {
+              return {
+                type: t,
+                name: val.name
+              };
+            });
+            scopetypes = _.values(scopetypes).sort(function(a,b) {
+              return (a.name > b.name) ? 1 : -1;
+            });
+            
+            return callback(null,scopetypes);
+            
+          } catch(e) {
+            return callback(e);
+          }          
         },
         function(callback) {
-          config.mongodb.db.collection("event_types").find({scope:"page"}).sort({type:1}).toArray(function(e,types) {
-            callback(e,types);
-          });
+          config.mongodb.db.collection("adminsettings").aggregate([
+            {
+              $match: {domid:"event_types"}
+            },
+            {
+              $project: {
+                _id: 0,
+                value: {
+                  $filter: {
+                    input: "$value",
+                    as: "v",
+                    cond: {
+                      $eq: ["$$v.scope","page"]
+                    }
+                  }
+                }
+              }
+            }
+          ],
+            function(e,types) {
+              if (e) return callback(e);
+              if (!types || !types.length || !(typeof types[0] === "object") || !(types[0].value instanceof Array)) return callback(null,[]);
+              
+              return callback(null,types[0].value.sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
+            }
+          );
         },
         function(callback) {
           wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {
