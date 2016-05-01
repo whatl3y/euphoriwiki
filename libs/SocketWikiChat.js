@@ -1,5 +1,6 @@
 var Authentication = require("./Authentication.js");
 var ChatMessageHandler = require("./ChatMessageHandler.js");
+var WikiHandler = require("./WikiHandler.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketWikiChat.js
@@ -64,11 +65,12 @@ function userTyping(io,socket,data) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function chatMessage(io,socket,data,SocketHandler) {
+  var wiki = new WikiHandler({path:data.room});
   var auth = new Authentication({session: socket.request.session});
   if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
   
   var messageData={
-    user: socket.request.session.username,
+    user: auth.username,
     name: socket.request.session.firstname + " " + socket.request.session.lastname,
     content: data.msg
   };
@@ -84,6 +86,7 @@ function chatMessage(io,socket,data,SocketHandler) {
       
       var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
       io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
+      wiki.event({type:"addchatmessage", params:{user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
     }
   );
 }
