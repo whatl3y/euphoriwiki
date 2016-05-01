@@ -70,17 +70,17 @@ ChatMessageHandler.prototype.findAll = function(page,cb) {
 |RETURNS:		Nothing
 -----------------------------------------------------------------------------------------*/
 ChatMessageHandler.prototype.insert = function(data,cb) {
-	data=data || {};
-	data.creationdate=new Date();
-	data.user=data.user || 'GUEST';
-	data.namespace=data.namespace || this.namespace;
-	data.room=data.room || this.room;
+	data = data || {};
+	data.creationdate = new Date();
+	data.user = data.user || 'GUEST';
+	data.namespace = data.namespace || this.namespace;
+	data.room = data.room || this.room;
 	
 	
 	try {
-		var db=config.mongodb.db;
+		var db = config.mongodb.db;
 		
-		var messages=db.collection(this.MESSAGE_COLLECTION);
+		var messages = db.collection(this.MESSAGE_COLLECTION);
 		messages.insert(data, function(err,r) {
 			if (err) return cb(err);
 			

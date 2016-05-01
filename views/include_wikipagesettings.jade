@@ -80,20 +80,32 @@ div(class="row")
         div Widgets
       div
         form(class="text-center")
+          div.form-group
+            div
+              h3 Widget Orientation
+            div
+              input(type="radio",id="widgetLeft",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'left'")
+              label(for="widgetLeft") Aligned Left (Default)
+              input(type="radio",id="widgetRight",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'right'")
+              label(for="widgetRight") Aligned Right
           div(class="form-group")
             div
-              h3 Add a page tree to the left or right
+              h3 Page navigation tree
             div
               div
                 input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
                 label(for="subpagesWidgetEnabled") Enabled
                 input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
                 label(for="subpagesWidgetDisabled") Disabled
+          div(class="form-group")
+            div
+              h3 Public page chat
+            div
               div
-                input(type="radio",id="subpagesWidgetLeft",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'left'")
-                label(for="subpagesWidgetLeft") Aligned Left (Default)
-                input(type="radio",id="subpagesWidgetRight",name="subpagesWidgetOrientation",data-ng-model="widgets.subpages.orientation",data-ng-value="'right'")
-                label(for="subpagesWidgetRight") Aligned Right
+                input(type="radio",id="subpagesWidgetEnabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="true")
+                label(for="subpagesWidgetEnabled") Enabled
+                input(type="radio",id="subpagesWidgetDisabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="false")
+                label(for="subpagesWidgetDisabled") Disabled
           div(class="separate-vert-small form-group text-center")
             button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
   div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")

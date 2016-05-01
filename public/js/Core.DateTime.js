@@ -1,10 +1,4 @@
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  Core = {};
-  module.exports=Core.DateTime;
-}
-//-------------------------------------------------------
+Core = (typeof Core !== "undefined") ? Core : {};
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Core.DateTime.js
@@ -362,3 +356,10 @@ Core.DateTime.prototype.format = function(format) {
       
   }
 }
+
+//-------------------------------------------------------
+//NodeJS
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports=Core.DateTime;
+}
+//-------------------------------------------------------

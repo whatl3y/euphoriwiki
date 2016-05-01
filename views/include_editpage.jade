@@ -1,12 +1,7 @@
 div(class="wrapper separate-vert-medium")
-  div(class="col-xs-12 col-sm-4 col-md-3",data-ng-show="widgets.subpages.enabled",data-ng-class="(widgets.subpages.orientation=='right') ? 'pull-right' : ''")
-    div(class="padding-medium minH300 border-soft",data-ng-class="(widgets.subpages.orientation=='right') ? 'border-left' : 'border-right'")
-      div(class="text-large") Page tree for  
-        em {{ pathname }}
-      div(class="padding-small",data-ng-show="!functions.objSize(subpages)")
-        alert No pages within {{ pathname }} yet!
-      subpage(subpages="subpages",data-ng-show="functions.objSize(subpages)")
-  div(data-ng-class="functions.style.mainWrapperWidgetClasses()")
+  div(class="col-xs-12 col-sm-4 col-md-3",data-ng-hide="functions.widgets.hideWidgetWrapper()",data-ng-class="(widgets.orientation == 'right') ? 'pull-right' : ''")
+    include include_wikipagewidgets.jade
+  div(data-ng-class="functions.widgets.style.mainWrapperWidgetClasses()")
     div(data-ng-show="editState")
       div(class="row",data-ng-show="!updateable")
         div(class="separate-vert-small text-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3")

@@ -1,0 +1,26 @@
+div(data-ng-controller="chatCtrl")
+  div.row
+    div.col-xs-12
+      div.chat-message-wrapper
+        div(data-ng-show="!messages.length")
+          i
+            small.soft-text No messages on page yet...
+        ul.list-unstyled(data-ng-show="messages.length")
+          li(data-ng-repeat="message in messages")
+            div.row.soft-text
+              small.col-xs-12
+                i {{ functions.date.formatDateTime(message.date) }}: 
+                span  {{ message.name }}
+            div.row
+              div.col-xs-12
+                div {{ message.message }}
+  form(data-ng-submit="handlers.submitMessage(chatMessage)")
+    div.row
+      div.col-xs-12.col-md-9
+        input.form-control(data-ng-model="chatMessage")
+      div.col-xs-12.col-md-3
+        button.btn.btn-success Send
+  div.row(data-ng-show="chatWarning")
+    div.col-xs-12
+      div.separate-vert-small
+        alert {{ chatWarning }}

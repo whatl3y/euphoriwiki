@@ -59,7 +59,8 @@ function userTyping(io,socket,data) {
 -----------------------------------------------------------------------------------------*/
 function chatMessage(io,socket,data,SocketHandler) {
   var messageData={
-    guestname: socket.request.session.firstname,
+    user: socket.request.session.username,
+    name: socket.request.session.firstname + " " + socket.request.session.lastname,
     content: data.msg
   };
   
@@ -68,12 +69,12 @@ function chatMessage(io,socket,data,SocketHandler) {
       if (_err) return log.error(_err);
       
       var mesID = message[0]._id;
-      var name = message[0].guestname;
+      var name = message[0].name || message[0].guestname;
       var cont = message[0].content;
       var d = message[0].creationdate;
       
-      var messageToSend = SocketHandler.messageInformation({id:mesID, name:name, content:cont, date:d});
-      io.to(data.room).emit('chatCtrl_chat',messageToSend);
+      var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
+      io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
     }
   );
 }
@@ -127,9 +128,9 @@ function getMessages(io,socket,data,SocketHandler) {
       
       var messagesToSend=[];
       for (var _i=0;_i<messages.length;_i++) {
-        messagesToSend.push(config.socketio.messageInfo({
+        messagesToSend.push(messageInformation({
           id: messages[_i]._id,
-          name: messages[_i].guestname,
+          name: messages[_i].name || messages[_i].guestname,
           content: messages[_i].content,
           date: messages[_i].creationdate,
           links: messages[_i].links
@@ -138,6 +139,26 @@ function getMessages(io,socket,data,SocketHandler) {
       
       socket.emit('chatCtrl_messages',messagesToSend);
     });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      messageInformation (PUBLIC)
+|DESCRIPTION:  Format messages
+|PARAMETERS:  1. opts(REQ): options about a message
+|CALLED FROM:  Nothing
+|SIDE EFFECTS: Nothing
+|ASSUMES:      Nothing
+|RETURNS:      <object>
+-----------------------------------------------------------------------------------------*/
+function messageInformation(opts) {
+  return {
+    id: opts.id,
+    date: opts.date,
+    name: opts.name,
+    message: opts.content,
+    links: opts.links,
+    submessages: opts.submessages
+  };
 }
 
 //-------------------------------------------------------

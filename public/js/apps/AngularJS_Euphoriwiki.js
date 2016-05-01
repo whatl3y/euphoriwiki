@@ -52,6 +52,7 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
 .controller('mainHomeCtrl',mainHomeCtrl)
 .controller('loginCtrl',loginCtrl)
 .controller('wikiPageCtrl',wikiPageCtrl)
+.controller('chatCtrl',chatCtrl)
 .controller('adminSettingsCtrl',adminSettingsCtrl)
 .controller('adminDiffCtrl',adminDiffCtrl)
 .controller('adminModulesCtrl',adminModulesCtrl)

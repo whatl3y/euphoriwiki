@@ -495,3 +495,23 @@ div.asyncloader {
 .widget a {
   color: #333333 !important;
 }
+
+.chat-message-wrapper {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 10px;
+  border: 1px solid #F0F0F0;
+  border-radius: 2px;
+  height: 350px;
+  overflow-y: scroll;
+}
+
+.chat-message-wrapper li {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 8px;
+}
+
+.chat-message-wrapper li:hover {
+  background: #FAFAFA;
+}

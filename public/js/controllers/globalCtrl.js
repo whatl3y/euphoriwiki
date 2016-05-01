@@ -15,7 +15,7 @@ function globalCtrl($scope,$http) {
       });
       
       $scope.socketHandler.initialize();
-      EuphoriwikiSocket.emit("subscribe",decodeURI(location.pathname));
+      EuphoriwikiSocket.emit("subscribe",{room:decodeURI(location.pathname)});
       
       this.setSearchQuery();
       

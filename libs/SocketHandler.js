@@ -99,34 +99,6 @@ SocketHandler.prototype.getRoomMembers = function(room) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      messageInformation (PUBLIC)
-|DESCRIPTION:  Will get a list of all room members in a namespace/room combo
-|PARAMETERS:  1. options(REQ): the socket id to add to a room
-|CALLED FROM:  
-|SIDE EFFECTS:  Nothing
-|ASSUMES:    Nothing
-|RETURNS:    <object>: object of message information
------------------------------------------------------------------------------------------*/
-SocketHandler.prototype.messageInformation = function(options) {
-  var date=new DateTime({date:opts.date}).calculateDateTime('us','/');
-  
-  if (typeof opts.submessages==='object' && opts.submessages.length>0) {
-    for (var _i=0;_i<opts.submessages.length;_i++) {
-      opts.submessages[_i].creationdate = new DateTime({date:opts.submessages[_i].creationdate}).calculateDateTime('us','/');
-    }
-  }
-  
-  return {
-    id: opts.id,
-    date: date,
-    name: opts.name,
-    message: opts.content,
-    links: opts.links,
-    submessages: opts.submessages
-  };
-}
-
-/*-----------------------------------------------------------------------------------------
 |NAME:      addToRoom (PUBLIC)
 |DESCRIPTION:  Will get a list of all room members in a namespace/room combo
 |PARAMETERS:  1. id(REQ): the socket id to add to a room
