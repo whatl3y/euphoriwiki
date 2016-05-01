@@ -41,8 +41,60 @@ function chatCtrl($scope,$http) {
             $scope.functions.updateMessages(message);
             
           }
+        },
+        {
+          Name: "chatCtrl_usertyping",
+          Handler: function(data) {
+            $scope.usersTyping = $scope.usersTyping || [];
+            
+            $scope.$apply(function() {
+              if (!data.typing) {
+                $scope.usersTyping = $scope.usersTyping.filter(function(user) {
+                  return user.id != data.info.id;
+                });
+              } else {
+                var alreadyCached = $scope.usersTyping.filter(function(user) {
+                  return user.id == data.info.id;
+                }).length;
+                
+                if (!alreadyCached) {
+                  $scope.usersTyping.push(data.info);
+                }
+              }
+            });
+            
+          }
+        },
+        {
+          Name: "chatCtrl_error",
+          Handler: function(warning) {
+            $scope.functions.warning(warning);
+          }
         }
       ]
+    },
+    
+    warning: function(message,remove,fadeTime) {
+      if (remove) return delete($scope.chatWarning);
+      
+      $scope.chatWarning = message;
+      
+      if (fadeTime !== -1) {
+        setTimeout(function() {
+          $scope.$apply(function() {
+            delete($scope.chatWarning);
+          });
+        }, fadeTime || 5000);
+      }      
+    },
+    
+    splitUsersTypingComma: function(ary) {
+      ary = ary || [{}];
+      ary = ary.map(function(a) {
+        return a.name || a.user || "A guest";
+      });
+      
+      return (ary || []).join(", ");
     },
     
     updateMessages: function(mes,type) {
@@ -104,6 +156,10 @@ function chatCtrl($scope,$http) {
         $scope.chatMessage = "";
         EuphoriwikiSocket.emit("chatmessage",{room:$scope.pathname, msg:message});
       }
+    },
+    
+    userTyping: function(text) {
+      EuphoriwikiSocket.emit("usertyping",{room:$scope.pathname, val:text || ""});
     }
   };
   

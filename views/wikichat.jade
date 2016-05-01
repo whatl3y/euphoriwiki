@@ -17,10 +17,13 @@ div(data-ng-controller="chatCtrl")
   form(data-ng-submit="handlers.submitMessage(chatMessage)")
     div.row
       div.col-xs-12.col-md-9
-        input.form-control(data-ng-model="chatMessage")
+        input.form-control(data-ng-model="chatMessage",data-ng-keyup="handlers.userTyping(chatMessage)")
       div.col-xs-12.col-md-3
         button.btn.btn-success Send
-  div.row(data-ng-show="chatWarning")
+  div.row.soft-text(data-ng-show="usersTyping.length")
+    small.col-xs-12
+      div {{ usersTyping.length }} User(s) typing: {{ functions.splitUsersTypingComma(usersTyping) }}
+  div.row.text-center(data-ng-show="chatWarning")
     div.col-xs-12
       div.separate-vert-small
-        alert {{ chatWarning }}
+        alert(type="danger") {{ chatWarning }}

@@ -19,7 +19,8 @@ SocketWikiChat = function(app,socket) {
     getmoremessages: getMessages.bind(this),
     usertyping: userTyping.bind(this),
     chatmessage: chatMessage.bind(this),
-    subchatmessage: subChatMessage.bind(this)
+    subchatmessage: subChatMessage.bind(this),
+    disconnect: disconnect.bind(this)
   }
 }
 
@@ -37,10 +38,15 @@ SocketWikiChat = function(app,socket) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function userTyping(io,socket,data) {
+  var auth = new Authentication({session: socket.request.session});
+  if (!auth.isLoggedIn()) return;
+  
+  var userInfo = this.app.CACHE.sockets[socket.id] || {};
+  
   if (data.val.length>0) {
-    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{id:socket.id, typing:true});
+    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{info:{id:socket.id, user:userInfo.user, name:userInfo.firsname}, typing:true});
   } else {
-    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{id:socket.id, typing:false});
+    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{info:{id:socket.id, user:userInfo.user, name:userInfo.firsname}, typing:false});
   }
 }
 
@@ -58,6 +64,9 @@ function userTyping(io,socket,data) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function chatMessage(io,socket,data,SocketHandler) {
+  var auth = new Authentication({session: socket.request.session});
+  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
+  
   var messageData={
     user: socket.request.session.username,
     name: socket.request.session.firstname + " " + socket.request.session.lastname,
@@ -93,6 +102,9 @@ function chatMessage(io,socket,data,SocketHandler) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function subChatMessage(io,socket,data,SocketHandler) {
+  var auth = new Authentication({session: socket.request.session});
+  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
+  
   var submessageData= {
     guestname: socket.request.session.firstname,
     primaryMessage: data.messageID,
@@ -139,6 +151,26 @@ function getMessages(io,socket,data,SocketHandler) {
       
       socket.emit('chatCtrl_messages',messagesToSend);
     });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      disconnect (PUBLIC)
+|DESCRIPTION:  Disconnect a client
+|PARAMETERS:  1. io(REQ): instance of socket.io in the app we can access info for
+|             2. socket(REQ): The socket we can emit to, if needed
+|             3. data(REQ): the data being returned by the client emit. This is string of what user is typing
+|                       {room:room, val:<string of current info>}
+|             4. SocketHandler(REQ): instance of SocketHandler we can use to do something
+|CALLED FROM:  Nothing
+|SIDE EFFECTS: Nothing
+|ASSUMES:      Nothing
+|RETURNS:      Nothing
+-----------------------------------------------------------------------------------------*/
+function disconnect(io,socket,data,SocketHandler) {
+  if (this.app.CACHE.sockets[socket.id]) {
+    var room = this.app.CACHE.sockets[socket.id].room;
+    socket.broadcast.to(room).emit('chatCtrl_usertyping',{info:{id:socket.id}, typing:false});
+  }
 }
 
 /*-----------------------------------------------------------------------------------------

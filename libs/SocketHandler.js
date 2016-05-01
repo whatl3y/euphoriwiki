@@ -55,8 +55,8 @@ SocketHandler.prototype.connectionEvent = function() {
     //connect socket.io and bind events
     this.io.on('connection',function(socket) {
       var eventHandlers = {
-        global: new SocketGlobal(self.app, socket),
-        chat: new SocketWikiChat(self.app, socket)
+        chat: new SocketWikiChat(self.app, socket),
+        global: new SocketGlobal(self.app, socket)
       };
       
       for (var _category in eventHandlers) {
