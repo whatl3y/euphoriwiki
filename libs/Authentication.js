@@ -120,7 +120,6 @@ Authentication.prototype.passportVerifyCallback = function(type) {
                 if (e) {
                   callback(e);
                 } else {
-                  console.log(doc);
                   self.login(doc,function(_e) {
                     callback(_e,doc);
                   });
@@ -133,12 +132,7 @@ Authentication.prototype.passportVerifyCallback = function(type) {
           }
         ],
           function(err,userRecord) {
-            if (err) {
-              log.error(err);
-              return done(err);
-            } else {
-              return done(null,info.username);
-            }
+            return done(err,info.username);
           }
         );
       }
