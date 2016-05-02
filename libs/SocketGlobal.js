@@ -1,3 +1,5 @@
+var config = require('./config.js');
+var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketGlobal.js

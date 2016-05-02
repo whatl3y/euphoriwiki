@@ -1,6 +1,8 @@
 var Authentication = require("./Authentication.js");
 var ChatMessageHandler = require("./ChatMessageHandler.js");
 var WikiHandler = require("./WikiHandler.js");
+var config = require('./config.js');
+var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketWikiChat.js
@@ -86,7 +88,7 @@ function chatMessage(io,socket,data,SocketHandler) {
       
       var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
       io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
-      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
+      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, room:data.room, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
     }
   );
 }
