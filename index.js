@@ -148,6 +148,7 @@ function main(notClustering) {
       
       //passport setup
       passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
+      passport.use("local-ad", new LocalStrategy(new Authentication().passportVerifyCallback("local-ad")));
       
       if (config.facebook.appId) {
         passport.use("facebook", new FacebookStrategy({
