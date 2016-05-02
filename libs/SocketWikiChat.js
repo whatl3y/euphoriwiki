@@ -86,7 +86,7 @@ function chatMessage(io,socket,data,SocketHandler) {
       
       var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
       io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
-      wiki.event({type:"addchatmessage", params:{user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
+      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
     }
   );
 }
