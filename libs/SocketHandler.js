@@ -1,6 +1,7 @@
 var async = require("async");
 var SocketGlobal = require("./SocketGlobal.js");
 var SocketWikiChat = require("./SocketWikiChat.js");
+var GeoIP = require("./GeoIP.js");
 var DateTime = require("../public/js/Core.DateTime.js");
 var config = require('./config.js');
 var log = require("bunyan").createLogger(config.logger.options());
@@ -101,34 +102,52 @@ SocketHandler.prototype.getRoomMembers = function(room) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      addToRoom (PUBLIC)
 |DESCRIPTION:  Will get a list of all room members in a namespace/room combo
-|PARAMETERS:  1. id(REQ): the socket id to add to a room
-|             2. room(REQ): the room we're looking for members in
+|PARAMETERS:  1. options(REQ): options of info
+|                   options.id: socket ID
+|                   options.room: room we're adding socket to
+|                   options.req: request object
+|             1. cb(REQ): callback function with info of socket added
 |CALLED FROM:  
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    <true/false>: success or not
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.addToRoom = function(id,room,session) {
-  if (!id || !room) return false;
+SocketHandler.prototype.addToRoom = function(options,cb) {
+  options = options || {};
+  var self = this;
   
-  try {
-    this.app.CACHE.sockets[id] = {
+  var id = options.id;
+  var room = options.room;
+  var socket = options.socket;
+  var req = socket.request;
+  
+  if (!id || !room) return cb("No socket ID or room to add this socket to.");
+  
+  new GeoIP().go(socket.handshake.address || "",function(err,geoData) {
+    self.app.CACHE.sockets[id] = {
       socketId: id,
       room: room,
-      user: session.username,
-      firstname: session.firstname,
-      lastname: session.lastname
+      user: req.session.username,
+      firstname: req.session.firstname,
+      lastname: req.session.lastname
     };
     
-    this.app.CACHE.rooms[room] = this.app.CACHE.rooms[room] || {};
-    this.app.CACHE.rooms[room][id] = true;
+    if (typeof geoData==="object" && geoData.ip) {
+      self.app.CACHE.sockets[id].location = {
+        ip: req.ip,
+        city: geoData.city,
+        state: geoData.region_name,
+        stateCde: geoData.region_code,
+        country: geoData.country_name,
+        countryCde: geoData.country_code
+      };
+    }
     
-    return this.app.CACHE.sockets[id];
+    self.app.CACHE.rooms[room] = self.app.CACHE.rooms[room] || {};
+    self.app.CACHE.rooms[room][id] = true;
     
-  } catch(err) {
-    log.error(err);
-    return false;
-  }
+    return cb(null,self.app.CACHE.sockets[id]);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------

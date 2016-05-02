@@ -32,19 +32,21 @@ SocketGlobal = function(app,socket) {
 -----------------------------------------------------------------------------------------*/
 function subscribe(io,socket,data,SocketHandler) {
   var self = this;
-  var info = SocketHandler.addToRoom(socket.id,data.room,socket.request.session);
   
-  if (info) {
-    socket.join(data.room);
-    
-    var roomMembersSocketIDs = SocketHandler.getRoomMembers(data.room);
-    var roomMembers = roomMembersSocketIDs.map(function(id) {
-      return self.app.CACHE.sockets[id];
-    });
-    
-    socket.broadcast.to(data.room).emit("globalCtrl_subscribe",info);
-    socket.emit("globalCtrl_populateclientlist",roomMembers);
-  }
+  SocketHandler.addToRoom({id:socket.id, room:data.room, socket:socket},function(err,info) {
+    if (err) return log.error(err);
+    if (info) {
+      socket.join(data.room);
+      
+      var roomMembersSocketIDs = SocketHandler.getRoomMembers(data.room);
+      var roomMembers = roomMembersSocketIDs.map(function(id) {
+        return self.app.CACHE.sockets[id];
+      });
+      
+      socket.broadcast.to(data.room).emit("globalCtrl_subscribe",info);
+      socket.emit("globalCtrl_populateclientlist",roomMembers);
+    }
+  });
 }
 
 /*-----------------------------------------------------------------------------------------

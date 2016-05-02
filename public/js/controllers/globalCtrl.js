@@ -85,7 +85,6 @@ function globalCtrl($scope,$http) {
               $scope.usersOnPage = clients;
               $scope.functions.showUsersOnPage();
             });
-            
           }
         },
         {
@@ -107,7 +106,7 @@ function globalCtrl($scope,$http) {
     
     showUsersOnPage: function() {
       $scope.usersOnPageSanitized = $scope.usersOnPage.map(function(u) {
-        if (u.id == EuphoriwikiSocket.id) return Object.merge(u,{
+        if (u.socketId == EuphoriwikiSocket.id) return Object.merge(u,{
           firstname: "You",
           lastname: ""
         });

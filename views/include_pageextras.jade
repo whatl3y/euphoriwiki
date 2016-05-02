@@ -19,6 +19,7 @@ div(class="row",data-ng-if="!protected")
           li.padding-small(data-ng-repeat="user in usersOnPageSanitized")
             a(href="#")
               div {{ $index+1 }}. {{ (user.firstname) ? user.firstname + " " + user.lastname : "A guest" }}
+                small.soft-text.margin-left-small(data-ng-show="user.location.city") ({{ user.location.city }}, {{ user.location.stateCde }})
 script(type="text/ng-template" id="subscribeContent.html")
   form
     div(class="modal-header")
