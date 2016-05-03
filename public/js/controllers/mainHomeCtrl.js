@@ -1,7 +1,7 @@
 function mainHomeCtrl($scope,$http) {
   $scope.functions= {
     initialize: function() {
-      var loader = new Core.Modals().asyncLoader({message:"Loading wiki page widgets..."});
+      var loader = new Core.Modals().asyncLoader({message:"Loading wiki page information..."});
       $http.post('/mainhome',{type:"initialize"})
       .success(function(ret) {
         if (!ret.success) {
