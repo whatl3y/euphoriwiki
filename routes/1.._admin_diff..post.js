@@ -46,7 +46,7 @@
         var directory = info.directory;
         var fullDirectory = (path.isAbsolute(directory)) ? directory : path.join(__dirname,directory);
         
-        new ChildProcesses({command:"processes/processdir", args:[fullDirectory], timeout:120}).run(function(err,obj) {
+        new ChildProcesses({command:"bin/processdir", args:[fullDirectory], timeout:120}).run(function(err,obj) {
           if (err) res.json({success:false, error:e});
           else {
             var now = Date.now();

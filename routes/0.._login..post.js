@@ -3,47 +3,61 @@
   var A = new Auth({session:req.session});
   var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
-  switch(info.type) {
-    case "loginLocal":
-      async.waterfall([
-        function(callback) {
-          passport.authenticate("local", function(err,user,passportInfo) {
+  //built strategy authentications for non built-in passport strategies
+  var strategyWaterfallFunctions = [];
+  _.each(fs.readdirSync("./passport_strategies") || [],function(stratFile) {
+    try {
+      var oStrat = require("./passport_strategies/" + stratFile);
+      
+      if (oStrat.BUILTIN) return;
+      if ((typeof oStrat.condition === "undefined") || oStrat.condition) {
+        var stratName = path.basename(stratFile,".js");
+        
+        return strategyWaterfallFunctions.push(function(un,callback) {
+          if (un) return callback(null,un);
+          
+          passport.authenticate(stratName, function(err,user,passportInfo) {
             if (err) return callback(err);
             return callback(null,user);
-          })(req, res);
-        },
-        function(user,callback) {
-          if (user) return callback();
-          
-          passport.authenticate("local-ad", function(err,user,passportInfo) {
-            if (err) return callback(err);
-            if (!user) return callback(new Error("LDAP is not enabled in the wiki."));
             
-            callback();
           })(req, res);
-        },
+        });
+      }
+      
+    } catch(err) {
+      log.error(err);
+    }
+  });
+  
+  switch(info.type) {
+    case "loginLocal":
+      async.waterfall([].concat([
         function(callback) {
-          A.findOrSaveUser({username:info.username},function(err,user) {
-            callback(err,user);
-          });
-        },
-        function(user,callback) {
-          if (user) {
-            A.login(user,function(_e) {
-              callback(_e,user);
-            });
-          } else callback(null,false);
-        },
-        function(userRecord,callback) {
-          if (!userRecord) {
-            var loginUsername = info.username + ((info.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
-            A.find({attribute:"userPrincipalName", value:loginUsername},function(err,info) {
-              callback(err,info,false);
-            });
-          } else callback(null,userRecord,true);
+          return callback(null,false);
         }
       ],
-        function(err,userRecord,existsAlready) {
+      strategyWaterfallFunctions,
+      [
+        function(user,callback) {
+          if (!user) return callback("We were unable to authenticate you. Please make sure your username and password are correct and try again or contact your admin if the problem persists.");
+          
+          A.findOrSaveUser({username:user},function(err,userRecord) {
+            callback(err,user,userRecord);
+          });
+        },
+        function(user,userRecord,callback) {
+          return callback(null,user,userRecord || false);
+        },
+        function(user,userRecord,callback) {
+          if (!userRecord) {
+            var loginUsername = user + ((user.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+            A.find({attribute:"userPrincipalName", value:loginUsername},function(err,info) {
+              callback(err,user,info,false);
+            });
+          } else callback(null,user,userRecord,true);
+        }
+      ]),
+        function(err,user,userRecord,existsAlready) {
           if (err) {
             if (err instanceof Error) log.error(err);
             return res.json({success:false, error:(err instanceof Error) ? "There was an issue trying to log you in. Please try again or contact your wiki admin if the problem persists." : err});
@@ -61,7 +75,7 @@
             saveData = {
               $set: {
                 lastlogin: new Date(),
-                username: info.username.toLowerCase(),
+                username: user.toLowerCase(),
                 firstname: userInfo.firstname || userInfo.givenName,
                 lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
                 sAMAccountName: userInfo.sAMAccountName || null,
@@ -74,7 +88,7 @@
               type: "activedirectory",
               created: new Date(),
               lastlogin: new Date(),
-              username: info.username.toLowerCase(),
+              username: user.toLowerCase(),
               firstname: userInfo.firstname || userInfo.givenName,
               lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
               sAMAccountName: userInfo.sAMAccountName || null,
@@ -87,11 +101,20 @@
           A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
             if (e) {
               res.json({success:false, error:e});
-              log.error(e);
-            } else res.json({success:true});
+              return log.error(e);
+            }
             
-            new WikiHandler().event({type:"login", params:{username:info.username}},function(e,result) {if (e) log.error(e);});
-            audit.log({type:"Login", user:info.username});
+            A.login(user,function(_e) {
+              if (e) {
+                log.error(e);
+                return res.json({success:false, error:"There was an issue trying to log you in. Please try again."});
+              }
+              
+              return res.json({success:true});
+            });
+            
+            new WikiHandler().event({type:"login", params:{username:user}},function(e,result) {if (e) log.error(e);});
+            audit.log({type:"Login", user:user});
           });
         }
       );

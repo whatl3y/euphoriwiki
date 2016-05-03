@@ -27,122 +27,6 @@ Authentication = function(options) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      passportVerifyCallback (PUBLIC)
-|DESCRIPTION:  Tries to authenticate a user based on a username/password combination.
-|PARAMETERS:  1. type(REQ): The strategy type we're authenticating with
-|        2. cb(REQ): callback function to return back whether the user successfully authenticated.
-|SIDE EFFECTS:  Nothing
-|ASSUMES:    Nothing
-|RETURNS:    <function>: the function to bind to a passport strategy
------------------------------------------------------------------------------------------*/
-Authentication.prototype.passportVerifyCallback = function(type) {
-  var self = this;
-  
-  switch (type) {
-    case "local":
-      return function(username,password,done) {
-        if (username && username == self.GLOBAL_ADMIN) return done(null,((password == self.GLOBAL_PASSWORD) ? true : false));
-        
-        self.findOrSaveUser({upsert:false, username:username},function(e,userRecord) {
-          if (e) return done(e);
-          if (!userRecord) return done(null,false);
-          
-          if (userRecord.password) {
-            if (self.validatePassword(password,userRecord.password)) return done(null,username);
-            return done(null,false);
-          }
-          
-          return done(null,false);
-        });
-      }
-      
-    case "local-ad":
-      return function(username,password,done) {
-        config.mongodb.db.collection("adminsettings").find({domid:"authtypes"}).toArray(function(e,types) {
-          if (e) return done(e);
-          if (!types || !types.length) return done(null,false);
-          
-          var ldapEnabled = (typeof types[0].value.ldap !== "undefined" && (types[0].value.ldap === true || types[0].value.ldap === "true"));
-          
-          if (ldapEnabled && config.ldap.url) {      //determines if LDAP is enabled in application
-            self.auth({type:"activedirectory", username:username, password:password},function(err,authenticated) {
-              if (err) return done(err);
-              else if (authenticated) return done(null,username);
-              else return done(null,false);
-            });
-          } else return done(null,false);
-        });
-      }
-      
-    case "facebook":
-      return function(req, accessToken, refreshToken, profile, done) {
-        self.session = req.session;
-        
-        if (typeof profile === "object") {
-          var info = {
-            username: "fb_" + profile.id,
-            firstname: profile.name.givenName,
-            lastname: profile.name.familyName,
-            email: profile.emails[0].value,
-            accessToken: accessToken,
-            refreshToken: refreshToken
-          };
-        } else return done(null,false);
-        
-        async.waterfall([
-          function(callback) {
-            self.findOrSaveUser({username:info.username},function(err,user) {
-              callback(err,user);
-            });
-          },
-          function(user,callback) {
-            if (user) {
-              self.login(user,function(_e) {
-                callback(_e,user);
-              });
-            } else callback(null,false);
-          },
-          function(userRecord,callback) {
-            if (!userRecord) {
-              var saveData = {
-                type: "facebook",
-                created: new Date(),
-                lastlogin: new Date(),
-                username: info.username,
-                firstname: info.firstname,
-                lastname: info.lastname,
-                email: info.email || null,
-                accessToken: info.accessToken,
-                refreshToken: info.refreshToken
-              };
-              
-              self.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
-                if (e) {
-                  callback(e);
-                } else {
-                  self.login(doc,function(_e) {
-                    callback(_e,doc);
-                  });
-                }
-                
-                new WikiHandler().event({type:"login", params:{username:info.username}},function(e,result) {if (e) log.error(e);});
-                audit.log({type:"Login", user:info.username});
-              });
-            } else callback(null,userRecord);
-          }
-        ],
-          function(err,userRecord) {
-            return done(err,info.username);
-          }
-        );
-      }
-    
-    default:
-      return this.passportVerifyCallback("local");
-  }
-}
-
-/*-----------------------------------------------------------------------------------------
 |NAME:      findOrSaveUser (PUBLIC)
 |DESCRIPTION:  Finds and/or saves a username to the DB.
 |PARAMETERS:  1. data(REQ): The data we're saving to the record
@@ -213,11 +97,6 @@ Authentication.prototype.auth = function(options,cb) {
       options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
       this.ldap.auth(options,cb);
       break;
-      
-    /*case "basic":
-      this.passportVerifyCallback("local")(options.username,options.password,cb);
-      
-      break;*/
       
     default:
       options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);

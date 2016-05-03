@@ -147,18 +147,20 @@ function main(notClustering) {
       });
       
       //passport setup
-      passport.use("local", new LocalStrategy(new Authentication().passportVerifyCallback("local")));
-      passport.use("local-ad", new LocalStrategy(new Authentication().passportVerifyCallback("local-ad")));
-      
-      if (config.facebook.appId) {
-        passport.use("facebook", new FacebookStrategy({
-          clientID: config.facebook.appId,
-          clientSecret: config.facebook.appSecret,
-          callbackURL: config.facebook.loginCallbackUrl(),
-          passReqToCallback: true,
-          profileFields: ["id", "emails", "name"]
-        }, new Authentication().passportVerifyCallback("facebook")));
-      }
+      _.each(fs.readdirSync("./passport_strategies") || [],function(stratFile) {
+        try {
+          var oStrat = require("./passport_strategies/" + stratFile);
+          if ((typeof oStrat.condition === "undefined") || oStrat.condition) {
+            var stratName = path.basename(stratFile,".js");
+            
+            if (oStrat.options) return passport.use(stratName,new oStrat.strategy(oStrat.options,oStrat.handler));
+            return passport.use(stratName,new oStrat.strategy(oStrat.handler));
+          }
+          
+        } catch(err) {
+          log.error(err);
+        }
+      });
       
       passport.serializeUser(function(user, done) {done(null, user);});
       passport.deserializeUser(function(user, done) {done(null, user);});

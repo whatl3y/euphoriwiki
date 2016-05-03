@@ -656,7 +656,7 @@
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
         if (/.+openxmlformats\-officedocument.+/.test(fileType)) {
-          new ChildProcesses({command:"processes/wordtohtml", args:filePath, timeout:30}).run(function(err,result) {
+          new ChildProcesses({command:"bin/wordtohtml", args:filePath, timeout:30}).run(function(err,result) {
             if (err) {
               log.error(err);
               res.json({wordsuccess:false, error:"Uh oh, there was an issue trying to convert your document. Please make sure it's a valid Microsoft Word document and try again. If this is a large Word file (>=1mb), it might not be a good idea to try to convert it through this tool as there is a 30 second timeout to convert the document."});
