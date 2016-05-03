@@ -1,11 +1,11 @@
 - // Needs access to the mainHomeCtrl controller
 div(class="col-xs-12")
-  div(class="row padding-medium")
+  div(class="row padding-small")
     div(class="col-xs-12",data-ng-show="widgets.length")
       h1 Quick Links
       alert(type="danger",data-ng-show="error") {{ error }}
       div(class="row")
-        div(class="widget separate-vert-small col-xs-12 col-sm-6 col-lg-3",data-ng-repeat="widget in widgets")
+        div.widget.separate-vert-small.col-xs-12(data-ng-repeat="widget in widgets")
           div(class="shadowsmall-subtle wrapper light gray padding-medium")
             div
               div(class="text-center text-large widget-header") {{ widget.name }}

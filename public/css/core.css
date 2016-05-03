@@ -397,6 +397,10 @@ div.asyncloader {
   padding-left: 15px;
 }
 
+.padding-left-large {
+  padding-left: 30px;
+}
+
 .padding-small {
   padding: 5px;
 }

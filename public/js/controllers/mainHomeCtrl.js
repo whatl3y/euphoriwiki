@@ -2,15 +2,16 @@ function mainHomeCtrl($scope,$http) {
   $scope.functions= {
     initialize: function() {
       var loader = new Core.Modals().asyncLoader({message:"Loading wiki page widgets..."});
-      $http.post('/mainhome',{type:"getWidgets"})
+      $http.post('/mainhome',{type:"initialize"})
       .success(function(ret) {
         if (!ret.success) {
           $scope.error = ret.error;
         } else {
           $scope.widgets = ret.widgets;
+          $scope.categories = ret.categories;
         }
         
-        //console.log(ret);
+        console.log(ret);
         loader.remove();
       })
       .error(function(data,err) {

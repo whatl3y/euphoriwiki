@@ -1,41 +1,50 @@
-include include_search.jade
-
-div(class="col-xs-12")
-  div(class="row",data-ng-controller="mainHomeCtrl")
-    div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
-      div(class="separate-vert-small padding-small shadowsmall-color")
-        h2
-          img(class="img-responsive block-center max200",src="/public/images/marketing/pmg.net.png")
-          div Welcome to the Wiki!
-        div(class="separate-vert-medium text-small text-theme-color padding-medium")
-          h3
-            a(href="wikihelp/howto") How To Guide
-          div This tool was built to have a common, central place to store knowledge, customer-specific information, or anything else that will help us get the word out there about useful stuff!
-          div(class="separate-vert-medium")
-            h3 How do I use it?
-            ul(class="text-left")
-              li
-                div Browse to any page at any point in time to review information.
-              li
-                div
-                  span Use the information in the widgets below, or navigate to any path in the page to create a new page (eg.  
-                  a(href="/customer/mondelez") /customer/Mondelez 
-                  span ).
-              li
-                div You can click the My Page link above to edit your own personal page where no one else can make changes but you.
-    div(class="col-xs-12 padding-medium separate-vert-medium wrapper light gray")
-      div(class="col-xs-12 col-md-6 col-md-offset-3")
-        div(class="panel panel-default")
-          div(class="panel-body")
-            form(data-ng-submit="handlers.newPage(newPagePath)")
-              div(class="form-group text-center")
-                label(for="newPage",class="control-label col-sm-12") 
-                  div(class="text-large") Create a new or go to an existing page
-                  div Enter a page path like, /yourname
-                div(class="separate-vert-small col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-                  input(type="text",class="form-control",id="newPage",name="newPage",data-ng-model="newPagePath")
-                div(class="col-xs-12")
-                  input(type="submit",class="btn btn-success",value="Go To Page")
-                div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
-                  alert(type="danger") {{ newPageError }}
-    include include_homepagewidgets.jade
+div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
+  div.hidden-xs.hidden-sm.col-md-2
+    div.padding-small.border-right.border-soft.minH300
+      include include_categorylist.jade
+  div.col-xs-12.col-md-7
+    div.row
+      div.text-center.col-xs-12
+        div(class="separate-vert-small padding-small shadowsmall-color")
+          h2
+            img(class="img-responsive block-center max200",src="/public/images/marketing/pmg.net.png")
+            div Welcome to the Wiki!
+          div(class="separate-vert-medium text-small text-theme-color padding-medium")
+            h3
+              a(href="wikihelp/howto") How To Guide
+            div This tool was built to have a common, central place to store knowledge, customer-specific information, or anything else that will help us get the word out there about useful stuff!
+            div(class="separate-vert-medium")
+              h3 How do I use it?
+              ul(class="text-left")
+                li
+                  div Browse to any page at any point in time to review information.
+                li
+                  div
+                    span Use the information in the widgets below, or navigate to any path in the page to create a new page (eg.  
+                    a(href="/customer/mondelez") /customer/Mondelez 
+                    span ).
+                li
+                  div You can click the My Page link above to edit your own personal page where no one else can make changes but you.
+      div.col-xs-12.col-md-10.col-md-offset-1
+        div.row
+          div.col-xs-12.separate-vert-small
+            div.panel.panel-primary
+              div.panel-heading
+                div Create or Go To Existing Page
+              div.panel-body
+                form(data-ng-submit="handlers.newPage(newPagePath)")
+                  div(class="form-group text-center")
+                    label(for="newPage",class="control-label col-sm-12") 
+                      - //div(class="text-large") Create a new or go to an existing page
+                      div Enter a page path like, 'yourname' or 'yourname/page1'
+                    div(class="separate-vert-small col-xs-12")
+                      input(type="text",placeholder="yourname, yourname/page1",class="form-control input-lg",id="newPage",name="newPage",data-ng-model="newPagePath")
+                    div.col-xs-12
+                      input(type="submit",class="btn btn-primary",value="Go To Page")
+                    div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
+                      alert(type="danger") {{ newPageError }}
+  div.col-xs-12.col-md-3
+    div.padding-left-large.border-left.border-soft.minH300
+      div.row
+        include include_search.jade
+        include include_homepagewidgets.jade

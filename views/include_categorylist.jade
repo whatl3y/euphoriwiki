@@ -1,0 +1,16 @@
+div.row.padding-small(data-ng-controller="mainHomeCtrl")
+  div.col-xs-12
+    ul.list-unstyled.categories
+      li
+        div.text-large
+          div.text-large Categories
+      li(data-ng-show="categories.length",data-ng-repeat="category in categories")
+        div.margin-left-medium
+          a(data-ng-href="{{ category.path }}")
+            - //span.glyphicon.glyphicon-star
+            span >  
+            span {{ category.path.substring(1) }}
+      li(data-ng-show="!categories.length")
+        div.separate-vert-medium
+          strong
+            i No categories in the wiki yet.

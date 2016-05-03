@@ -7,12 +7,28 @@
   var Access = new AccessManagement({db:config.mongodb.db});
   
   switch(info.type) {
-    case "getWidgets":
-      config.mongodb.db.collection("homewidgets").find({active:true}).toArray(function(_e,widgets) {
-        if (_e) {
-          log.error(_e);
-          res.json({success:false, error:_e});
-        } else if (widgets.length) {
+    case "initialize":
+      async.parallel([
+        function(callback) {
+          config.mongodb.db.collection("wikicontent").find({path:/^\/[^\/]+$/, aliasfor:{$exists:false}},{_id:0,path:1}).sort({path:1}).toArray(function(e,mainPages) {
+            callback(e,mainPages);
+          });
+        },
+        function(callback) {
+          config.mongodb.db.collection("homewidgets").find({active:true}).toArray(function(_e,widgets) {
+            callback(_e,widgets);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) {
+            log.error(err);
+            res.json({success:false, error:err});
+          }
+          
+          var categories = results[0] || [];
+          var widgets = results[1] || [];
+          
           log.debug("Got widgets: ",widgets);
           
           var aWidgets = _.map(widgets,function(widget) {
@@ -62,15 +78,15 @@
                       });
                     });
                     
-                    res.json({success:true, widgets:returnedWidgets});
+                    res.json({success:true, widgets:returnedWidgets, categories:categories});
                     log.debug("Widgets returning to client: ",returnedWidgets);
                   }
                 }
               );
             }
           });
-        } else res.json({success:false});
-      });
+        }
+      );
       
       break;
       
