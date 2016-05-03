@@ -11,7 +11,7 @@ function mainHomeCtrl($scope,$http) {
           $scope.categories = ret.categories;
         }
         
-        console.log(ret);
+        //console.log(ret);
         loader.remove();
       })
       .error(function(data,err) {

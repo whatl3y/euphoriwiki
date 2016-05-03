@@ -1,6 +1,6 @@
 - //requires being included directly within globalCtrl scope for handlers.search() to run
 
-div.separate-vert-small.col-xs-12
+div.separate-vert-small.col-xs-12(data-ng-controller="globalCtrl")
   div.row.text-center
     div(class="col-xs-12")
       form(method="post",data-ng-submit="handlers.search(query)")
