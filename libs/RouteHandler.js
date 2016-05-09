@@ -14,8 +14,10 @@ var config = require("./config.js");
 |      *LJW 1/25/2016 - created
 -----------------------------------------------------------------------------------------*/
 RouteHandler=function(options) {
-  this.path = "routes";
-  this.collection = "routes";
+  options = options || {};
+  
+  this.path = options.path || "routes";
+  this.collection = options.collection || "routes";
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -32,11 +34,21 @@ RouteHandler.prototype.update=function(cb) {
   
   async.waterfall([
     function(callback) {
-      fs.readdir(self.path,function(err,files) {
-        callback(err,files);
+      new MDB({config:config, callback:function(err,opts) {
+        callback(err,opts.db);
+      }});
+    },
+    function(db,callback) {
+      db.collection(self.collection).remove({},null,function(err) {
+        callback(err,db);
       });
     },
-    function(files,callback) {
+    function(db,callback) {
+      fs.readdir(self.path,function(err,files) {
+        callback(err,db,files);
+      });
+    },
+    function(db,files,callback) {
       async.each(files,function(file,_callback) {
         async.waterfall([
           function(__callback) {
@@ -45,12 +57,6 @@ RouteHandler.prototype.update=function(cb) {
             });
           },
           function(content,__callback) {
-            new MDB({config:config, callback:function(err,opts) {                
-                __callback(err,opts.db,file,content);
-              }
-            });
-          },
-          function(db,file,content,__callback) {
             var routeInfo = file.replace(/\.js/g,"").replace(/_/g,"/").replace(/\[star\]/g,"*").replace(/\[colon\]/g,":").split("..");
             var routeOrder = Number(routeInfo[0] || 0);
             var routePath = routeInfo[1];

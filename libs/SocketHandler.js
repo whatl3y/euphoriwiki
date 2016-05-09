@@ -124,6 +124,8 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
   if (!id || !room) return cb("No socket ID or room to add this socket to.");
   
   new GeoIP().go(socket.handshake.address || "",function(err,geoData) {
+    if (err) log.error(err);
+    
     self.app.CACHE.sockets[id] = {
       socketId: id,
       room: room,

@@ -79,17 +79,18 @@ html
   
     title= pageTitle
   body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl")
-    div(class="container-fluid")
-      include ./header.jade
-      
-      div(id="global-error-wrapper",style="display:none")
-        alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
-          span(class="glyphicon glyphicon-warning-sign")
-          span {{ global.error }}
-          span(class="glyphicon glyphicon-warning-sign")
-      
-      - if (!data.session.loggedIn)
-        div(class="row")
-          include include_login.jade
+    div.container-fluid
+      div.main-header-wrapper(data-ng-hide="hideAllOfHeader")
+        include ./header.jade
+        
+        div(id="global-error-wrapper",style="display:none")
+          alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
+            span(class="glyphicon glyphicon-warning-sign")
+            span {{ global.error }}
+            span(class="glyphicon glyphicon-warning-sign")
+        
+        - if (!data.session.loggedIn)
+          div(class="row")
+            include include_login.jade
       
       block main

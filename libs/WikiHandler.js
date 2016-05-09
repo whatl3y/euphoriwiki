@@ -187,8 +187,8 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      getTemplates (PUBLIC)
-|DESCRIPTION:  Gets all the active templates in the DB that users can use.
+|NAME:      updateAliases (PUBLIC)
+|DESCRIPTION:  Updates page aliases.
 |PARAMETERS:  1. options(REQ): options for this method
 |                    options.aliases: array of aliases 
 |                       ['alias1','alias2',...]

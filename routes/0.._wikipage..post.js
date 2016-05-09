@@ -80,7 +80,8 @@
                   password: pageInfo[0].password,
                   pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
                   viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
-                  pageEvents: pageInfo[0].events
+                  pageEvents: pageInfo[0].events,
+                  hideAllOfHeader: pageInfo[0].hideAllOfHeader
                 };
               }
               
@@ -786,26 +787,50 @@
       break;
     
     case "updatePageSetting":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      else {
-        var key = info.key;
-        var val = info.value;
-        
-        if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
-        if (key=="settings.viewscope") for (var _k in val) val[_k] = Object.removeDollarKeys(val[_k]);
-        
-        var o = {};
-        o[key] = val;
-        var saveData = {}
-        saveData[(val)?"$set":"$unset"] = o;
-        
-        config.mongodb.db.collection("wikicontent").update({path:wiki.path},saveData,{ upsert:true },function(err) {
-          if (err) res.json({success:false, error:err});
-          else res.json({success:true});
+      async.parallel([
+        function(callback) {
+          try {
+            var loggedIn = A.isLoggedIn();
+            callback(null,loggedIn);
+          } catch(e) {
+            callback(e);
+          }
+        },
+        function(callback) {
+          Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) return res.json({success:false, error:err});
           
-          audit.log({type:"Update Page Setting", additional:{path:wiki.path,settingInfo:o}});
-        });
-      }
+          var isLoggedIn = results[0];
+          var canEdit = results[1];
+          
+          if (!isLoggedIn) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+          if (!canEdit) return res.json({success:false, error:"You must be a page administrator to make edits to page settings."});
+          
+          var key = info.key;
+          var val = info.value;
+          
+          if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
+          if (key=="settings.viewscope") for (var _k in val) val[_k] = Object.removeDollarKeys(val[_k]);
+          if (val === "false") val = false;
+          
+          var o = {};
+          o[key] = val;
+          var saveData = {}
+          saveData[(val)?"$set":"$unset"] = o;
+          
+          config.mongodb.db.collection("wikicontent").update({path:wiki.path},saveData,{ upsert:true },function(err) {
+            if (err) res.json({success:false, error:err});
+            else res.json({success:true});
+            
+            audit.log({type:"Update Page Setting", additional:{path:wiki.path,settingInfo:o}});
+          });
+        }
+      );
       
       break;
     

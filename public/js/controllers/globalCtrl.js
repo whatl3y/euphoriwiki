@@ -1,6 +1,12 @@
 function globalCtrl($scope,$http) {
   window.EuphoriwikiSocket=window.EuphoriwikiSocket || io(LOCAL_DATA.wshost);    //io(LOCAL_DATA.wshost+":"+LOCAL_DATA.port+LOCAL_DATA.namespace);
   
+  //setup event listener for hiding the header
+  $scope.$on("hideAllOfHeader",function(_event,hide) {
+    $scope.hideAllOfHeader = hide;
+    //$scope.$broadcast("hideAllOfHeader",hide);
+  });
+  
   $scope.global = {};
   $scope.functions= {
     initialize: function() {

@@ -2,6 +2,43 @@
 - //has access to properties in wikiPageCtrl controller
 div(class="row")
   div(class="col-xs-12 col-md-10 col-md-offset-1")
+    h1 Inherited Settings
+    small The following settings will be inherited at lower child page levels to this one unless overridden at that page.
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
+      div(class="text-large header padding-small")
+        div Page Administrators
+      div
+        div(class="separate-vert-small text-theme-color")
+          em.
+            This will determine a subset of people who have access to edit 
+            this AND any subpages to this page. If no one here is specified, 
+            then this setting will ascend up the page tree to see if there are administrators 
+            specified there. If there are none at any level above this page, anyone can edit this page.
+        div
+          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
+            span {{ admin }}
+            small(class="margin-left-small")
+              a(href="javascript:void(0)",data-ng-click="pageadmins.splice($index,1)")
+                em x
+        div(class="row separate-vert-small")
+          div(class="text-center")
+            form(class="form-inline",data-ng-submit="pageadmins.push(tempAd);tempAd=''")
+              div(class="form-group")
+                label(for="tempAdmins") New Page Administrator
+                input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
+                button(type="submit",class="btn btn-default margin-left-small") Add Username
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
+      div(class="text-large header padding-small")
+        div Who Can View This and Child Pages?
+      div(class="padding-small")
+        - var scopeAry = "viewscopes"
+        include include_viewscopeConfigModule.jade
+  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
+  div(class="col-xs-12 col-md-10 col-md-offset-1")
     h1 Non-inherited Settings
     small The following settings will only be applied to the current page, {{ pathname }}, and will not affect lower child pages.
   div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
@@ -111,6 +148,21 @@ div(class="row")
   div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
     div(class="shadowsmall-subtle wrapper light gray padding-small")
       div(class="text-large header padding-small")
+        div Hide All Header Information on Page
+      div
+        form
+          div.form-group
+            div.separate-vert-small This will hide the header navigation and all of the associated wiki links that don't pertain to this page's content.
+            div.margin-left-large
+              input(type="radio",id="hideHeaderNo",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="0",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
+              label(for="hideHeaderNo") No (Default)
+              input(type="radio",id="hideHeaderYes",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="1",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
+              label(for="hideHeaderYes") Yes
+          div(class="separate-vert-small form-group text-center")
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('hideAllOfHeader',hideAllOfHeader)") Save Hiding Header Info
+  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
+    div(class="shadowsmall-subtle wrapper light gray padding-small")
+      div(class="text-large header padding-small")
         div Password Protect Page
       div
         form
@@ -124,43 +176,6 @@ div(class="row")
             div(class="text-center col-xs-12")
               button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
               button(class="btn btn-warning margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
-  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
-  div(class="col-xs-12 col-md-10 col-md-offset-1")
-    h1 Inherited Settings
-    small The following settings will be inherited at lower child page levels to this one unless overridden at that page.
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Page Administrators
-      div
-        div(class="separate-vert-small text-theme-color")
-          em.
-            This will determine a subset of people who have access to edit 
-            this AND any subpages to this page. If no one here is specified, 
-            then this setting will ascend up the page tree to see if there are administrators 
-            specified there. If there are none at any level above this page, anyone can edit this page.
-        div
-          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
-            span {{ admin }}
-            small(class="margin-left-small")
-              a(href="javascript:void(0)",data-ng-click="pageadmins.splice($index,1)")
-                em x
-        div(class="row separate-vert-small")
-          div(class="text-center")
-            form(class="form-inline",data-ng-submit="pageadmins.push(tempAd);tempAd=''")
-              div(class="form-group")
-                label(for="tempAdmins") New Page Administrator
-                input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
-                button(type="submit",class="btn btn-default margin-left-small") Add Username
-          div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Who Can View This and Child Pages?
-      div(class="padding-small")
-        - var scopeAry = "viewscopes"
-        include include_viewscopeConfigModule.jade
   div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
   div(class="col-xs-12 col-md-10 col-md-offset-1")
     h1 Delete Page

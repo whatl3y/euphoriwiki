@@ -92,6 +92,9 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
             $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
             $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
             $scope.pageEvents = ret.pageEvents || [];
+            
+            //hiding the header information when desired
+            $scope.functions.hideAllOfHeader(ret.hideAllOfHeader);
           }
           
           $scope.functions.postInitialize();
@@ -130,6 +133,18 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         console.log("postinit unsuccessful",data,err);
         loader.remove();
       });
+    },
+    
+    hideAllOfHeader: function(hide) {
+      hide = hide || false;
+      
+      if (hide) {
+        $scope.hideAllOfHeader = true;
+        $scope.$emit("hideAllOfHeader",true);
+      } else {
+        $scope.hideAllOfHeader = false;
+        $scope.$emit("hideAllOfHeader",false);
+      }
     },
     
     rteInit: function(bind) {

@@ -43,8 +43,10 @@ GeoIP.prototype.go = function(ip,cb) {
   
   this.setPath(ip);
   this.client.request(null,function(err,data) {
-    if (err) cb(err);
-    else cb(null,(self.dataType=="json") ? JSON.parse(data) : data);
+    if (err) return cb(err);
+    if (!data) return cb("No location information for IP address: " + ip)
+    
+    return cb(null,(self.dataType=="json") ? JSON.parse(data) : data);
   });
 }
 

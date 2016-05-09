@@ -117,7 +117,7 @@ function chatCtrl($scope,$http) {
     },
     
     bindMessages: function(messages) {
-      console.log(messages);
+      //console.log(messages);
       $scope.functions.updateMessages(messages,"absolute");
     },
     

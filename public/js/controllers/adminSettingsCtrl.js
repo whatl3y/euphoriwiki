@@ -4,7 +4,7 @@ function adminSettingsCtrl($scope,$http,$sce) {
   $scope.functions= {
     initialize: function() {
       new Core.Modals().alertPopup({loading:true});
-      $http.post('/adminsettings',{type:"init"})
+      $http.post('/admin',{type:"init"})
       .success(function(ret) {
         if (ret.success) $scope.settings = ret.settings;
         else {
@@ -36,7 +36,7 @@ function adminSettingsCtrl($scope,$http,$sce) {
   $scope.handlers = {
     saveSetting: function(settingKey,value) {
       var loader = new Core.Modals().asyncLoader({message:"Saving setting key: "+settingKey});
-      $http.post('/adminsettings',{type:"save", key:settingKey, value:value})
+      $http.post('/admin',{type:"save", key:settingKey, value:value})
       .success(function(ret) {
         if (ret.success) console.log("Successfully saved setting key: "+settingKey);
         else {

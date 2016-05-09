@@ -30,7 +30,7 @@ AccessManagement = function(options) {
 AccessManagement.prototype.isAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
-  var editOnly = (options.editOnly===false) ? false : true;
+  var editOnly = (options.editOnly === false) ? false : true;
   
   var self = this;
   
