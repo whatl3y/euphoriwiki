@@ -6,10 +6,9 @@ div.row.padding-small(data-ng-controller="mainHomeCtrl")
           div.text-large Categories
       li(data-ng-show="categories.length",data-ng-repeat="category in categories")
         div.margin-left-medium
-          a(data-ng-href="{{ category.path }}")
-            - //span.glyphicon.glyphicon-star
-            span >  
-            span {{ category.path.substring(1) }}
+          span.glyphicon.glyphicon-triangle-right
+          - //span > 
+          a(data-ng-href="{{ category.path }}") {{ category.path.substring(1) }}
       li(data-ng-show="!categories.length")
         div.separate-vert-medium
           strong

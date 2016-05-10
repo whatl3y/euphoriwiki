@@ -1,10 +1,14 @@
 div(data-ng-show="widgets.subpages.enabled")
-  div(class="padding-medium minH300 border-soft",data-ng-class="(widgets.orientation=='right') ? 'border-left' : 'border-right'")
-    div(class="text-large") Page tree for  
-      em {{ pathname }}
-    div(class="padding-small",data-ng-show="!functions.objSize(subpages)")
-      alert No pages within {{ pathname }} yet!
-    subpage(subpages="subpages",data-ng-show="functions.objSize(subpages)")
+  div.panel.panel-default
+    div.panel-heading
+      div(class="text-large") Page tree for  
+        em {{ pathname }}
+    div.panel-body
+      div
+        - //(class="border-soft",data-ng-class="(widgets.orientation=='right') ? 'border-left' : 'border-right'")
+        div(class="padding-small",data-ng-show="!functions.objSize(subpages)")
+          alert No pages within {{ pathname }} yet!
+        subpage(subpages="subpages",data-ng-show="functions.objSize(subpages)")
 div(data-ng-show="widgets.chat.enabled")
   div(class="padding-medium minH300 border-soft",data-ng-class="(widgets.orientation=='right') ? 'border-left' : 'border-right'")
     div(class="text-large") Chat: {{ pathname }}

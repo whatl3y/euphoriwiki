@@ -18,7 +18,7 @@
 |RETURNS:    number representing size of object
 -----------------------------------------------------------------------------------------*/
 Object.size = function(obj) {
-  var size=0;
+  var size = 0;
     for (var key in obj) {
       if (obj.hasOwnProperty(key)) {
         size++;

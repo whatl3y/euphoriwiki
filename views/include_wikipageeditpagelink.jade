@@ -1,4 +1,4 @@
-- if ((typeof editkey!=="undefined" && data.external.EXTRA[editkey]))
+- if (typeof data.external.EXTRA.canSeeEditButton !== "undefined" && data.external.EXTRA.canSeeEditButton)
   div(class="row",data-ng-if="!protected")
     div(class="col-xs-12 text-right")
       h5

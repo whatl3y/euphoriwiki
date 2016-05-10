@@ -7,7 +7,7 @@ function subpageDir() {
       subpages: "=",
       link: "="
     },
-    template: "<ul class='list-unstyled list-left subpages border-left border-soft'><subpage-member ng-repeat='(key,page) in subpages' subpage-member-key='key' subpage-member-val='page' subpage-member-link='link||" + '""' + "'></subpage-member></ul>"
+    template: "<ul class='list-unstyled list-left subpages'><subpage-member data-ng-repeat='(key,page) in subpages' subpage-member-key='key' subpage-member-val='page' subpage-member-link='link || \"\"' show-children='showChildren'></subpage-member></ul>"
   }
 }
 
@@ -19,13 +19,16 @@ function subpageMemberDir($compile) {
     scope: {
       subpageMemberLink: "=",
       subpageMemberKey: "=",
-      subpageMemberVal: "="
+      subpageMemberVal: "=",
+      showChildren: "="
     },
-    template: "<li><div class='padding-small radius-sm subpage-page'><a data-ng-href='{{ subpageMemberLink + " + '"/"' + " + subpageMemberKey }}'>{{ subpageMemberKey }}</a></div><!--<div><small>Some small text</small></div>--></li>",
+    template: "<li><span class='click glyphicon' data-ng-class='(showChildren) ? \"glyphicon-triangle-bottom\" : \"glyphicon-triangle-right\"' data-ng-click='showChildren = true'></span><span class='padding-small radius-sm subpage-page'><a data-ng-href='{{ subpageMemberLink + " + '"/"' + " + subpageMemberKey }}'>{{ subpageMemberKey }}</a></span><!--<span><small>Some small text</small></span>--></li>",
     link: function($scope, $element, $attrs) {
-      if (angular.isObject($scope.subpageMemberVal)) {
-        $element.append("<subpage subpages='subpageMemberVal' link='subpageMemberLink + " + '"/"' + " + subpageMemberKey'></subpage>");
+      if (angular.isObject($scope.subpageMemberVal) && Object.size($scope.subpageMemberVal)) {
+        $element.append("<subpage subpages='subpageMemberVal' link='subpageMemberLink + " + '"/"' + " + subpageMemberKey' data-ng-show='showChildren'></subpage>");
         $compile($element.contents())($scope);
+      } else {
+        $scope.showChildren = true;
       }
     }
   }
