@@ -1,0 +1,24 @@
+extends layout
+
+block main  
+  div(class="row",data-ng-controller="adminVisitorsCtrl")
+    div(class="col-xs-12")
+      include include_adminnav.jade
+    div(class="col-xs-12 col-md-10 col-md-offset-1")
+      div.row
+        h1.col-xs-12 Current Visitors
+      div.row
+        div.col-xs-12.col-md-10-col-md-offset-1
+          table.table.table-responsive.table-striped.table-bordered
+            tr
+              th User
+              th City
+              th State
+              th Country
+              th Current Page
+            tr(data-ng-repeat="(socketId,info) in visitors")
+              td {{ info.user || "Guest" }} {{ (info.firstname) ? "(" + info.firstname + " " + info.lastname + ")" : "" }}
+              td {{ info.location.city || "N/A" }}
+              td {{ info.location.state || "N/A" }}
+              td {{ info.location.country || "N/A" }}
+              td {{ info.room || "N/A" }}

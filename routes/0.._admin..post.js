@@ -68,6 +68,11 @@
       
       break;
     
+    case "visitors":
+      res.json({success:true, visitors:config.socketio.CACHE.sockets});
+      
+      break;
+    
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
