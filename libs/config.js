@@ -135,6 +135,10 @@ var self = module.exports = {
         pass: process.env.SMTP_PASSWORD
       },
       
+      tls: {
+        ciphers: process.env.SMTP_TLSCIPHERS
+      },
+      
       defaultEmail: process.env.SMTP_DEFAULTEMAIL,
       defaultName: process.env.SMTP_DEFAULTNAME
     },
@@ -145,8 +149,7 @@ var self = module.exports = {
           //pool: this.core.pool,
           host: this.core.host,
           port: Number(this.core.port || 587),
-          secure: this.core.secure || false,
-          authMethod: this.core.authMethod || "PLAIN"
+          secure: this.core.secure || false
         };
         
         if (typeof this.core.auth==="object" && this.core.auth.user) {
@@ -156,9 +159,17 @@ var self = module.exports = {
           };
         }
         
+        if (this.core.tls.ciphers) o.tls = this.core.tls;
+        
         return o;
       } else {
-        return null;
+        return {
+          service: "gmail",
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
+          }
+        };
       }
     }
   },
