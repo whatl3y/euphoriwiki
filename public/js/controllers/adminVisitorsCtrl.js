@@ -3,9 +3,30 @@ function adminVisitorsCtrl($scope,$http) {
     initialize: function() {
       $scope.functions.ajax("visitors",null,function(e,ret) {
         if (e) return console.log(e);
-        
+                
         $scope.visitors = ret.visitors;
       });
+      
+      $scope.socketHandler=new Core.SocketHandler({
+        $scope: $scope,
+        socket: EuphoriwikiSocket,
+        wshost: LOCAL_DATA.wshost,
+        namespace: LOCAL_DATA.namespace || "/",
+        events: this.globalSocketEvents()
+      }).initialize();
+    },
+    
+    globalSocketEvents: function() {
+      return [
+        {
+          Name: "adminVisitorsCtrl_update",
+          Handler: function(updatedVisitors) {
+            $scope.$apply(function() {
+              $scope.visitors = updatedVisitors;
+            });
+          }
+        }
+      ]
     },
     
     ajax: function(type,data,cb) {

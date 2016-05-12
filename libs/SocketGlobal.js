@@ -47,6 +47,8 @@ function subscribe(io,socket,data,SocketHandler) {
       
       socket.broadcast.to(data.room).emit("globalCtrl_subscribe",info);
       socket.emit("globalCtrl_populateclientlist",roomMembers);
+      
+      io.to("/admin/visitors").emit("adminVisitorsCtrl_update",self.app.CACHE.sockets);
     }
   });
 }
@@ -65,7 +67,10 @@ function subscribe(io,socket,data,SocketHandler) {
 -----------------------------------------------------------------------------------------*/
 function disconnect(io,socket,data,SocketHandler) {
   var room = SocketHandler.disconnect(socket.id);
-  if (room) io.to(room).emit("globalCtrl_disconnect",socket.id);
+  if (room) {
+    io.to(room).emit("globalCtrl_disconnect",socket.id);
+    io.to("/admin/visitors").emit("adminVisitorsCtrl_update",this.app.CACHE.sockets);
+  }
 }
 
 //-------------------------------------------------------
