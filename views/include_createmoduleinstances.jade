@@ -7,7 +7,7 @@ form
     button(class="btn btn-default margin-left-small",data-ng-click="functions.updateAryLength('moduleInstances','dec')",popover-trigger="mouseenter",popover="Delete last event.")
       span(class="glyphicon glyphicon-minus")
   div(class="col-xs-12 padding-small text-center",data-ng-show="!moduleInstances.length")
-    alert There are no modules configured for this page.
+    alert There are no modules configured.
   div(class="col-xs-12 col-md-6 col-lg-4 padding-small",data-ng-repeat="instance in moduleInstances",data-ng-show="moduleInstances.length")
     div(class="wrapper light gray padding-medium")
       div(class="text-large")

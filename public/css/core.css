@@ -523,3 +523,7 @@ div.asyncloader {
 .chat-message-wrapper li:hover {
   background: #FAFAFA;
 }
+
+#admin-nav > a > button {
+  margin-bottom: 3px;
+}
