@@ -64,7 +64,7 @@
               callback(e);
             }
             
-          } else callback("We couldn't find the module provided. Please make sure the module has not been delete by contacting your wiki administrator.");
+          } else callback("We couldn't find the module provided. Please make sure the module has not been deleted by contacting your wiki administrator.");
         },
         function(result,callback) {
           var module = moduleTemplate;

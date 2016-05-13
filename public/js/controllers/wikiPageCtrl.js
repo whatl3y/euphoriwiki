@@ -120,7 +120,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         } else {
           $scope.content.versions = ret.versions || [];
           $scope.availableModules = ret.modules || [];
-          $scope.pageModules = ret.pageModules || [];
+          $scope.moduleInstances = ret.pageModules || [];
           $scope.scopeTypes = ret.scopeTypes || [];
           $scope.eventTypes = ret.eventTypes || [];
           $scope.aliases = ret.pageAliases || [];
@@ -182,6 +182,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     updateAryLength: function(scopeKey,which) {
       scopeKey = scopeKey || "";
       which = which || "inc";
+      
+      $scope[scopeKey] = $scope[scopeKey] || [];
       
       switch(which) {
         case "inc":
@@ -478,7 +480,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
-    savePageModules: function(modules) {
+    saveModuleInstances: function(modules) {
       var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
       $http.post('/wikipage',{type:"updatePageModules", page:$scope.pathname, modules:modules})
       .success(function(ret) {

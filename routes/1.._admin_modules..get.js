@@ -14,7 +14,7 @@
         //get the admin settings to include
         
         res.render("admin_modules",config.view.send(req,{obj:o}));
-      } else res.redirect("/user/" + username);
+      } else res.redirect("/");
     });
   }
 })

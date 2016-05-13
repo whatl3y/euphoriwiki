@@ -31,14 +31,33 @@
         else {
           switch(info.type) {
             case "init":
-              config.mongodb.db.collection("wiki_modules").find({}).toArray(function(e,modules) {
-                if (e) {
-                  res.json({success:false, error:e});
-                  log.error(e);
-                } else {
-                  res.json({success:true, modules:modules});
+              var path = info.page || "";
+              var wiki = new WikiHandler({path:decodeURI(path)});
+              
+              async.parallel([
+                function(callback) {
+                  wiki.getModules({filters:{}},function(e,modules) {
+                    callback(e,modules);
+                  });
+                },
+                function(callback) {
+                  wiki.getModuleInstances(null,function(e,instances) {
+                    callback(e,instances);
+                  });
                 }
-              });
+              ],
+                function(e,results) {
+                  if (e) {
+                    res.json({success:false, error:e});
+                    return log.error(e);
+                  }
+                  
+                  var modules = results[0];
+                  var instances = results[1];
+                  
+                  res.json({success:true, modules:modules, instances:instances});
+                }
+              );
               
               break;
             
@@ -87,7 +106,7 @@
                       
                       res.json({success:true, module:updatedModule});
                       
-                      if (oldModule.length && newFileName) {
+                      if (oldModule.length && oldModule[0].template && newFileName) {
                         fh.deleteFile({filename:oldModule[0].template},function(e) {
                           if (e) log.error(e);
                         });

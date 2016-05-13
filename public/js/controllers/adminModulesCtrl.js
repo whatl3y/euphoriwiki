@@ -1,12 +1,16 @@
 function adminModulesCtrl($scope,$http,Upload) {
+  $scope.pathname = decodeURI(location.pathname);
+  
   $scope.functions= {
     initialize: function() {
-      $scope.functions.ajax("init",null,function(e,ret) {
+      $scope.functions.ajax("init",{page:$scope.pathname},function(e,ret) {
         if (e) console.log(e);
         else {
           $scope.modules = ret.modules || [];
+          $scope.availableModules = ret.modules || [];
+          $scope.moduleInstances = ret.instances || [];
         }
-        console.log(e,ret);
+        //console.log(e,ret);
       });
     },
     
@@ -25,6 +29,13 @@ function adminModulesCtrl($scope,$http,Upload) {
           $scope[scopeKey].pop();
           break;
       }
+    },
+    
+    getModuleDescription: function(moduleKey) {
+      moduleKey = moduleKey || null;
+      if (moduleKey) return $scope.availableModules.filter(function(m){return m.key == moduleKey})[0].description || "";
+      
+      return "";
     },
     
     updateNewModuleConfigLength: function(which) {
@@ -114,6 +125,7 @@ function adminModulesCtrl($scope,$http,Upload) {
     
     editModule: function(oModule) {
       $scope.newModule = oModule || {};
+      $scope.editPaneOpen = true;
     },
     
     deleteModule: function(key,template,scopeAryIndex) {
@@ -123,6 +135,21 @@ function adminModulesCtrl($scope,$http,Upload) {
           else $scope.modules.splice(scopeAryIndex,1);
         });
       }
+    },
+    
+    saveModuleInstances: function(modules) {
+      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      $http.post('/wikipage',{type:"updatePageModules", page:$scope.pathname, modules:modules})
+      .success(function(ret) {
+        if (ret.success) $scope.functions.initialize();
+        else console.log(ret);
+        
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        loader.remove();
+      });
     }
   };
   

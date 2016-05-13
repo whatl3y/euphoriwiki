@@ -626,7 +626,7 @@ WikiHandler.prototype.event=function(options,cb) {
 WikiHandler.prototype.getModules=function(options,cb) {
   options = options || {};
   
-  var filters = options.filters || {};
+  var filters = options.filters || { active:{$ne:false} };
   var fields = options.fields || {};
   
   async.parallel([

@@ -102,6 +102,10 @@ FileHandler.prototype.getFile=function(options,cb) {
       cb(null,data);
     });
     
+    readStream.on("error",function(e) {
+      cb(e);
+    });
+    
   } catch(err) {
     cb(err);
   }

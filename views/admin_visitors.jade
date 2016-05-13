@@ -24,5 +24,6 @@ block main
               td {{ info.location.city || "N/A" }}
               td {{ info.location.state || "N/A" }}
               td {{ info.location.country || "N/A" }}
-              td {{ info.room || "N/A" }}
+              td 
+                a(data-ng-href="{{ info.room || '' }}",target="_blank") {{ info.room || "N/A" }}
               td N/A
