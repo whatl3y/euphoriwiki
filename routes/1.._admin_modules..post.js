@@ -120,10 +120,10 @@
                 fh.uploadFile({path:filePath, filename:fileName},function(e,newFileName) {
                   if (e) {
                     res.json({success:false, error:e});
-                    log.error(err);
-                  } else {
-                    createOrModify(newFileName);
+                    return log.error(err);
                   }
+                  
+                  createOrModify(newFileName);
                 });
               } else createOrModify();
             

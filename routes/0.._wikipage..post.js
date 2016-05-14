@@ -613,28 +613,34 @@
           }
         };
         
-        config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
-          function(e,result) {
-            if (e) {
-              log.error(e);
-              res.json({success:false, error:"There was an error saving your draft. Please try again."});
-            } else {
-              if (onlyDelete) res.json({success:true});
-              else {
-                config.mongodb.db.collection("accounts").update({username:username},saveData,{upsert:true},
-                function(er,result) {
-                  if (er) {
-                    log.error(er);
-                    res.json({success:false, error:"There was an error saving your draft. Please try again."});
-                  } else {
-                    res.json({success:true});
-                    
-                    audit.log({type:"Update Draft", additional:{path:wiki.path}});
-                  }
-                });
+        async.series([
+          function(callback) {
+            config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+              function(e,result) {
+                callback(e,result);
               }
+            );
+          },
+          function(callback) {
+            if (onlyDelete) return callback();
+            
+            config.mongodb.db.collection("accounts").update({username:username},saveData,{upsert:true},
+              function(er,result) {
+                callback(er,result);
+              }
+            );
+          }
+        ],
+          function(err,results) {
+            if (err) {
+              res.json({success:false, error:"There was an error saving your draft. Please try again."});
+              return log.error(er);
             }
-          });
+            
+            res.json({success:true});
+            audit.log({type:"Update Draft", additional:{path:wiki.path}});
+          }
+        );
       }
       
       break;

@@ -527,3 +527,7 @@ div.asyncloader {
 #admin-nav > a > button {
   margin-bottom: 3px;
 }
+
+.new-template label {
+  display: block;
+}

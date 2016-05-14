@@ -7,4 +7,54 @@ block main
     div(class="col-xs-12 col-md-10 col-md-offset-1")
       div(class="padding-medium")
         h1 Template Management
-        div template management stuff
+        div.row.separate-vert-medium
+          div.col-xs-12
+            table.table.table-striped.table-responsive.table-bordered
+              tr
+                th #
+                th Type
+                th Name
+                th File
+                th Edit/Delete
+              tr(data-ng-repeat="template in templates")
+                td {{ $index+1 }}
+                td {{ functions.getTemplateTypeName(template.type) }}
+                td {{ template.name }}
+                td
+                  a(data-ng-href="/file/{{ template.file }}",target="_blank") {{ template.file }}
+                td
+                  a(href="javascript:void(0)",data-ng-click="handlers.editTemplate(template)") Edit
+                  span  /  
+                  a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplate(template)") Delete
+        div.row
+          div.col-xs-12.col-md-6.col-md-offset-3
+            div.panel.panel-success
+              div.panel-heading
+                div.text-large Create/Edit Template
+              div.panel-body
+                form.new-template
+                  div.form-group
+                    label
+                      span Type
+                      select.form-control(type="text",data-ng-options="type.key as type.name for type in templateTypes",data-ng-model="newTemplate.type")
+                  div.form-group
+                    label
+                      span Name
+                      input.form-control(type="text",data-ng-model="newTemplate.name")
+                  div.form-group
+                    label
+                      span 
+                        div New Template (.html/.jade file)
+                        div
+                          i
+                            small
+                              small Ignore if you want to keep the same template file that already exists for this template, if applicable
+                      input.form-control(type="file",fileread="templateFile")
+                  div.form-group(data-ng-show="newTemplate.file")
+                    label
+                      div Current Template
+                      div
+                        a(data-ng-href="/file/{{ newTemplate.file }}",target="_blank") {{ newTemplate.file }}
+                  div.form-group
+                    div.text-center
+                      button.btn.btn-success(data-ng-click="handlers.addOrEditTemplate('templateFile')") Create/Edit Template

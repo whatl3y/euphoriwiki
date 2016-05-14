@@ -1,7 +1,14 @@
-function adminTemplateMgmtCtrl($scope,$http) {
+function adminTemplateMgmtCtrl($scope,$http,Upload) {
   $scope.functions= {
     initialize: function() {
-      console.log("here");
+      this.ajax("init",null,function(err,data) {
+        if (err) return console.log(err,data);
+        
+        $scope.templateTypes = data.templateTypes;
+        $scope.templates = data.templates;
+        
+        console.log(data);
+      });
     },
     
     updateAryLength: function(scopeKey,which) {
@@ -19,9 +26,17 @@ function adminTemplateMgmtCtrl($scope,$http) {
       }
     },
     
+    getTemplateTypeName: function(type) {
+      return $scope.templateTypes.filter(function(t) {
+        return t.key == type;
+      }).map(function(t) {
+        return t.name;
+      })[0];
+    },
+    
     ajax: function(type,data,cb) {
       var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
-      $http.post('/admin/events',Object.merge({type:type},(data || {})))
+      $http.post('/admin/templates',Object.merge({type:type},(data || {})))
       .success(function(ret) {
         if (ret.success) cb(null,ret)
         else {
@@ -38,7 +53,48 @@ function adminTemplateMgmtCtrl($scope,$http) {
   };
   
   $scope.handlers = {
-   
+    uploadFile: function(file,key) {
+      $scope[key] = file;
+    },
+    
+    editTemplate: function(oTemplate) {
+      $scope.newTemplate = oTemplate;
+    },
+    
+    addOrEditTemplate: function(fileScopeKey) {
+      var file = $scope[fileScopeKey] || null;
+      $scope.newTemplate = $scope.newTemplate || {};
+      
+      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      Upload.upload({
+        url: '/admin/templates',
+        file: file,
+        fields: {
+          type: "addOrEditTemplate",
+          module: $scope.newTemplate
+        }
+      })
+      .success(function(data) {
+        if (data.success) {
+          
+          
+        } else {
+          console.log(data);
+          $scope.error = data.error || "There was a problem creating your template. Please try again.";
+        }
+        
+        loader.remove();
+      })
+      .error(function(ret,_err) {
+        console.log(ret,_err);
+        $scope.error = "There was a problem creating your template. Please try again.";
+        loader.remove();
+      });
+    },
+    
+    deleteTemplate: function(oTemplate) {
+      console.log(oTemplate);
+    }
   };
   
   $scope.functions.initialize();
