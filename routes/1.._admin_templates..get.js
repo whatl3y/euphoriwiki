@@ -13,7 +13,7 @@
       if (isAdmin) {
         //get the admin settings to include
         
-        res.render("admin_events",config.view.send(req,{obj:o}));
+        res.render("admin_template_mgmt",config.view.send(req,{obj:o}));
       } else res.redirect("/");
     });
   }

@@ -1,6 +1,8 @@
-# A nice small HTML wiki
+# A small NodeJS content and knowledge management platform.
 
-This is a MEAN stack wiki application you can get up and running in a matter of minutes once you have NodeJS and MongoDB installed.
+This is a MEAN stack application you can get up and running in a matter of minutes once you have NodeJS and MongoDB installed.
+This platform can be used for many purposes, most notably building internal or corporate wikis, content management, blogs, and
+many more applications.
 
 ## What you need
 
