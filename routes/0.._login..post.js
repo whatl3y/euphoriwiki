@@ -5,7 +5,7 @@
   
   //built strategy authentications for non built-in passport strategies
   var strategyWaterfallFunctions = [];
-  _.each(fs.readdirSync("./passport_strategies") || [],function(stratFile) {
+  _.each((fs.readdirSync("./passport_strategies") || []).sort(),function(stratFile) {
     try {
       var oStrat = require("./passport_strategies/" + stratFile);
       
@@ -42,14 +42,11 @@
           if (!user) return callback("We were unable to authenticate you. Please make sure your username and password are correct and try again or contact your admin if the problem persists.");
           
           A.findOrSaveUser({username:user},function(err,userRecord) {
-            callback(err,user,userRecord);
+            callback(err,user,userRecord || false);
           });
         },
         function(user,userRecord,callback) {
-          return callback(null,user,userRecord || false);
-        },
-        function(user,userRecord,callback) {
-          if (!userRecord) {
+          if (!userRecord && user != A.GLOBAL_ADMIN) {
             var loginUsername = user + ((user.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
             A.find({attribute:"userPrincipalName", value:loginUsername},function(err,info) {
               callback(err,user,info,false);

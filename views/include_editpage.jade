@@ -12,6 +12,9 @@ div.wrapper
               div You are not a page administrator so cannot make updates.
               div Please contact the page administrator to get access to update this page.
       div(data-ng-show="updateable")
+        div.row.text-large.text-center.separate-vert-small(data-ng-show="currentlyEditing.isEditing")
+          div.col-xs-12.col-md-8.col-md-offset-2
+            alert(type="danger") User {{ (currentlyEditing.user.firstname) ? currentlyEditing.user.firstname + " " + currentlyEditing.user.lastname : currentlyEditing.user.user }} is also currently editing this page. Please be concious of what changes you make and when you save to ensure your changes don't get overwritten.
         div(class="text-center padding-medium")
           button(class="btn btn-success",data-ng-click="handlers.saveChanges()") Commit Content Changes
           button(class="btn btn-info margin-left-medium",data-ng-click="handlers.saveChanges(true)") Save Draft To Finish Later

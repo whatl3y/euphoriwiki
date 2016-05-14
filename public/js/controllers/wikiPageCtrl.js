@@ -37,7 +37,16 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   $scope.functions = {
     initialize: function(alreadyLoaded) {
       if (!alreadyLoaded) {
-          angular.element("button#upload-file-word").on("click",function() {
+        $scope.socketHandler=new Core.SocketHandler({
+          $scope: $scope,
+          socket: EuphoriwikiSocket,
+          wshost: LOCAL_DATA.wshost,
+          namespace: LOCAL_DATA.namespace || "/",
+          events: this.globalSocketEvents()
+        }).initialize();
+        
+        //make sure our buttons that correspond to file inputs bind click events
+        angular.element("button#upload-file-word").on("click",function() {
           angular.element("#file-input-word").trigger("click");
         });
         
@@ -133,6 +142,35 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         console.log("postinit unsuccessful",data,err);
         loader.remove();
       });
+    },
+    
+    globalSocketEvents: function() {
+      return [
+        {
+          Name: "wikiPageCtrl_editing",
+          Handler: function(editingData) {
+            var isEditing = editingData.isEditing;
+            var who = editingData.who;
+            
+            $scope.$apply(function() {
+              if (!isEditing) delete($scope.currentlyEditing);
+              else {
+                if (typeof who === "object" && typeof who[Object.keys(who)[0]] === "object") {
+                  for (var _sid in who) {
+                    if (_sid != EuphoriwikiSocket.io.engine.id) {
+                      $scope.currentlyEditing = {isEditing:true, user:who[_sid]};
+                      return;
+                    }
+                  }
+                  
+                  delete($scope.currentlyEditing);
+                  
+                } else $scope.currentlyEditing = {isEditing:true, user:who};
+              }
+            });
+          }
+        }
+      ];
     },
     
     hideAllOfHeader: function(hide) {
@@ -358,21 +396,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       $scope.functions.changePageState('view');
       $scope.editState=!$scope.editState;
       
-      console.log("edit page");
-      //make ajax call to lock page
-      /*
-      $http.post('/wikipage',{type:"edit"})
-      .success(function(ret) {
-        if (ret.success) $scope.functions.reloadPage();
-        else {
-          $scope.saveError = ret.error || "There was an issue saving your data. Please try again.";
-          console.log(ret);
-        }
-      })
-      .error(function(data,err) {
-        console.log(data,err);
-      });
-      */
+      EuphoriwikiSocket.emit("initEdit",{room:$scope.pathname,editState:$scope.editState});
     },
     
     saveChanges: function(draft,deleteDraft) {

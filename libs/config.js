@@ -16,7 +16,6 @@ var self = module.exports = {
   
   view: {
     NAVLINKS: [],              //placeholder where all links will be stored once we retrieve them from our persistent store
-    CLIENTSOCKETEVENTS : [],   //placeholder where all client socket event listeners will be stored and sent to the client on a request
     send: function(req,opts) {
       opts = opts || {};
       var obj = opts.obj || {};
@@ -32,7 +31,6 @@ var self = module.exports = {
           external: {
             wshost:  wshost,
             port: self.server.PORT,
-            socketEvents: this.CLIENTSOCKETEVENTS,
             EXTRA: obj
           },
           host: host,

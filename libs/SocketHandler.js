@@ -1,6 +1,7 @@
 var async = require("async");
 var SocketGlobal = require("./SocketGlobal.js");
 var SocketWikiChat = require("./SocketWikiChat.js");
+var SocketPages = require("./SocketPages.js");
 var GeoIP = require("./GeoIP.js");
 var DateTime = require("../public/js/Core.DateTime.js");
 var config = require('./config.js');
@@ -57,6 +58,7 @@ SocketHandler.prototype.connectionEvent = function() {
     this.io.on('connection',function(socket) {
       var eventHandlers = {
         chat: new SocketWikiChat(self.app, socket),
+        pages: new SocketPages(self.app, socket),
         global: new SocketGlobal(self.app, socket)
       };
       

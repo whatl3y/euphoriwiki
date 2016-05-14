@@ -17,10 +17,9 @@ function globalCtrl($scope,$http) {
         socket: EuphoriwikiSocket,
         wshost: LOCAL_DATA.wshost,
         namespace: LOCAL_DATA.namespace || "/",
-        events: /*LOCAL_DATA.socketEvents || */this.globalSocketEvents()
-      });
+        events: this.globalSocketEvents()
+      }).initialize();
       
-      $scope.socketHandler.initialize();
       EuphoriwikiSocket.emit("subscribe",{room:decodeURI(location.pathname)});
       
       this.setSearchQuery();
