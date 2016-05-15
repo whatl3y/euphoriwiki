@@ -144,6 +144,11 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
+    diffTextHtml: function(text1,text2) {
+      var d = new diff_match_patch();
+      return d.diff_prettyHtml(d.diff_main(text1, text2))
+    },
+    
     globalSocketEvents: function() {
       return [
         {
