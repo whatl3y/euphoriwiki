@@ -318,7 +318,7 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getTemplates=function(cb) {
-  config.mongodb.db.collection("wikitemplates").find({}).sort({name:1}).toArray(function(_e,templates) {
+  config.mongodb.db.collection("wikitemplates").find({ active:{$ne:false} }).sort({name:1}).toArray(function(_e,templates) {
     cb(_e,templates);
   });
 }

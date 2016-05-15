@@ -646,16 +646,39 @@
       break;
     
     case "getTemplate":
-      var dir = __dirname + "/views/wikitemplates/";
-      var template = info.template;
-      var p = dir + template;
-      var ext = path.extname(p);
-      var retHtml;
+      var templateName = info.template;
+    
+      var fh = new FileHandler({db:config.mongodb.db});
+      var gH = new GetHTML();
       
-      if (ext == ".jade") retHtml = jade.renderFile(p);
-      else retHtml = fs.readFileSync(p,{encoding:"utf8"});
-      
-      res.json({success:true, html:html.prettyPrint(retHtml,{indent_size:2})});
+      async.waterfall([
+        function(callback) {
+          fh.getFile({filename:templateName, encoding:"utf8"},function(err,file) {
+            callback(err,file);
+          });
+        },
+        function(file,callback) {
+          try {
+            var method = gH.extension(templateName).substring(1).toLowerCase();
+            
+            gH[method](file,function(err,html) {
+              callback(err,html);
+            })
+            
+          } catch(err) {
+            callback(err);
+          }
+        }
+      ],
+        function(err,templateHtml) {
+          if (err) {
+            res.json({success:false, error:(typeof err === "string") ? err : "There was a problem getting your template."});
+            return log.error(err);
+          }
+          
+          res.json({success:true, html:templateHtml});
+        }
+      );
       
       break;
     

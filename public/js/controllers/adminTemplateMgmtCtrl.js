@@ -71,12 +71,17 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
         file: file,
         fields: {
           type: "addOrEditTemplate",
-          module: $scope.newTemplate
+          template: $scope.newTemplate
         }
       })
       .success(function(data) {
         if (data.success) {
+          $scope.templates = $scope.templates || [];
           
+          $scope.templates = $scope.templates.filter(function(t) {
+            return t._id != $scope.newTemplate._id || false;
+          });
+          $scope.templates.push(data.template);
           
         } else {
           console.log(data);
@@ -93,7 +98,15 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
     },
     
     deleteTemplate: function(oTemplate) {
-      console.log(oTemplate);
+      if (confirm("Are you sure you want to delete this template? This template will be permanently deleted.")) {
+        $scope.functions.ajax("deleteTemplate",{_id:oTemplate._id, file:oTemplate.file},function(err,data) {
+          if (err || !data.success) return $scope.error = err || data.error;
+          
+          $scope.templates = $scope.templates.filter(function(t) {
+            return t._id != oTemplate._id;
+          });
+        });
+      }
     }
   };
   

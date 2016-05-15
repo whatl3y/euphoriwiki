@@ -122,9 +122,13 @@ FileHandler.prototype.getFile=function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.deleteFile=function(options,cb) {
-  var fileName = options.filename;
-  
-  this.gfs.remove({filename:fileName},cb);
+  try {
+    var fileName = options.filename || "";
+    this.gfs.remove({filename:fileName},cb);
+    
+  } catch(err) {
+    cb(err);
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
