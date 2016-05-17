@@ -1,11 +1,11 @@
 # ignore
-EXTRAS
-tests
-logs
-files
-documentation
-views/*
-!views/adminsettings
-node_modules
-.env_windows
-.env_linux
+/EXTRAS
+/tests
+/logs
+/files
+/documentation
+/views/wikitemplates
+/views/emailtemplates
+/node_modules
+/.env_windows
+/.env_linux
