@@ -2,18 +2,23 @@ extends layout
 
 block main  
   include include_adminnav.jade
-  div(class="row padding-large",data-ng-controller="adminSettingsCtrl")
-    div(class="col-xs-3 hidden-xs sidenav-affix",data-spy="affix",data-offset-top="60")
+  div(class="row padding-medium",data-ng-controller="adminSettingsCtrl")
+    div(class="col-xs-2 hidden-xs sidenav-affix",data-spy="affix",data-offset-top="60")
       small
         ul(class="list-unstyled")
-          li(data-ng-repeat="setting in settings")
+          li(data-ng-repeat="setting in settingsNav")
             a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
-    div(class="col-xs-9 pull-right")
+    div(class="col-xs-12 col-sm-10 pull-right")
       h1 Global Settings
-      div(class="col-xs-12 separate-vert-medium",data-ng-repeat="setting in settings")
-        div(class="shadowsmall-subtle wrapper light gray padding-small")
-            div(id="{{ setting.domid }}",class="text-large header padding-small")
-              div {{ setting.name }}
-            div(compile-html="functions.sanitizeHtml(setting.html)")
-            div(class="separate-vert-small text-center col-xs-12")
-              button(class="btn btn-success",data-ng-click="handlers.saveSetting(setting.domid,setting.value)") Save {{ setting.name }}
+      div.row
+        div.col-xs-12(data-ng-repeat="aS in settings")
+          div.row
+            div.col-xs-12.col-md-4.separate-vert-medium(data-ng-repeat="setting in aS")
+              div(class="shadowsmall-subtle wrapper light gray padding-small")
+                  div(id="{{ setting.domid }}",class="text-large header padding-small")
+                    div {{ setting.name }}
+                  div(compile-html="functions.sanitizeHtml(setting.html)")
+                  div.row
+                    div(class="separate-vert-small text-center col-xs-12")
+                      button(class="btn btn-success",data-ng-click="handlers.saveSetting(setting.domid,setting.value)") Save {{ setting.name }}
+            div.col-xs-12.hidden-xs.hidden-sm.divider.thick(data-ng-hide="$index == aS.length-1")

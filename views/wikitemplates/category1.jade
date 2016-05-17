@@ -10,6 +10,6 @@ div(class="container")
           div(class="panel-heading text-xlarge") Page Tree for 
             em {{ pathname }}
           div(class="panel-body")
-            subpage(subpages="subpages",data-ng-show="functions.objSize(subpages)")
+            subpage(subpages="subpages",show-children="true",data-ng-show="functions.objSize(subpages)")
             div(class="padding-small",data-ng-show="!functions.objSize(subpages)")
               alert No pages within {{ pathname }} yet!

@@ -6,8 +6,15 @@ function adminSettingsCtrl($scope,$http,$sce) {
       new Core.Modals().alertPopup({loading:true});
       $http.post('/admin',{type:"init"})
       .success(function(ret) {
-        if (ret.success) $scope.settings = ret.settings;
-        else {
+        if (ret.success) {
+          $scope.settingsNav = ret.settings;
+          $scope.settings = [];
+          for (var _i = 0;_i<ret.settings.length;_i++) {
+            if (!(_i%3)) $scope.settings.push([]);
+            $scope.settings[$scope.settings.length-1].push(ret.settings[_i]);
+          }
+          
+        } else {
           $scope.error = ret.error || "There was an issue saving your data. Please try again.";
           console.log(ret);
         }
