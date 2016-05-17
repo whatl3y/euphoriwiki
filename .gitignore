@@ -4,8 +4,7 @@
 /logs
 /files
 /documentation
-/views/emailtemplates
-/views/wikitemplates
+/views/*
 /node_modules
 /.env_windows
 /.env_linux
