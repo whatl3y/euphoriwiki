@@ -9,8 +9,14 @@
           res.json({success:false});
         } else {
           for (var _i=0; _i<settings.length; _i++) {
-            var h = jade.renderFile(__dirname+'/views/adminsettings/'+settings[_i].include);
-            settings[_i].html = h;
+            try {
+              var h = jade.renderFile(__dirname+'/views/adminsettings/'+settings[_i].include);
+              settings[_i].html = h;
+            
+            } catch(err) {
+              log.error(err);
+              settings[_i].html = "";
+            }
           }
           
           res.json({success:true, settings:settings});

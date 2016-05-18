@@ -204,32 +204,41 @@
             callback(e,oPages);
           });
         },
+        function(callback) {
+          wiki.getExternalDatasources(function(e,datasources) {
+            callback(e,datasources);
+          });
+        }
       ],
         function(err,results) {
-          if (err) res.json({success:false, error:err});
+          if (err) {
+            res.json({success:false, error:err});
+            return log.error(err);
+          }
+          
+          var pageExists = results[0];
+          var pageArchive = results[1];
+          var modules = results[2];
+          var moduleInstances = results[3];
+          var viewScopeTypes = results[4];
+          var eventTypes = results[5];
+          var aliases = results[6];
+          var oSubPages = results[7];
+          var externalDatasources = results[8];
+          
+          if (!pageExists.length) res.json({success:true});
           else {
-            var pageExists = results[0];
-            var pageArchive = results[1];
-            var modules = results[2];
-            var moduleInstances = results[3];
-            var viewScopeTypes = results[4];
-            var eventTypes = results[5];
-            var aliases = results[6];
-            var oSubPages = results[7];
-            
-            if (!pageExists.length) res.json({success:true});
-            else {
-              res.json({
-                success:true,
-                versions: pageArchive,
-                modules: modules,
-                pageModules: moduleInstances,
-                scopeTypes: viewScopeTypes,
-                eventTypes: eventTypes.map(function(t) {return t.type}),
-                pageAliases: aliases.map(function(t) {return t.path}),
-                subpages: (Object.size(oSubPages)) ? oSubPages : []
-              });
-            }
+            res.json({
+              success:true,
+              versions: pageArchive,
+              modules: modules,
+              pageModules: moduleInstances,
+              scopeTypes: viewScopeTypes,
+              eventTypes: eventTypes.map(function(t) {return t.type}),
+              pageAliases: aliases.map(function(t) {return t.path}),
+              subpages: (Object.size(oSubPages)) ? oSubPages : [],
+              datasources: externalDatasources
+            });
           }
         }
       );
@@ -449,35 +458,33 @@
       ],
         function(err,results) {
           if (err) {
-            log.error(err);
             res.json({success:false, error:err});
-          } else {
-            var isAdmin = results[0];
-            if (!isAdmin) res.json({success:false, error:"You need to be a page admin to perform this function."});
-            else {
-              
-              async.series([
-                function(callback) {
-                  config.mongodb.db.collection("wiki_modules_instances").remove({ path:wiki.path },function(_e) {
-                    callback(_e);
-                  });
-                },
-                function(callback) {
-                  config.mongodb.db.collection("wiki_modules_instances").insert(modules,function(_e) {
-                    callback(_e);
-                  });
-                }
-              ],
-                function(_err,_results) {
-                  if (_err) {
-                    log.error(_err);
-                    res.json({success:false, error:_err});
-                    
-                  } else res.json({success:true});
-                }
-              );
-            }
+            return log.error(err);
           }
+          
+          var isAdmin = results[0];
+          if (!isAdmin) return res.json({success:false, error:"You need to be a page admin to perform this function."});
+            
+          async.series([
+            function(callback) {
+              config.mongodb.db.collection("wiki_modules_instances").remove({ path:wiki.path },function(_e) {
+                callback(_e);
+              });
+            },
+            function(callback) {
+              config.mongodb.db.collection("wiki_modules_instances").insert(modules,function(_e) {
+                callback(_e);
+              });
+            }
+          ],
+            function(_err,_results) {
+              if (_err) {
+                log.error(_err);
+                res.json({success:false, error:_err});
+                
+              } else res.json({success:true});
+            }
+          );
         }
       );
     

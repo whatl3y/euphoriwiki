@@ -32,6 +32,8 @@ function adminSettingsCtrl($scope,$http,$sce) {
     },
     
     pushArray: function(array,value) {
+      array = array || [];
+      
       if (value) array.push(value);
     },
     

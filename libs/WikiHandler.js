@@ -614,6 +614,41 @@ WikiHandler.prototype.event=function(options,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      getExternalDatasources (PUBLIC)
+|DESCRIPTION:  Gets available modules from the DB a user can configure as instances on their page(s).
+|PARAMETERS:    1. options(OPT): options to include 
+|                       options.name
+|               2. cb(REQ): the callback function
+|                 cb(err,<array/object>:);
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getExternalDatasources=function(options,cb) {
+  cb = (typeof options === "function") ? options : cb;
+  options = (typeof options === "function") ? {} : (options || {});
+  
+  var dsName = (typeof options === "string") ? options : (options.name || null);
+  
+  config.mongodb.db.collection("adminsettings").find({domid:"datasources"}).toArray(function(e,datasources) {
+    if (e) return cb(e);
+    if (!datasources.length) return cb(null,datasources);
+    
+    datasources = datasources[0].value;
+    
+    if (dsName) {
+      datasources = datasources.filter(function(ds) {
+        return ds.name == dsName;
+      })[0];
+      
+      return cb(null,datasources);
+    }
+    
+    return cb(null,datasources);
+  });
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      getModules (PUBLIC)
 |DESCRIPTION:  Gets available modules from the DB a user can configure as instances on their page(s).
 |PARAMETERS:    1. options(OPT): options to include 

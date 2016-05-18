@@ -9,6 +9,7 @@ function adminModulesCtrl($scope,$http,Upload) {
           $scope.modules = ret.modules || [];
           $scope.availableModules = ret.modules || [];
           $scope.moduleInstances = ret.instances || [];
+          $scope.externalDatasources = ret.datasources || [];
         }
         //console.log(e,ret);
       });

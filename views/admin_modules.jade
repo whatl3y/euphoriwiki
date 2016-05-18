@@ -81,16 +81,17 @@ block main
                               ul(class="list-unstyled")
                                 li(class="switch-grey separate-vert-small padding-medium",data-ng-show="newModule.config.length",data-ng-repeat="conf in newModule.config")
                                   div.row
-                                    div.col-xs-4
+                                    div.col-xs-12.col-sm-4
                                       label(for="cn{{ $index }}") Config Option Name
                                       input(type="text",class="form-control",id="cn{{ $index }}",name="cn{{ $index }}",data-ng-model="conf.name")
-                                    div.col-xs-4
+                                    div.col-xs-12.col-sm-4
                                       label(for="ct{{ $index }}") Control Type
                                       select(class="form-control",id="ct{{ $index }}",name="ct{{ $index }}",data-ng-model="conf.type")
+                                        option(value="datasource") External Datasource
+                                        option(value="select") Select List
                                         option(value="textbox") Text Box
                                         option(value="textarea") Text Area
-                                        option(value="select") Select List
-                                    div.col-xs-4
+                                    div.col-xs-12.col-sm-4
                                       label(for="cv{{ $index }}") Value(s)
                                       input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
                         div(class="form-group")

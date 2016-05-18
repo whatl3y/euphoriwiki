@@ -36,7 +36,7 @@
               callback(_e,instance,module);
             });
             
-          } else callback("We couldn't find the module instance provided. Please ensure your ID is correct.");
+          } else callback("We couldn't find the module instance provided. Please ensure your module ID is correct.");
         },
         function(instance,module,callback) {
           if (module.length) {
@@ -47,7 +47,7 @@
               //if the code in module.code does not call callback after 30 seconds, do it here.
               setTimeout(function() {
                 try {
-                  callback(null,"No results were returned from the code.");
+                  return callback(null,"No results were returned from the code.");
                 } catch(e) {}
               },30000);
               
@@ -58,13 +58,13 @@
               
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
               //go ahead and assume we need to call the callback with that result here.
-              if (codeResult) callback(null,codeResult);
+              if (codeResult) return callback(null,codeResult);
               
             } catch(e) {
-              callback(e);
+              return callback(e);
             }
             
-          } else callback("We couldn't find the module provided. Please make sure the module has not been deleted by contacting your wiki administrator.");
+          } else return callback("We couldn't find the module provided. Please make sure the module has not been deleted by contacting your wiki administrator.");
         },
         function(result,callback) {
           var module = moduleTemplate;

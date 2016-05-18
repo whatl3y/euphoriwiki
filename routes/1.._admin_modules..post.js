@@ -44,6 +44,11 @@
                   wiki.getModuleInstances(null,function(e,instances) {
                     callback(e,instances);
                   });
+                },
+                function(callback) {
+                  wiki.getExternalDatasources(function(e,datasources) {
+                    callback(e,datasources);
+                  });
                 }
               ],
                 function(e,results) {
@@ -54,8 +59,14 @@
                   
                   var modules = results[0];
                   var instances = results[1];
+                  var externalDatasources = results[2];
                   
-                  res.json({success:true, modules:modules, instances:instances});
+                  res.json({
+                    success:true,
+                    modules:modules,
+                    instances:instances,
+                    datasources: externalDatasources
+                  });
                 }
               );
               

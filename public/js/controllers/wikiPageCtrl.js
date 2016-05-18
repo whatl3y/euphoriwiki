@@ -134,6 +134,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.eventTypes = ret.eventTypes || [];
           $scope.aliases = ret.pageAliases || [];
           $scope.subpages = ret.subpages || [];
+          $scope.externalDatasources = ret.datasources || [];
         }
         
         loader.remove();

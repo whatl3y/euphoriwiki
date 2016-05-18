@@ -1,0 +1,55 @@
+- //access to adminSettingsCtrl functions
+- //the information saved needs to go to setting.value as either an object or other piece of data
+
+div(class="separate-vert-small")
+  div.padding-small
+    ul.list-unstyled
+      li(class="padding-small",data-ng-repeat="ds in setting.value")
+        small
+          small
+            table.table.table-responsive.table-bordered.table-striped(style="margin-bottom:0px")
+              tr
+                th Name
+                th Host
+                th Driver
+                th Database
+                th Username
+                th Password
+                th Remove
+              tr
+                td
+                  strong
+                    em {{ ds.name }}
+                td {{ ds.server }}
+                td {{ ds.driver }}
+                td {{ ds.database }}
+                td {{ ds.username }}
+                td *****
+                td
+                  a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
+                    em x
+  div(class="separate-vert-small")
+    div.padding-small
+      div.panel.panel-default
+        div.panel-body
+          form(data-ng-submit="functions.pushArray(setting.value,{name:setting.dsName,server:setting.dsServer,driver:setting.dsDriver,database:setting.dsDb,username:setting.dsUn,password:setting.dsPw})")
+            div.form-group
+              label(for="dsName") Datasource Name
+              input.form-control.margin-small(type="text",id="dsName",name="dsName",data-ng-model="setting.dsName")
+            div.form-group
+              label(for="dsServer") Server/Host
+              input.form-control.margin-small(type="text",id="dsServer",name="dsServer",data-ng-model="setting.dsServer")
+            div.form-group
+              label(for="tmpDsDriver") Driver
+              select.form-control.margin-small(id="tmpDsDriver",name="tmpDsDriver",data-ng-model="setting.dsDriver",data-ng-options="d.key as d.name for d in [{key:'mssql',name:'MS SQL Server'},{key:'mysql',name:'MySQL'}]")
+            div.form-group
+              label(for="dsDb") Database
+              input.form-control.margin-small(type="text",id="dsDb",name="dsDb",data-ng-model="setting.dsDb")
+            div.form-group
+              label(for="dsUn") Username
+              input.form-control.margin-small(type="text",id="dsUn",name="dsUn",data-ng-model="setting.dsUn")
+            div.form-group
+              label(for="dsPw") Password
+              input.form-control.margin-small(type="text",id="dsPw",name="dsPw",data-ng-model="setting.dsPw")
+            div.form-group.text-center
+              button(type="submit",class="btn btn-default margin-left-small") Add Datasource
