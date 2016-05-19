@@ -797,25 +797,38 @@
           function(err,results) {
             if (err) {
               res.json({success:false, error:"There was an issue trying to update your path. Please try again."});
-              log.error(err);
-            } else {
-              var allowed = results[0];
-              var page = results[1];
-              var canUpdate = results[2];
-              
-              if (!canUpdate) res.json({success:false, error:"You cannot update the path as you do not have appropriate rights. Contact the page administrator to get access."});
-              else if (!allowed) res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
-              else if (page.length) res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
-              else {
+              return log.error(err);
+            }
+            
+            var allowed = results[0];
+            var page = results[1];
+            var canUpdate = results[2];
+            
+            if (!canUpdate) return res.json({success:false, error:"You cannot update the path as you do not have appropriate rights. Contact the page administrator to get access."});
+            else if (!allowed) return res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
+            else if (page.length) return res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
+            
+            async.parallel([
+              function(callback) {
                 config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath}},function(err) {
-                  if (err) res.json({success:false, error:err});
-                  else res.json({success:true});
-                  
-                  audit.log({type:"Update Page Path", additional:{formerPath:wiki.path, newPath:newPath}});
-                  wiki.event({type:"updatepagepath", params:{username:username, formerPath:wiki.path, newPath:newPath}},function(e,result) {if (e) log.error(e);});
+                  callback(err);
+                });
+              },
+              function(callback) {
+                config.mongodb.db.collection("wiki_modules_instances").update({path:wiki.path},{$set:{path:newPath}},function(err) {
+                  callback(err);
                 });
               }
-            }
+            ],
+              function(err,results) {
+                if (err) return res.json({success:false, error:err});
+                
+                res.json({success:true});
+                
+                audit.log({type:"Update Page Path", additional:{formerPath:wiki.path, newPath:newPath}});
+                wiki.event({type:"updatepagepath", params:{username:username, formerPath:wiki.path, newPath:newPath}},function(e,result) {if (e) log.error(e);});
+              }
+            );
           }
         );
       }

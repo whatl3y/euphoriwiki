@@ -751,6 +751,11 @@ WikiHandler.prototype.deletePage=function(cb) {
       config.mongodb.db.collection("wikicontent").remove({ $or:[{path:self.path},{aliasfor:self.path}] },function(e,result) {
         callback(e,result);
       });
+    },
+    function(callback) {
+      config.mongodb.db.collection("wiki_modules_instances").remove({ path:self.path },function(e,result) {
+        callback(e,result);
+      });
     }
   ],
     function(err,results) {
