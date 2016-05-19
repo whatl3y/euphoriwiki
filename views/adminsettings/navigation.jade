@@ -2,16 +2,27 @@
 - //the information saved needs to go to setting.value as either an object or other piece of data
 
 div(class="separate-vert-small")
-  div
-    span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="nav in setting.value")
-      span {{ nav.text + " || " + nav.link }}
-      small(class="margin-left-small")
-        a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
-          em x
-  div(class="separate-vert-small")
-    div(class="text-center")
-      form(class="form-inline",data-ng-submit="functions.pushArray(setting.value,{text:setting.temp,link:'/'+setting.temp})")
-        div(class="form-group")
-          label(for="tempNewAdminUser") Add Link
-          input(type="text",id="tempNewAdminUser",name="tempNewAdminUser",class="form-control margin-left-small",data-ng-model="setting.temp")
-          button(type="submit",class="btn btn-default margin-left-small") Add Link
+  div.padding-small
+    table.table.table-responsive
+      tr
+        th Text
+        th Link
+        th Delete
+      tr(data-ng-repeat="nav in setting.value")
+        td {{ nav.text }}
+        td {{ nav.link }}
+        td
+          a(href="javascript:void(0)",data-ng-click="setting.value.splice(setting.value.indexOf(type),1)")
+            div Delete
+  div.separate-vert-small.padding-small
+    div.panel.panel-default
+      div.panel-body
+        form(data-ng-submit="functions.pushArray(setting.value,{text:setting.text,link:setting.link})")
+          div(class="form-group")
+            label(for="tempNewEventType") Nav Text
+            input.form-control(type="text",id="tempNewEventType",name="tempNewEventType",data-ng-model="setting.text")
+          div(class="form-group")
+            label(for="tempNewEventScope") Link
+            input.form-control(id="tempNewEventScope",name="tempNewEventScope",data-ng-model="setting.link")
+          div.form-group
+            button(type="submit",class="btn btn-default margin-left-small") Add Link
