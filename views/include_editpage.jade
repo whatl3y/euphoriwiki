@@ -2,7 +2,7 @@ div.wrapper
   div(class="col-xs-12 col-sm-4 col-md-3",data-ng-hide="functions.widgets.hideWidgetWrapper()",data-ng-class="(widgets.orientation == 'right') ? 'pull-right' : ''")
     include include_wikipagewidgets.jade
   div(data-ng-class="functions.widgets.style.mainWrapperWidgetClasses()")
-    div(data-ng-show="editState")
+    div(data-ng-if="editState")
       div(class="row",data-ng-show="!updateable")
         div(class="separate-vert-small text-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3")
           alert(type="danger")
@@ -52,7 +52,7 @@ div.wrapper
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.olderVersions)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('olderVersions')") Review Older Versions
     div
-      div(data-ng-hide="!pageState.view")
+      div(data-ng-show="pageState.view")
         div(data-ng-show="protected",class="row text-center")
           div(class="separate-vert-large col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-4 col-lg-offset-4")
             alert(class="margin-small")

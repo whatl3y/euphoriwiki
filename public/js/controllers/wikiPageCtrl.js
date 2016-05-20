@@ -52,6 +52,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         //is needed to prevent showing angular markup before all the JS has loaded on
         //the page and the controller(s) have began initializing.
         angular.element( "#main-wiki-wrapper" ).removeAttr("style");
+        $scope.initcomplete = true;
         //----------------------------------------------------------------------
         
         angular.element(function() {
@@ -118,7 +119,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
             $scope.functions.postInitialize();
             $scope.functions.rteInit(true);
             
-            $scope.initcomplete = true;
             window.wikiPageInitComplete = true;
             angular.element( '#loader' ).remove();
             if (typeof loader !== "undefined") loader.remove();
