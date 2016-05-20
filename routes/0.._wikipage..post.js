@@ -50,77 +50,75 @@
         }
       ],
         function(err,results) {
-          if (err) res.json({success:false, error:err});
-          else {
-            var pageInfo = results[0];
-            var validated = results[1];
-            var templates = results[2];
-            var canUpdate = results[3] || results[4] || false;
-            var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
+          if (err) return res.json({success:false, error:err});
+          
+          var pageInfo = results[0];
+          var validated = results[1];
+          var templates = results[2];
+          var canUpdate = results[3] || results[4] || false;
+          var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
+          
+          if (!validated) return res.json({success:false, protected:true});
+          else if (!canViewPage) return res.json({success:false, outofscope:true});
+          
+          var oRet;
+          if (!pageInfo.length) {
+            oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
+          } else {
+            oRet = {
+              success: true,
+              exists: true,
+              updateable: canUpdate,
+              description: pageInfo[0].description,
+              html: pageInfo[0].content_html,
+              markdown: pageInfo[0].content_markdown,
+              widgets: pageInfo[0].widgets,
+              lastUpdate: pageInfo[0].updated,
+              person: pageInfo[0].updatedBy,
+              tags: pageInfo[0].tags,
+              pageFiles: pageInfo[0].files,
+              password: pageInfo[0].password,
+              pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
+              viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
+              pageEvents: pageInfo[0].events,
+              hideAllOfHeader: pageInfo[0].hideAllOfHeader
+            };
+          }
+          
+          //get like information and determine if the current logged in user
+          //is allowed to like (i.e. whether they've already liked the page)
+          if (pageInfo.length && typeof pageInfo[0].likes==="object") {
+            oRet.pageLikes = pageInfo[0].likes.number;
             
-            if (!validated) res.json({success:false, protected:true});
-            else if (!canViewPage) res.json({success:false, outofscope:true});
-            else {
-              var oRet;
-              if (!pageInfo.length) {
-                oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
-              } else {
-                oRet = {
-                  success: true,
-                  exists: true,
-                  updateable: canUpdate,
-                  description: pageInfo[0].description,
-                  html: pageInfo[0].content_html,
-                  markdown: pageInfo[0].content_markdown,
-                  widgets: pageInfo[0].widgets,
-                  lastUpdate: pageInfo[0].updated,
-                  person: pageInfo[0].updatedBy,
-                  tags: pageInfo[0].tags,
-                  pageFiles: pageInfo[0].files,
-                  password: pageInfo[0].password,
-                  pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
-                  viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
-                  pageEvents: pageInfo[0].events,
-                  hideAllOfHeader: pageInfo[0].hideAllOfHeader
-                };
-              }
-              
-              //get like information and determine if the current logged in user
-              //is allowed to like (i.e. whether they've already liked the page)
-              if (pageInfo.length && typeof pageInfo[0].likes==="object") {
-                oRet.pageLikes = pageInfo[0].likes.number;
-                
-                if (username) {
-                  var canLike = true;
-                  _.each(pageInfo[0].likes.info,function(like) {
-                    if (like.username == username) {
-                      canLike = false;
-                      return;
-                    }
-                  });
-                  
-                  oRet.canLike = canLike;
+            if (username) {
+              var canLike = true;
+              _.each(pageInfo[0].likes.info,function(like) {
+                if (like.username == username) {
+                  canLike = false;
+                  return;
                 }
-              }
+              });
               
-              //add templates to what is returned and save subpages
-              oRet.pageTemplates = templates || [];
-              
-              if (A.isLoggedIn()) {
-                config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
-                  if (_e) log.error(_e);
-                  else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
-                  else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
-                  
-                  res.json(oRet);
-                });
-              } else {
-                res.json(oRet);
-              }
-              
-              wiki.event("visitpage",function(e,result) {if (e) log.error(e);});
+              oRet.canLike = canLike;
             }
           }
+          
+          //add templates to what is returned and save subpages
+          oRet.pageTemplates = templates || [];
+          
+          if (A.isLoggedIn()) {
+            config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
+              if (_e) log.error(_e);
+              else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
+              else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
+              
+              res.json(oRet);
+            });
+          } else {
+            res.json(oRet);
+          }
+          
+          wiki.event("visitpage",function(e,result) {if (e) log.error(e);});
         }
       );
       

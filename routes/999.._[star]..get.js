@@ -1,5 +1,5 @@
 (function(req,res) {
-  var wiki = new WikiHandler();
+  var wiki = new WikiHandler({path:req.originalUrl});
   var A = new Auth({session:req.session});
   var Access = new AccessManagement({db: config.mongodb.db});
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
@@ -34,6 +34,11 @@
         Access.canViewPage({session:req.session, username:username, path:path},function(e,canView) {
           callback(e,canView);
         });
+      },
+      function(callback) {
+        wiki.validatePassword({session:req.session},function(e,validated) {
+          callback(e,validated);
+        })
       }
     ],
       function(err,results) {
@@ -42,14 +47,17 @@
           var page = results[0] || {};
           var canEditPage = results[1];
           var canViewPage = results[2] || results[3];
+          var passwordValidated = results[4];
           
           oView.loggedIn = (req.session.loggedIn) ? true : false;
           oView.pagePieces = wiki.pageTree(req.params[0]);
           oView.canSeeEditButton = (oView.loggedIn && canEditPage);
           
-          if (!canViewPage) res.redirect("/?auth=" + path);
-          else if (page.aliasfor) res.redirect(page.aliasfor);
-          else res.render("wikipage",config.view.send(req,{obj:oView,title:path}));
+          if (!canViewPage) return res.redirect("/?auth=" + path);
+          else if (page.aliasfor) return res.redirect(page.aliasfor);
+          else if (!passwordValidated) page = {};
+          
+          return res.render("wikipage",config.view.send(req,{obj:oView, iobj:{pageInfo:page}, title:path}));
         }
       }
     );

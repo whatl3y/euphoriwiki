@@ -19,6 +19,7 @@ var self = module.exports = {
     send: function(req,opts) {
       opts = opts || {};
       var obj = opts.obj || {};
+      var iobj = opts.iobj || {};
       
       var routeInfo = opts.routeInfo || {};
       
@@ -33,6 +34,7 @@ var self = module.exports = {
             port: self.server.PORT,
             EXTRA: obj
           },
+          EXTRA: iobj,
           host: host,
           session: req.session,
           title: opts.title || null,

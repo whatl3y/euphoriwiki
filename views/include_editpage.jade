@@ -79,7 +79,9 @@ div.wrapper
                     div(class="text-large header padding-small") Select From a Page Template
                     div(class="padding-medium col-xs-12 col-sm-8 col-sm-offset-2")
                       select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availablePageTemplates",data-ng-change="handlers.getTemplate(template)")
-        div(data-ng-show="content.html")
+        - if (typeof data.EXTRA.pageInfo === "object" && data.EXTRA.pageInfo.content_html)
+          div.server-page-html(data-ng-if="!initializedEditInSession")!= data.EXTRA.pageInfo.content_html
+        div.client-page-html(data-ng-if="initializedEditInSession && content.html")
           div(compile-html="functions.sanitizeHtml(content.html)")
         div(class="col-xs-12")
           small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ content.person.username }}

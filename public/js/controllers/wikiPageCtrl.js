@@ -45,77 +45,89 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           events: this.globalSocketEvents()
         }).initialize();
         
-        //make sure our buttons that correspond to file inputs bind click events
-        angular.element("button#upload-file-word").on("click",function() {
-          angular.element("#file-input-word").trigger("click");
-        });
-        
-        angular.element("button#upload-file-main").on("click",function() {
-          angular.element("#file-input-main").trigger("click");
-        });
-        
         //----------------------------------------------------------------------
         //#main-wiki-wrapper is in wikipage.jade, and initially this
         //has a style attribute to set display property: none. As soon as the DOM
         //loads and the loader starts, we will remove that style attribute. This
         //is needed to prevent showing angular markup before all the JS has loaded on
         //the page and the controller(s) have began initializing.
-        new Core.Modals().alertPopup({loading:true});
         angular.element( "#main-wiki-wrapper" ).removeAttr("style");
         //----------------------------------------------------------------------
         
-        $http.post('/wikipage',{type:"init", page:$scope.pathname})
-        .success(function(ret) {
-          if (!ret.success) {
-            if (ret.protected) {
-              $scope.protected = true;
-            } else if (ret.outofscope) {
-              location.href = "/?auth=" + $scope.pathname;
+        angular.element(function() {
+          $scope.pageHasContent = !!angular.element( ".server-page-html" ).length;
+          
+          //make sure our buttons that correspond to file inputs bind click events
+          angular.element("button#upload-file-word").on("click",function() {
+            angular.element("#file-input-word").trigger("click");
+          });
+          
+          angular.element("button#upload-file-main").on("click",function() {
+            angular.element("#file-input-main").trigger("click");
+          });
+          
+          //----------------------------------------------------------------------
+          //Depending on if this page already has content on it delivered from the server
+          //either display a synchronous or asynchronous loader.
+          if ($scope.pageHasContent) var loader = new Core.Modals().asyncLoader({message:"We're getting info about this page!"});
+          else new Core.Modals().alertPopup({loading:true});
+          //----------------------------------------------------------------------
+          
+          $http.post('/wikipage',{type:"init", page:$scope.pathname})
+          .success(function(ret) {
+            if (!ret.success) {
+              if (ret.protected) {
+                $scope.protected = true;
+              } else if (ret.outofscope) {
+                location.href = "/?auth=" + $scope.pathname;
+              } else {
+                $scope.error = ret.error;
+              }
             } else {
-              $scope.error = ret.error;
+              $scope.exists = ret.exists;
+              $scope.updateable = ret.updateable;
+              
+              $scope.content = $scope.content || {};
+              $scope.content.html = ret.html || "";
+              $scope.content.markdown = ret.markdown || "";
+              $scope.content.description = ret.description || "";
+              $scope.content.person = ret.person || {};
+              $scope.content.lastUpdate = ret.lastUpdate || null;
+              $scope.content.tags = ret.tags || [];
+              $scope.content.draft = ret.draft || false;
+              
+              angular.element("#rte-editor").html( $scope.content.html );
+              
+              $scope.password = ret.password || "";
+              $scope.widgets = ret.widgets || {};
+              $scope.userfiles = ret.userFiles || [];
+              $scope.pagefiles = ret.pageFiles || [];
+              $scope.pageLikes = Number(ret.pageLikes || 0);
+              $scope.canLike = (ret.canLike == false) ? false : true;
+              $scope.pageadmins = ret.pageadmins || [];
+              $scope.viewscopes =  ret.viewscopes || [];
+              
+              $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
+              $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
+              $scope.pageEvents = ret.pageEvents || [];
+              
+              //hiding the header information when desired
+              $scope.functions.hideAllOfHeader(ret.hideAllOfHeader);
             }
-          } else {
-            $scope.exists = ret.exists;
-            $scope.updateable = ret.updateable;
             
-            $scope.content = $scope.content || {};
-            $scope.content.html = ret.html || "";
-            $scope.content.markdown = ret.markdown || "";
-            $scope.content.description = ret.description || "";
-            $scope.content.person = ret.person || {};
-            $scope.content.lastUpdate = ret.lastUpdate || null;
-            $scope.content.tags = ret.tags || [];
-            $scope.content.draft = ret.draft || false;
+            $scope.functions.postInitialize();
+            $scope.functions.rteInit(true);
             
-            angular.element("#rte-editor").html( $scope.content.html );
-            
-            $scope.password = ret.password || "";
-            $scope.widgets = ret.widgets || {};
-            $scope.userfiles = ret.userFiles || [];
-            $scope.pagefiles = ret.pageFiles || [];
-            $scope.pageLikes = Number(ret.pageLikes || 0);
-            $scope.canLike = (ret.canLike == false) ? false : true;
-            $scope.pageadmins = ret.pageadmins || [];
-            $scope.viewscopes =  ret.viewscopes || [];
-            
-            $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
-            $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
-            $scope.pageEvents = ret.pageEvents || [];
-            
-            //hiding the header information when desired
-            $scope.functions.hideAllOfHeader(ret.hideAllOfHeader);
-          }
-          
-          $scope.functions.postInitialize();
-          $scope.functions.rteInit(true);
-          
-          $scope.initcomplete = true;
-          window.wikiPageInitComplete = true;
-          angular.element( '#loader' ).remove();
-        })
-        .error(function(data,err) {
-          console.log(data,err);
-          angular.element( '#loader' ).remove();
+            $scope.initcomplete = true;
+            window.wikiPageInitComplete = true;
+            angular.element( '#loader' ).remove();
+            if (typeof loader !== "undefined") loader.remove();
+          })
+          .error(function(data,err) {
+            console.log(data,err);
+            angular.element( '#loader' ).remove();
+            if (typeof loader !== "undefined") loader.remove();
+          });
         });
       }
     },
@@ -398,9 +410,11 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   };
   
   $scope.handlers = {
-    initializeEdit: function() {
+    initializeEdit: function(forceEdit) {
+      if (!$scope.initializedEditInSession) $scope.initializedEditInSession = true;
+      
       $scope.functions.changePageState('view');
-      $scope.editState=!$scope.editState;
+      $scope.editState = (forceEdit) ? true : !$scope.editState;
       
       EuphoriwikiSocket.emit("initEdit",{room:$scope.pathname,editState:$scope.editState});
     },
@@ -787,6 +801,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
           
           $scope.functions.rteInit();
+          $scope.handlers.initializeEdit(true);
           //$scope.functions.changePageState("view");
         } else $scope.error = ret.error || "There was a problem fetching the template. Please try again.";
         
