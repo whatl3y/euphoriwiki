@@ -53,6 +53,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         //the page and the controller(s) have began initializing.
         angular.element( "#main-wiki-wrapper" ).removeAttr("style");
         $scope.initcomplete = true;
+        $scope.content.html = "Placeholder...";
         //----------------------------------------------------------------------
         
         angular.element(function() {
