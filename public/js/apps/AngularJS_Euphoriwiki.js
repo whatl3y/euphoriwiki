@@ -58,4 +58,5 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
 .controller('adminModulesCtrl',adminModulesCtrl)
 .controller('adminEventsCtrl',adminEventsCtrl)
 .controller('adminVisitorsCtrl',adminVisitorsCtrl)
-.controller('adminTemplateMgmtCtrl',adminTemplateMgmtCtrl);
+.controller('adminTemplateMgmtCtrl',adminTemplateMgmtCtrl)
+.controller('adminThemingCtrl',adminThemingCtrl);
