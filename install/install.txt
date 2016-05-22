@@ -1,3 +1,10 @@
+REQUIREMENTS:
+
+1. MongoDB version 3.0+
+2. NodeJS version >=0.12
+
+
+
 Instructions to get the required default documents into the
 MongoDB instance you have running that the wiki will use as its
 data store.
