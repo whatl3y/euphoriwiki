@@ -15,11 +15,10 @@
         fh.getFile({filename:homeBodyFile, encoding:"utf8"},function(e,data) {
           callback(e,homeBodyFile,data);
         });
-        
-        return;
+      } else {
+        return callback(null,"");
       }
       
-      return callback(null,"");
     },
     function(filename,fileContent,callback) {
       if (fileContent) {
@@ -33,11 +32,9 @@
         } catch(err) {
           return callback(err);
         }
-        
-        return;
+      } else {
+        return callback(null,"");
       }
-      
-      return callback(null,"");
     }
   ],
     function(err,bodyHtml) {
