@@ -205,14 +205,14 @@ var self = module.exports = {
     options: function(app) {
       return {
         name: app || "euphoriwiki",
-        /*level: process.env.LOGGING_LEVEL || "info",
-        stream: process.stdout*/
-        streams: [
+        level: process.env.LOGGING_LEVEL || "info",
+        stream: process.stdout
+        /*streams: [
           {
             level: process.env.LOGGING_LEVEL || "info",
             path: path.join(__dirname,"..","logs","wiki.log")
           }
-        ]
+        ]*/
       }
     }
   }
