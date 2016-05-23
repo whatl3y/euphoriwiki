@@ -7,7 +7,7 @@ div(class="nav-affix")
       nav(class="navbar navbar-default")
         div
           div(class="navbar-header")
-            a(href="http://pmg.net",class="navbar-brand",target="_blank")
+            a(data-ng-href="{{ navLogoLink }}",class="navbar-brand",target="_blank")
               img(alt="Brand",style="max-height:100%",data-ng-src="{{ navLogo }}")
             button(type="button",class="navbar-toggle collapsed",data-toggle="collapse",data-target="#navbarcoll",aria-expanded="false")
               span(class="sr-only") Toggle navigation
