@@ -668,7 +668,7 @@
             
             gH[method](file,function(err,html) {
               callback(err,html);
-            })
+            });
             
           } catch(err) {
             callback(err);

@@ -4,27 +4,8 @@ div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
       include include_categorylist.jade
   div.col-xs-12.col-md-7
     div.row
-      div.text-center.col-xs-12
-        div(class="separate-vert-small padding-small shadowsmall-color")
-          h2
-            img(class="img-responsive block-center max200",src="/public/images/marketing/pmg.net.png")
-            div Welcome to the Wiki!
-          div(class="separate-vert-medium text-small text-theme-color padding-medium")
-            h3
-              a(href="wikihelp/howto") How To Guide
-            div This tool was built to have a common, central place to store knowledge, customer-specific information, or anything else that will help us get the word out there about useful stuff!
-            div(class="separate-vert-medium")
-              h3 How do I use it?
-              ul(class="text-left")
-                li
-                  div Browse to any page at any point in time to review information.
-                li
-                  div
-                    span Use the information in the widgets below, or navigate to any path in the page to create a new page (eg.  
-                    a(href="/customer/mondelez") /customer/Mondelez 
-                    span ).
-                li
-                  div You can click the My Page link above to edit your own personal page where no one else can make changes but you.
+      - if (data.EXTRA.homeBody)
+        div!= data.EXTRA.homeBody
       div.col-xs-12
         div.row
           div.col-xs-12.separate-vert-small

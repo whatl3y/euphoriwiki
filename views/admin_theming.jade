@@ -9,5 +9,40 @@ block main
         h1 Theme Management
     div.col-xs-12.col-md-10.col-md-offset-1
       div.row
-        div.col-xs-12
-          div Testing 123
+        div.col-xs-12.col-md-6
+          div.panel.panel-default
+            div.panel-heading.text-large Platform Header Logo
+            div.panel-body
+              div The image below will show the full image, but it will be resized to fit in the navbar once the page is reloaded.
+              div.divider
+              div.text-center
+                div.text-large
+                  a(data-ng-href="{{ curLogoPath }}",target="_blank") {{ curLogoPath }}
+                div.row
+                  div.col-xs-12.col-sm-10.col-sm-offset-1
+                    div.dark.padding-small
+                      img.img-responsive.block-center(data-ng-src="{{ curLogoPath }}")
+                div.divider
+              div
+                h3 Update Logo
+                form(data-ng-submit="handlers.updateLogo('navLogoFile')")
+                  input.form-control(type="file",fileread="navLogoFile")
+                  div.text-center.separate-vert-small
+                    button.btn.btn-success Update Logo
+        div.col-xs-12.col-md-6
+          div.panel.panel-default
+            div.panel-heading.text-large Home Page Template
+            div.panel-body
+              div.text-center
+                div.text-large
+                  div(data-ng-show="homeBodyFile")
+                    a(data-ng-href="{{ homeBodyFile }}",target="_blank") {{ homeBodyFile }}
+                  div(data-ng-show="!homeBodyFile")
+                    em No home file currently...
+                  div.divider
+              div
+                h3 Update home page main section
+                form(data-ng-submit="handlers.updateMainPage('homeFile')")
+                  input.form-control(type="file",fileread="homeFile")
+                  div.text-center.separate-vert-small
+                    button.btn.btn-success Update Home Page File

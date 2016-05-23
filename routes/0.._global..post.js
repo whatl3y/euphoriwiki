@@ -19,15 +19,22 @@
           Access.onlyViewablePaths({session:req.session, username:username, paths:pages},function(err,filteredPages) {
             callback(err,filteredPages);
           });
+        },
+        function(filteredPages,callback) {
+          config.mongodb.db.collection("themes").find({type:"global"}).toArray(function(e,themeInfo) {
+            callback(e,filteredPages,themeInfo);
+          });
         }
       ],
-        function(err,filteredPages) {
+        function(err,filteredPages,themeInfo) {
           if (err) {
             log.error(err);
             return res.json({success:false, error:err});
           }
           
-          return res.json({success:true, allpages:filteredPages});
+          var theme = (themeInfo instanceof Array && themeInfo.length) ? themeInfo[0] : {};
+          
+          return res.json({success:true, allpages:filteredPages, logo:theme.header_logo});
         }
       );
       

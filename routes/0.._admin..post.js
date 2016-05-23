@@ -5,22 +5,22 @@
     case "init":
       config.mongodb.db.collection("adminsettings").find({active:{$not:{$eq:false}}}).sort({name:1}).toArray(function(_e,settings) {
         if (_e) {
-          log.error(_e);
           res.json({success:false});
-        } else {
-          for (var _i=0; _i<settings.length; _i++) {
-            try {
-              var h = jade.renderFile(__dirname+'/views/adminsettings/'+settings[_i].include);
-              settings[_i].html = h;
-            
-            } catch(err) {
-              log.error(err);
-              settings[_i].html = "";
-            }
-          }
-          
-          res.json({success:true, settings:settings});
+          return log.error(_e);
         }
+        
+        for (var _i=0; _i<settings.length; _i++) {
+          try {
+            var h = jade.renderFile(__dirname+'/views/adminsettings/'+settings[_i].include);
+            settings[_i].html = h;
+          
+          } catch(err) {
+            log.error(err);
+            settings[_i].html = "";
+          }
+        }
+        
+        return res.json({success:true, settings:settings});
       });
       
       break;

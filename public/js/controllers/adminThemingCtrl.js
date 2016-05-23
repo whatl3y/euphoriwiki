@@ -6,9 +6,13 @@ function adminThemingCtrl($scope,$http,Upload) {
       $scope.functions.ajax("init",{page:$scope.pathname},function(e,ret) {
         if (e) console.log(e);
         else {
+          $scope.curLogo = ret.logo || null;
+          $scope.curLogoPath = ($scope.curLogo) ? "/file/" + $scope.curLogo : "/public/images/euphoriwiki.png";
           
+          $scope.homeBody = ret.homeBody || null;
+          $scope.homeBodyFile = ($scope.homeBody) ? "/file/" + $scope.homeBody : null;
         }
-        console.log(e,ret);
+        //console.log(e,ret);
       });
     },
     
@@ -46,25 +50,52 @@ function adminThemingCtrl($scope,$http,Upload) {
       $scope[key] = file;
     },
     
-    createModule: function(fileScopeKey) {
+    updateLogo: function(fileScopeKey) {
       var file = $scope[fileScopeKey] || null;
-      $scope.newModule = $scope.newModule || {};
       
-      var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
+      var loader = new Core.Modals().asyncLoader({message:"Updating your logo!"});
       Upload.upload({
         url: '/admin/theming',
         file: file,
         fields: {
-          type: "uploadModule",
-          module: $scope.newModule
+          type: "updateLogo",
+          currentLogoFile: $scope.curLogo
         }
       })
       .success(function(data) {
         if (data.success) {
-          $scope.modules = $scope.modules.filter(function(m) {
-            return m.key != $scope.newModule.key;
-          });
-          $scope.modules.push(data.module);
+          $scope.curLogo = data.newLogo || null;
+          $scope.curLogoPath = ($scope.curLogo) ? "/file/" + $scope.curLogo : "/public/images/euphoriwiki.png";
+          
+        } else {
+          console.log(data);
+          $scope.error = data.error || "There was a problem creating your module. Please try again.";
+        }
+        
+        loader.remove();
+      })
+      .error(function(ret,_err) {
+        console.log(ret,_err);
+        $scope.error = "There was a problem creating your module. Please try again.";
+        loader.remove();
+      });
+    },
+    
+    updateMainPage: function(fileScopeKey) {
+      var file = $scope[fileScopeKey] || null;
+      
+      var loader = new Core.Modals().asyncLoader({message:"Updating your home page body!"});
+      Upload.upload({
+        url: '/admin/theming',
+        file: file,
+        fields: {
+          type: "updateMainBody",
+          currentFile: $scope.homeBody
+        }
+      })
+      .success(function(data) {
+        if (data.success) {
+          $scope.homeBodyFile = (data.homeBody) ? "/file/" + data.homeBody : null;
           
         } else {
           console.log(data);
