@@ -37,7 +37,7 @@ div.separate-vert-small
               input.input-sm.form-control.margin-small(type="text",id="dsServer",name="dsServer",data-ng-model="setting.dsServer")
             div.form-group
               label(for="tmpDsDriver") Driver
-              select.input-sm.form-control.margin-small(id="tmpDsDriver",name="tmpDsDriver",data-ng-model="setting.dsDriver",data-ng-options="d.key as d.name for d in [{key:'mssql',name:'Microsoft SQL Server'},{key:'mysql',name:'MySQL'}]")
+              select.input-sm.form-control.margin-small(id="tmpDsDriver",name="tmpDsDriver",data-ng-model="setting.dsDriver",data-ng-options="d.key as d.name for d in [{key:'mssql',name:'Microsoft SQL Server'},{key:'mysql',name:'MySQL'},{key:'postgresql',name:'PostgreSQL'}]")
             div.form-group
               label(for="dsDb") Database
               input.input-sm.form-control.margin-small(type="text",id="dsDb",name="dsDb",data-ng-model="setting.dsDb")

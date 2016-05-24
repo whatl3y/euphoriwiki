@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var mssql = require("mssql");
+var pg = require("pg");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:      SQLHandler.js
@@ -41,7 +42,9 @@ SQLHandler.prototype.init = function() {
   return this.map = {
     driver: {
       mysql: "mysql",
-      mssql: "mssql"
+      mssql: "mssql",
+      postgres: "postgresql",
+      postgresql: "postgresql"
     },
     
     createConnection: {
@@ -50,15 +53,21 @@ SQLHandler.prototype.init = function() {
       },
       mssql: function(config) {
         return new mssql.Connection(config);
+      },
+      postgresql: function(conString) {
+        return new pg.Client(conString);
       }
     },
     
     connect: {
       mysql: function(cb)  {
-        (self.connection) ? self.connection.connect(cb) : self.noop(cb)
+        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
       },
       mssql: function(cb)  {
-        (self.connection) ? self.connection.connect(cb) : self.noop(cb)
+        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
+      },
+      postgresql: function(cb) {
+        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
       }
     },
     
@@ -69,6 +78,9 @@ SQLHandler.prototype.init = function() {
       mssql: function(q,cb) {
         var conn = (self.connection) ? self.connection : {};
         new mssql.Request(conn).query(q,cb);
+      },
+      postgresql: function(q,cb) {
+        (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
       }
     },
     
@@ -78,6 +90,9 @@ SQLHandler.prototype.init = function() {
       },
       mssql: function() {
         (self.connection) ? self.connection.close() : self.noop();
+      },
+      postgresql: function() {
+        (self.connection) ? self.connection.end() : self.noop();
       }
     }
   };
