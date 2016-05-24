@@ -2,7 +2,7 @@ div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
   div.hidden-xs.hidden-sm.col-md-2
     div.padding-small.border-right.border-soft.minH300
       include include_categorylist.jade
-  div.col-xs-12.col-md-7
+  div.col-xs-12.col-sm-7
     div.row
       - if (data.EXTRA.homeBody)
         div!= data.EXTRA.homeBody
@@ -24,7 +24,7 @@ div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
                       input(type="submit",class="btn btn-primary",value="Go To Page")
                     div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
                       alert(type="danger") {{ newPageError }}
-  div.col-xs-12.col-md-3
+  div.hidden-xs.col-sm-5.col-md-3
     div.padding-left-large.border-left.border-soft.minH300
       div.row
         include include_search.jade
