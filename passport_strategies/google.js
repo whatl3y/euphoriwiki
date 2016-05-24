@@ -5,6 +5,7 @@ var WikiHandler = require("../libs/WikiHandler.js");
 var Audit = require("../libs/Audit.js");
 var config = require("../libs/config.js");
 var log = require("bunyan").createLogger(config.logger.options());
+var Object = require("../public/js/Object_prototypes.js");
 
 var A = new Authentication();
 
@@ -61,9 +62,8 @@ module.exports = {
           };
           
           A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
-            if (e) {
-              callback(e);
-            } else {
+            if (e) return callback(e);
+            else {
               A.login(doc,function(_e) {
                 callback(_e,doc);
               });
