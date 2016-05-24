@@ -165,7 +165,15 @@
           }          
         },
         function(callback) {
-          config.mongodb.db.collection("adminsettings").aggregate([
+          config.mongodb.db.collection("adminsettings").find({domid:"event_types"}).toArray(function(e,types) {
+            if (e) return callback(e);
+            if (!types || !types.length || !(typeof types[0] === "object") || !(types[0].value instanceof Array)) return callback(null,[]);
+            
+            return callback(null,types[0].value.filter(function(t) {return t.scope == "page"}).sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
+          });
+          
+          // $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
+          /*config.mongodb.db.collection("adminsettings").aggregate([
             {
               $match: {domid:"event_types"}
             },
@@ -190,7 +198,7 @@
               
               return callback(null,types[0].value.sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
             }
-          );
+          );*/
         },
         function(callback) {
           wiki.getPage({filters:{aliasfor:wiki.path},fields:{path:1,_id:0}},function(e,aliases) {

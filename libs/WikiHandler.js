@@ -553,6 +553,16 @@ WikiHandler.prototype.event=function(options,cb) {
   
   async.parallel([
     function(callback) {
+      config.mongodb.db.collection("wikicontent").find({path:self.path}).toArray(function(e,doc) {
+        if (e) return callback(e);
+        if (!doc || !doc.length || !(typeof doc[0] === "object") || !(doc[0].events instanceof Array)) return callback(null,[]);
+        
+        doc[0].events = doc[0].events.filter(function(ev) {return ev.type == type});
+        
+        return callback(e,doc);
+      });
+      
+      /* $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
       config.mongodb.db.collection("wikicontent").aggregate([
         {
           $match: {path:self.path}
@@ -573,7 +583,7 @@ WikiHandler.prototype.event=function(options,cb) {
         }
       ],function(e,doc) {
         callback(e,doc);
-      });
+      });*/
     },
     function(callback) {
       config.mongodb.db.collection("defaultevents").find({type:type}).toArray(function(e,events) {
