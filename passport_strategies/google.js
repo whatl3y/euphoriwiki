@@ -1,4 +1,5 @@
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
+var async = require("async");
 var Authentication = require("../libs/Authentication.js");
 var WikiHandler = require("../libs/WikiHandler.js");
 var Audit = require("../libs/Audit.js");
