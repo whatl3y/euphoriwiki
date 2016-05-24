@@ -17,11 +17,11 @@ module.exports = {
     passReqToCallback: true
   },
   handler: function(req, accessToken, refreshToken, profile, done) {
-    log.error(profile);
-    return done(null,false);
+    log.debug(profile);
+    
     A.session = req.session;
     
-    /*if (typeof profile === "object") {
+    if (typeof profile === "object") {
       var info = {
         username: "google_" + profile.id,
         firstname: profile.name.givenName,
@@ -77,6 +77,6 @@ module.exports = {
       function(err,userRecord) {
         return done(err,info.username);
       }
-    );*/
+    );
   }
 }
