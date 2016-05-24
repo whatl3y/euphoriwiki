@@ -67,14 +67,14 @@ AccessManagement.prototype.isAdmin = function(options,cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.isWikiAdmin = function(username,cb) {
-  if (!username) cb(null,false);
-  else {
-    this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
-      if (e) cb(e);
-      else if (admin.length) cb(null,true);
-      else cb(null,false);
-    });
-  }
+  if (!username) return cb(null,false);
+  
+  this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
+    if (e) return cb(e);
+    else if (admin.length) return cb(null,true);
+    
+    return cb(null,false);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ div(class="nav-affix")
                   a(href=link.link)= link.text
             div(class="navbar-right")
               ul(class="nav navbar-nav")
-                li(class="button-main")
+                li.button-main
                   a(href="javascript:void(0)",class="dropdown")
                     div(class="dropdown-toggle",data-target="#",data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
                       span Search Wiki
@@ -47,5 +47,8 @@ div(class="nav-affix")
                       li(class="row padding-medium")
                         div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
                           select(class="allpages form-control",data-ng-model="gotopage",data-ng-options="page.path for page in allPages",data-ng-change="handlers.quickSearchSelect(gotopage)")
-                li(class="button-main")
+                - if (typeof data.session !== "undefined" && data.session.isFullAdmin)
+                  li.button-main
+                    a(href="/admin") Admin Portal
+                li.button-main
                   a(href="/logout") Logout

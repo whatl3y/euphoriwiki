@@ -1,5 +1,6 @@
 var async = require("async");
 var Encryption = require("./Encryption.js");
+var Access = require("./AccessManagement.js");
 var LDAPHandler = require("./LDAPHandler.js");
 var config = require("./config.js");
 
@@ -188,29 +189,23 @@ Authentication.prototype.login = function(objOrUpn,cb) {
     self.session.lastname = self.session.lastname || self.session.familyName || self.session.sn || "";
     
     self.session.loggedIn = true;
-    self.session.save();
-    cb(null);
-  }
-  
-  if (objOrUpn == this.GLOBAL_ADMIN) {
-    self.session.ADMIN = true;
-    self.session.username = this.GLOBAL_ADMIN;
-    self.session.sAMAccountName = this.GLOBAL_ADMIN;
     
-    self.session.loggedIn = true;
-    self.session.save();
-    cb(null);
-  } else if (typeof objOrUpn === "object") {
-    saveInfo(objOrUpn);
-  } else {
-    this.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
-      if (err) cb(err);
-      else {
-        //assuming the first user is the one we want
-        saveInfo(info.users[0]);
-      }
+    new Access({db:config.mongodb.db}).isWikiAdmin(self.session.username,function(err,isAdmin) {
+      self.session.isFullAdmin = isAdmin || false;
+      
+      self.session.save();
+      return cb(err);
     });
   }
+  
+  if (objOrUpn == this.GLOBAL_ADMIN) return saveInfo({ADMIN:true, username:this.GLOBAL_ADMIN});
+  else if (typeof objOrUpn === "object") return saveInfo(objOrUpn);
+  
+  this.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
+    if (err) return cb(err);
+    
+    return saveInfo(info.users[0]);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
