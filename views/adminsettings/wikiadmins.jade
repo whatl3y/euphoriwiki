@@ -2,15 +2,21 @@
 - //the information saved needs to go to setting.value as either an object or other piece of data
 
 div(class="separate-vert-small")
-  div
-    span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="person in setting.value")
-      span {{ person.username }}
-      small(class="margin-left-small")
-        a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
-          em x
-  div(class="separate-vert-small")
-    div(class="text-center")
-      form(class="form-inline",data-ng-submit="functions.pushArray(setting.value,{username:setting.temp})")
+  div.padding-small
+    table.table.table-responsive
+      tr
+        th Username
+        th Name
+        th Delete
+      tr(data-ng-repeat="person in setting.value | orderBy:'username'")
+        td {{ person.username }}
+        td {{ (person.firstname) ? person.firstname + " " + person.lastname : "N/A" }}
+        td
+          a(href="javascript:void(0)",data-ng-click="setting.value.splice(setting.value.indexOf(person),1)")
+            div Delete
+  div.separate-vert-small
+    div.text-center
+      form.form-inline(data-ng-submit="functions.pushArray(setting.value,{username:setting.temp})")
         div(class="form-group")
           label(for="tempNewAdminUser") Add User
           input(type="text",id="tempNewAdminUser",name="tempNewAdminUser",class="form-control margin-left-small",data-ng-model="setting.temp")
