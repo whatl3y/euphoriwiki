@@ -3,6 +3,7 @@ var Authentication = require("../libs/Authentication.js");
 var WikiHandler = require("../libs/WikiHandler.js");
 var Audit = require("../libs/Audit.js");
 var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
 
 var A = new Authentication();
 
