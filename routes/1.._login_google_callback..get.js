@@ -1,1 +1,1 @@
-passport.authenticate("google", {successRedirect:'/', failureRedirect:'/login/google'});
+passport.authenticate("google", {successRedirect:'/', failureRedirect:/*'/login/google'*/"/"});

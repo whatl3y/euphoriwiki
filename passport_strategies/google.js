@@ -18,10 +18,10 @@ module.exports = {
   },
   handler: function(req, accessToken, refreshToken, profile, done) {
     log.info(profile);
-    
+    return done(null,false);
     A.session = req.session;
     
-    if (typeof profile === "object") {
+    /*if (typeof profile === "object") {
       var info = {
         username: "google_" + profile.id,
         firstname: profile.name.givenName,
@@ -77,6 +77,6 @@ module.exports = {
       function(err,userRecord) {
         return done(err,info.username);
       }
-    );
+    );*/
   }
 }
