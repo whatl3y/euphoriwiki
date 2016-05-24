@@ -200,7 +200,7 @@ var self = module.exports = {
     appId: process.env.GOOGLE_APP_ID,
     appSecret: process.env.GOOGLE_APP_SECRET,
     loginCallbackUrl: function() {
-      return self.server.HOST + ":" + self.server.PORT + "/login/google/callback";
+      return self.server.HOST + "/login/google/callback";
     }
   },
   
