@@ -17,7 +17,7 @@ module.exports = {
     passReqToCallback: true
   },
   handler: function(req, accessToken, refreshToken, profile, done) {
-    log.info(profile);
+    log.error(profile);
     return done(null,false);
     A.session = req.session;
     
