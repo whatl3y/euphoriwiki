@@ -196,6 +196,14 @@ var self = module.exports = {
     }
   },
   
+  google: {
+    appId: process.env.GOOGLE_APP_ID,
+    appSecret: process.env.GOOGLE_APP_SECRET,
+    loginCallbackUrl: function() {
+      return self.server.HOST + ":" + self.server.PORT + "/login/google/callback";
+    }
+  },
+  
   cryptography: {
     algorithm: "aes-256-ctr",
     password: process.env.CRYPT_SECRET

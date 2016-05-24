@@ -1,0 +1,1 @@
+passport.authenticate("google",{scope: ['profile']});
