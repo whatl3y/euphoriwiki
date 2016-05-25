@@ -28,7 +28,7 @@ div.separate-vert-small
     div.padding-small
       div.panel.panel-default
         div.panel-body
-          form(data-ng-submit="functions.pushArray(setting.value,{name:setting.dsName,server:setting.dsServer,driver:setting.dsDriver,database:setting.dsDb,username:setting.dsUn,password:setting.dsPw})")
+          form(data-ng-submit="functions.pushArray(setting.value,{name:setting.dsName, server:setting.dsServer, driver:setting.dsDriver, database:setting.dsDb, username:setting.dsUn, password:setting.dsPw})")
             div.form-group
               label(for="dsName") Datasource Name
               input.input-sm.form-control.margin-small(type="text",id="dsName",name="dsName",data-ng-model="setting.dsName")
