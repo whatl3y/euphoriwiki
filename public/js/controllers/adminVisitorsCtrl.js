@@ -3,8 +3,9 @@ function adminVisitorsCtrl($scope,$http) {
     initialize: function() {
       $scope.functions.ajax("visitors",null,function(e,ret) {
         if (e) return console.log(e);
-                
+        
         $scope.visitors = ret.visitors;
+        console.log(ret);
       });
       
       $scope.socketHandler=new Core.SocketHandler({
