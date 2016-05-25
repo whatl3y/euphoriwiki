@@ -5,7 +5,7 @@ function adminVisitorsCtrl($scope,$http) {
         if (e) return console.log(e);
         
         $scope.visitors = ret.visitors;
-        console.log(ret);
+        //console.log(ret);
       });
       
       $scope.socketHandler=new Core.SocketHandler({

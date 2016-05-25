@@ -128,24 +128,24 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
   new GeoIP().go(socket.handshake.address || "",function(err,geoData) {
     if (err) log.error(err);
     
+    geoData = geoData || {};
+    
     self.app.CACHE.sockets[id] = {
       socketId: id,
       room: room,
       user: req.session.username,
       firstname: req.session.firstname,
-      lastname: req.session.lastname
-    };
-    
-    if (typeof geoData==="object" && geoData.ip) {
-      self.app.CACHE.sockets[id].location = {
-        ip: req.ip,
+      lastname: req.session.lastname,
+      
+      location: {
+        ip: geoData.ip || socket.handshake.address,
         city: geoData.city,
         state: geoData.region_name,
         stateCde: geoData.region_code,
         country: geoData.country_name,
         countryCde: geoData.country_code
-      };
-    }
+      }
+    };
     
     self.app.CACHE.rooms[room] = self.app.CACHE.rooms[room] || {};
     self.app.CACHE.rooms[room][id] = true;
