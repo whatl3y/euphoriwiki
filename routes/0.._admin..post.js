@@ -77,7 +77,7 @@
       }
       
       
-      if (settingKey != "datasources" || value instanceof Array && typeof value[0] === "object" && value[0].username) {
+      if (settingKey != "datasources" && (value instanceof Array && typeof value[0] === "object" && value[0].username)) {
         var newValue = [];
         
         async.each(value,function(v,callback) {
