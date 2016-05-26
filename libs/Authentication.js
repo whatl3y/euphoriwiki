@@ -162,16 +162,46 @@ Authentication.prototype.isUserMemberOf = function(options,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      isAuthTypeEnabled (PUBLIC)
+|DESCRIPTION:  Gets necessary information about a user and logs them in by saving to the session.
+|PARAMETERS:  1. type(REQ): string indicating the auth type to see if it's enabled
+|                 should correspond to keys in db.adminsettings.find > value object
+|                     local
+|                     ldap
+|                     facebook
+|                     google
+|             2. cb(REQ): cb(error,<true/false>
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.isAuthTypeEnabled = function(type,cb) {
+  var oFilter = {};
+  oFilter["domid"] = "authtypes";
+  oFilter["value." + type] = "true";
+  
+  config.mongodb.db.collection("adminsettings").find(oFilter,{_id:1}).toArray(function(e,isEnabled) {
+    if (e) return cb(e);
+    
+    return cb(null,!!isEnabled.length);
+  });
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      login (PUBLIC)
 |DESCRIPTION:  Gets necessary information about a user and logs them in by saving to the session.
 |PARAMETERS:  1. objOrUpn(REQ): userPrincipalName we're going to find, then store information in the session
-|             2. cb(REQ): 
+|             2. cb(REQ): cb(<error/null>)
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.login = function(objOrUpn,cb) {
-  objOrUpn = (typeof objOrUpn==="object") ? objOrUpn : objOrUpn + ((objOrUpn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
+  objOrUpn = (typeof objOrUpn==="object")
+    ? objOrUpn
+    : ((typeof objOrUpn === "string")
+      ? objOrUpn + ((objOrUpn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix)
+      : objOrUpn);
   
   var self = this;
   
@@ -201,11 +231,16 @@ Authentication.prototype.login = function(objOrUpn,cb) {
   if (objOrUpn == this.GLOBAL_ADMIN) return saveInfo({ADMIN:true, username:this.GLOBAL_ADMIN});
   else if (typeof objOrUpn === "object") return saveInfo(objOrUpn);
   
-  this.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
+  this.isAuthTypeEnabled("ldap",function(err,isEnabled) {
     if (err) return cb(err);
+    if (!isEnabled) return cb();
     
-    return saveInfo(info.users[0]);
-  });
+    self.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
+      if (err) return cb(err);
+      
+      return saveInfo(info.users[0]);
+    });
+  });  
 }
 
 /*-----------------------------------------------------------------------------------------
