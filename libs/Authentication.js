@@ -69,7 +69,7 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
       
       var origRecord = results[0];
       var updatedOrNewRecord = results[1];
-      console.log(origRecord,updatedOrNewRecord);
+      console.log(username,origRecord,updatedOrNewRecord);
       
       if (upsert || update) return cb(null,updatedOrNewRecord);
       else if (origRecord) return cb(null,origRecord);
