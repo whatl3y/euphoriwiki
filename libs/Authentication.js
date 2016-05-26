@@ -71,9 +71,10 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
         var origRecord = results[0];
         var updatedOrNewRecord = results[1];
         
-        if (origRecord && upsert) cb(null,updatedOrNewRecord);
-        else if (origRecord) cb(null,origRecord);
-        else cb(null,(origRecord instanceof Array) ? origRecord : false);
+        if (upsert) return cb(null,updatedOrNewRecord);
+        else if (origRecord) return cb(null,origRecord);
+        
+        return cb(null,(origRecord instanceof Array) ? origRecord : false);
       }
     }
   );
