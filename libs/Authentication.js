@@ -56,9 +56,11 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
     },
     function(callback) {
       if (update || upsert) {
-        config.mongodb.db.collection("accounts").update({username:username},data,{upsert:upsert, new:1},
-          function(e,doc) {
-            return callback(e,(doc instanceof Array) ? doc[0]: doc);
+        config.mongodb.db.collection("accounts").update({username:username},data,{ upsert:upsert },
+          function(e,result) {
+            if (e) return callback(e);
+            
+            return callback(null,(data.$set) ? data.$set : data);
           }
         );
       } else callback(null,false);
