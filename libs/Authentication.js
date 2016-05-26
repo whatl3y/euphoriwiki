@@ -56,7 +56,7 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
     },
     function(callback) {
       if (update || upsert) {
-        config.mongodb.db.collection("accounts").update({username:username},data,{ upsert:upsert },
+        config.mongodb.db.collection("accounts").update({username:username},data,{upsert:upsert, new:1},
           function(e,doc) {
             if (e) callback(e);
             else callback(null,(doc instanceof Array) ? doc[0]: doc);
@@ -66,16 +66,15 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
     }
   ],
     function(err,results) {
-      if (err) cb(err);
-      else {
-        var origRecord = results[0];
-        var updatedOrNewRecord = results[1];
-        
-        if (upsert) return cb(null,updatedOrNewRecord);
-        else if (origRecord) return cb(null,origRecord);
-        
-        return cb(null,(origRecord instanceof Array) ? origRecord : false);
-      }
+      if (err) return cb(err);
+      
+      var origRecord = results[0];
+      var updatedOrNewRecord = results[1];
+      
+      if (upsert || update) return cb(null,updatedOrNewRecord);
+      else if (origRecord) return cb(null,origRecord);
+      
+      return cb(null,false);
     }
   );
 }
