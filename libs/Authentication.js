@@ -17,7 +17,7 @@ Authentication = function(options) {
   options = options || {};
   
   this.session = options.session;        //the session object we will be able to save for future requests
-  this.username = this.username();
+  this.username = this.getUsername();
   
   this.accountsTable = "accounts";
   
@@ -243,14 +243,14 @@ Authentication.prototype.login = function(objOrUpn,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
-|NAME:      username (PUBLIC)
+|NAME:      getUsername (PUBLIC)
 |DESCRIPTION:  Determines if a user is logged in and returns the username if so, false otherwise.
 |PARAMETERS:    None
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    <string or false>: string if logged in with username, else false
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.username = function() {
+Authentication.prototype.getUsername = function() {
   return (this.isLoggedIn()) ? this.session.username : false;
 }
 

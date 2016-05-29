@@ -10,9 +10,22 @@
     case "initialize":
       async.parallel([
         function(callback) {
-          config.mongodb.db.collection("wikicontent").find({path:/^\/[^\/]+$/, aliasfor:{$exists:false}},{_id:0,path:1}).sort({path:1}).toArray(function(e,mainPages) {
-            callback(e,mainPages);
-          });
+          async.waterfall([
+            function(_callback) {
+              config.mongodb.db.collection("wikicontent").find({path:/^\/[^\/]+$/, aliasfor:{$exists:false}},{_id:0,path:1}).sort({path:1}).toArray(function(e,mainPages) {
+                _callback(e,mainPages);
+              });
+            },
+            function(mainPages, _callback) {
+              Access.onlyViewablePaths({session:req.session, username:A.username, paths:mainPages},function(e,paths) {
+                _callback(e,paths);
+              });
+            }
+          ],
+            function(err,filteredPaths) {
+              return callback(err,filteredPaths);
+            }
+          );
         },
         function(callback) {
           config.mongodb.db.collection("homewidgets").find({active:true}).toArray(function(_e,widgets) {
