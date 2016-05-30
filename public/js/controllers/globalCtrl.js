@@ -44,6 +44,8 @@ function globalCtrl($scope,$http) {
         } else {
           $scope.allPages = ret.allpages;
           $scope.navLogo = (ret.logo) ? "/file/" + ret.logo : "/public/images/euphoriwiki.png";
+          $scope.navLogoLink = ret.logoLink || null;
+          
           angular.element( 'select.allpages' ).autocompleteselect({
             placeholder: "Quick Page Search (3 character minimum)",
             inputclasses: "form-control input-xs"

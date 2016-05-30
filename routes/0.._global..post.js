@@ -34,7 +34,7 @@
           
           var theme = (themeInfo instanceof Array && themeInfo.length) ? themeInfo[0] : {};
           
-          return res.json({success:true, allpages:filteredPages, logo:theme.header_logo});
+          return res.json({success:true, allpages:filteredPages, logo:theme.header_logo, logoLink:theme.header_logo_link});
         }
       );
       

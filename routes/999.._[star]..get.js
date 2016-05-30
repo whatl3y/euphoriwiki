@@ -21,6 +21,11 @@
         });
       },
       function(callback) {
+        wiki.getPageContent(function(e,html) {
+          callback(e,html);
+        });
+      },
+      function(callback) {
         Access.isAdmin({username:username, path:path},function(e,canEdit) {
           callback(e,canEdit);
         });
@@ -42,23 +47,26 @@
       }
     ],
       function(err,results) {
-        if (err) log.error(err);
-        else {
-          var page = results[0] || {};
-          var canEditPage = results[1];
-          var canViewPage = results[2] || results[3];
-          var passwordValidated = results[4];
-          
-          oView.loggedIn = (req.session.loggedIn) ? true : false;
-          oView.pagePieces = wiki.pageTree(req.params[0]);
-          oView.canSeeEditButton = (oView.loggedIn && canEditPage);
-          
-          if (!canViewPage) return res.redirect("/?auth=" + path);
-          else if (page.aliasfor) return res.redirect(page.aliasfor);
-          else if (!passwordValidated) page = {};
-          
-          return res.render("wikipage",config.view.send(req,{obj:oView, iobj:{pageInfo:page}, title:path}));
+        if (err) {
+          res.render("wikipage",config.view.send(req,{}));
+          return log.error(err);
         }
+        
+        var page = results[0] || {};
+        var pageHtml = results[1] || "";
+        var canEditPage = results[2];
+        var canViewPage = results[3] || results[4];
+        var passwordValidated = results[5];
+        
+        oView.loggedIn = (req.session.loggedIn) ? true : false;
+        oView.pagePieces = wiki.pageTree(req.params[0]);
+        oView.canSeeEditButton = (oView.loggedIn && canEditPage);
+        
+        if (!canViewPage) return res.redirect("/?auth=" + path);
+        else if (page.aliasfor) return res.redirect(page.aliasfor);
+        else if (!passwordValidated) pageHtml = "";
+        
+        return res.render("wikipage",config.view.send(req,{obj:oView, iobj:{pageInfo:{content_html:pageHtml}}, title:path}));
       }
     );
     

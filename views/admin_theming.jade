@@ -26,7 +26,12 @@ block main
               div
                 h3 Update Logo
                 form(data-ng-submit="handlers.updateLogo('navLogoFile')")
-                  input.form-control(type="file",fileread="navLogoFile")
+                  div.form-group
+                    input.form-control(type="file",fileread="navLogoFile")
+                  div.form-group
+                    label Header Logo Link
+                    div
+                      input.form-control(data-ng-model="navLogoLink")
                   div.text-center.separate-vert-small
                     button.btn.btn-success Update Logo
         div.col-xs-12.col-md-6

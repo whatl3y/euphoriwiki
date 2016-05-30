@@ -1,4 +1,12 @@
 function adminTemplateMgmtCtrl($scope,$http,Upload) {
+  $scope.templateConfigTypes = [
+    {name:"Image", type:"image"},
+    {name:"List", type:"list"},
+    {name:"Select List", type:"select"},
+    {name:"Text Area", type:"textarea"},
+    {name:"Text Box", type:"textbox"}
+  ];
+  
   $scope.functions= {
     initialize: function() {
       this.ajax("init",null,function(err,data) {
@@ -6,6 +14,7 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
         
         $scope.templateTypes = data.templateTypes;
         $scope.templates = data.templates;
+        $scope.externalDatasources = data.datasources || [];
         
         console.log(data);
       });
@@ -14,6 +23,8 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
     updateAryLength: function(scopeKey,which) {
       scopeKey = scopeKey || "";
       which = which || "inc";
+      
+      $scope[scopeKey] = $scope[scopeKey] || [];
       
       switch(which) {
         case "inc":
@@ -59,6 +70,7 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
     
     editTemplate: function(oTemplate) {
       $scope.newTemplate = oTemplate;
+      $scope.newTemplateConfig = $scope.newTemplate.config;
     },
     
     addOrEditTemplate: function(fileScopeKey) {
@@ -107,6 +119,18 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
           });
         });
       }
+    },
+    
+    updateListColumns: function(num,obj) {
+      obj["listcols"] = obj["listcols"] || [];
+      
+      var a = [];
+      for (var _i=0; _i<num; _i++) {
+        var o = (typeof obj["listcols"][_i] === "undefined") ? {colName:""} : obj["listcols"][_i];
+        a.push(o);
+      }
+      
+      obj["listcols"] = a;
     }
   };
   

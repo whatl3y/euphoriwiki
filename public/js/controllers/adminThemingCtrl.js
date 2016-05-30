@@ -59,7 +59,8 @@ function adminThemingCtrl($scope,$http,Upload) {
         file: file,
         fields: {
           type: "updateLogo",
-          currentLogoFile: $scope.curLogo
+          currentLogoFile: $scope.curLogo,
+          logoLink: $scope.navLogoLink || null
         }
       })
       .success(function(data) {

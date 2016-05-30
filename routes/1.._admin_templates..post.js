@@ -11,6 +11,7 @@
   
   var A = new Auth({session:req.session});
   var Access = new AccessManagement({db:config.mongodb.db});
+  var wiki = new WikiHandler();
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
   
   var username = A.username;
@@ -43,6 +44,11 @@
                 config.mongodb.db.collection("wikitemplates").find({ active:{$ne:false} }).sort( {type:1, name:1} ).toArray(function(e,templates) {
                   callback(e,templates);
                 });
+              },
+              function(callback) {
+                wiki.getExternalDatasources(function(e,datasources) {
+                  callback(e,datasources);
+                });
               }
             ],
               function(e,results) {
@@ -53,8 +59,9 @@
                 
                 var templateTypes = results[0];
                 var templates = results[1];
+                var datasources = results[2];
                 
-                res.json({success:true, templateTypes:templateTypes, templates:templates});
+                res.json({success:true, templateTypes:templateTypes, templates:templates, datasources:datasources});
               }
             );
             
@@ -67,13 +74,18 @@
             var templateId = info.template._id || null;
             var templateName = info.template.name;
             var templateType = info.template.type;
+            var isEasyConfig = info.template.isEasyConfig;
+            var templateConfig = _.toArray(info.template.config);
             
             var createOrModify = function(newFileName) {
               var data = {$set: {updated: new Date()}};
               
+              data["$set"].file = newFileName || "NOFILE";
+              
               if (templateName) data["$set"].name = templateName;
               if (templateType) data["$set"].type = templateType;
-              if (newFileName) data["$set"].file = newFileName;
+              if (isEasyConfig) data["$set"].isEasyConfig = isEasyConfig;
+              if (templateConfig) data["$set"].config = Object.removeDollarKeys(templateConfig);
               
               async.series([
                 function(callback) {

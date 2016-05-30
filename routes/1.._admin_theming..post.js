@@ -56,13 +56,15 @@
             break;
             
           case "updateLogo":
-            if (!fileName) return res.json({success:false, error:"Please make sure you have uploaded a file to be replaced as your new logo."});
-            
             var currentLogoFileName = info.currentLogoFile;
+            var link = info.logoLink;
+            
             var fh = new FileHandler({db:config.mongodb.db});
             
             async.waterfall([
               function(callback) {
+                if (!fileName) return callback();
+                
                 if (currentLogoFileName) {
                   fh.deleteFile({filename:currentLogoFileName},function(e) {
                     return callback(e);
@@ -74,12 +76,14 @@
                 return callback();
               },
               function(callback) {
+                if (!fileName) return callback(null,currentLogoFileName);
+                
                 fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
                   return callback(err,newFileName);
                 });
               },
               function(logoFileName,callback) {
-                config.mongodb.db.collection("themes").update({type:"global"},{$set:{header_logo:logoFileName}},{upsert:true},function(err) {
+                config.mongodb.db.collection("themes").update({type:"global"},{$set:{header_logo:logoFileName, header_logo_link:link}},{upsert:true},function(err) {
                   return callback(err,logoFileName);
                 })
               }

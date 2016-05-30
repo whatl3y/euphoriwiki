@@ -1,5 +1,6 @@
 var _ = require("underscore");
 var async = require("async");
+var FileHandler = require("./FileHandler.js");
 var CodeRunner = require("./CodeRunner.js");
 var config = require('./config.js');
 var Object = require("../public/js/Object_prototypes.js");
@@ -140,6 +141,71 @@ WikiHandler.prototype.getPage=function(options,cb) {
     if (_e) cb(_e);
     else cb(null,pageInfo);
   });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getPageContent (PUBLIC)
+|DESCRIPTION:  Gets the final HTML of a page.
+|PARAMETERS:  1. cb: callback function
+|                 cb(<error/null>,<html>)
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getPageContent=function(cb) {
+  var self = this;
+  
+  async.waterfall([
+    function(callback) {
+      self.getPage({fields:{content_html:1, template:1}}, function(e,page) {
+        callback(e,page);
+      });
+    },
+    function(page,callback) {
+      if (page && page.length) {
+        if (page[0].template) {
+          return callback(null,page[0].template,null);
+        }
+        
+        return callback(null,null,page[0].content_html);
+      }
+      
+      return callback(null,null,null);
+    },
+    function(templateId,html,callback) {
+      if (!templateId) return callback(null,html);
+      
+      try {
+        var ObjectId = require('mongodb').ObjectID;
+        
+        async.waterfall([
+          function(_callback) {
+            config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1}).toArray(function(e,result) {
+              _callback(e,result);
+            });
+          },
+          function(template,_callback) {
+            var fh = new FileHandler({db:config.mongodb.db});
+            
+            fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
+              _callback(e,result);
+            });
+          }
+        ],
+          function(err,result) {
+            return callback(err,result);
+          }
+        );
+        
+      } catch(e) {
+        return callback(e);
+      }
+    }
+  ],
+    function(err,html) {
+      return cb(err,html);
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------
