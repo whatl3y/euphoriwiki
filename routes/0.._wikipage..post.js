@@ -61,6 +61,15 @@
           if (!validated) return res.json({success:false, protected:true});
           else if (!canViewPage) return res.json({success:false, outofscope:true});
           
+          var oTemplate = {};
+          if (pageInfo instanceof Array && pageInfo.length && typeof pageInfo[0].template === "object") {
+            oTemplate = {
+              isEasyConfig: (pageInfo[0].template.templateId) ? "Yes" : "No",
+              config: pageInfo[0].template.config
+            };
+          }
+          
+          
           var oRet;
           if (!pageInfo.length) {
             oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
@@ -69,6 +78,7 @@
               success: true,
               exists: true,
               updateable: canUpdate,
+              template: oTemplate,
               description: pageInfo[0].description,
               html: pageInfo[0].content_html,
               markdown: pageInfo[0].content_markdown,
@@ -666,16 +676,24 @@
       
       async.waterfall([
         function(callback) {
-          fh.getFile({filename:templateName, encoding:"utf8"},function(err,file) {
-            callback(err,file);
+          config.mongodb.db.collection("wikitemplates").find({file:templateName}).toArray(function(e,result) {
+            if (e) return callback(e);
+            if (!result || !result.length) return callback(null,null);
+            
+            return callback(null,result[0]);
           });
         },
-        function(file,callback) {
+        function(oTemplate,callback) {
+          fh.getFile({filename:templateName, encoding:"utf8"},function(err,file) {
+            callback(err,oTemplate,file);
+          });
+        },
+        function(oTemplate,file,callback) {
           try {
             var method = gH.extension(templateName).substring(1).toLowerCase();
             
             gH[method](file,function(err,html) {
-              callback(err,html);
+              callback(err,oTemplate,html);
             });
             
           } catch(err) {
@@ -683,13 +701,13 @@
           }
         }
       ],
-        function(err,templateHtml) {
+        function(err,oTemplate,templateHtml) {
           if (err) {
             res.json({success:false, error:(typeof err === "string") ? err : "There was a problem getting your template."});
             return log.error(err);
           }
           
-          res.json({success:true, html:templateHtml});
+          res.json({success:true, html:templateHtml, templateInfo:oTemplate});
         }
       );
       

@@ -98,6 +98,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
               $scope.content.tags = ret.tags || [];
               $scope.content.draft = ret.draft || false;
               
+              $scope.template = ret.template || {};
+              
               angular.element("#rte-editor").html( $scope.content.html );
               
               $scope.password = ret.password || "";
@@ -798,6 +800,11 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         //console.log(ret);
         
         if (ret.success) {
+          $scope.template = $scope.template || {};
+          
+          $scope.template.isEasyConfig = ret.templateInfo.isEasyConfig;
+          $scope.template.config = ret.templateInfo.config || [];
+          
           $scope.content.html = (append) ? (($scope.content.html || "")+ret.html) : ret.html;
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
           
