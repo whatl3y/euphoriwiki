@@ -147,7 +147,7 @@ WikiHandler.prototype.getPage=function(options,cb) {
 |NAME:      getPageContent (PUBLIC)
 |DESCRIPTION:  Gets the final HTML of a page.
 |PARAMETERS:  1. cb: callback function
-|                 cb(<error/null>,<html>)
+|                 cb(<error/null>,<html>,<template config object/null>)
 |SIDE EFFECTS:  None
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -163,8 +163,8 @@ WikiHandler.prototype.getPageContent=function(cb) {
     },
     function(page,callback) {
       if (page && page.length) {
-        if (page[0].template) {
-          return callback(null,page[0].template,null);
+        if (typeof page[0].template === "object") {
+          return callback(null,page[0].template.templateId,null);
         }
         
         return callback(null,null,page[0].content_html);
@@ -180,7 +180,7 @@ WikiHandler.prototype.getPageContent=function(cb) {
         
         async.waterfall([
           function(_callback) {
-            config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1}).toArray(function(e,result) {
+            config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1,config:1}).toArray(function(e,result) {
               _callback(e,result);
             });
           },
@@ -188,12 +188,12 @@ WikiHandler.prototype.getPageContent=function(cb) {
             var fh = new FileHandler({db:config.mongodb.db});
             
             fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
-              _callback(e,result);
+              _callback(e,result,template[0].config);
             });
           }
         ],
-          function(err,result) {
-            return callback(err,result);
+          function(err,html,config) {
+            return callback(err,result,config);
           }
         );
         
@@ -202,8 +202,8 @@ WikiHandler.prototype.getPageContent=function(cb) {
       }
     }
   ],
-    function(err,html) {
-      return cb(err,html);
+    function(err,html,templateConfig) {
+      return cb(err,html,templateConfig || null);
     }
   );
 }

@@ -24,6 +24,11 @@
           });
         },
         function(callback) {
+          wiki.getPageContent(function(e,html) {
+            callback(e,html);
+          });
+        },
+        function(callback) {
           wiki.validatePassword({session:req.session},function(e,validated) {
             callback(e,validated);
           })
@@ -34,12 +39,7 @@
           });
         },
         function(callback) {
-          Access.isPageAdmin({username:username, path:wiki.path, editOnly:true},function(e,isAdmin) {
-            callback(e,isAdmin);
-          });
-        },
-        function(callback) {
-          Access.isWikiAdmin(username,function(e,isAdmin) {
+          Access.isAdmin({username:username, path:wiki.path, editOnly:true},function(e,isAdmin) {
             callback(e,isAdmin);
           });
         },
@@ -53,9 +53,10 @@
           if (err) return res.json({success:false, error:err});
           
           var pageInfo = results[0];
-          var validated = results[1];
-          var templates = results[2];
-          var canUpdate = results[3] || results[4] || false;
+          var pageContent = results[1];
+          var validated = results[2];
+          var templates = results[3];
+          var canUpdate = results[4];
           var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
           
           if (!validated) return res.json({success:false, protected:true});
@@ -81,7 +82,7 @@
               updateable: canUpdate,
               template: oTemplate,
               description: pageInfo[0].description,
-              html: pageInfo[0].content_html,
+              html: pageContent,
               markdown: pageInfo[0].content_markdown,
               widgets: pageInfo[0].widgets,
               lastUpdate: pageInfo[0].updated,
@@ -243,178 +244,176 @@
           var oSubPages = results[7];
           var externalDatasources = results[8];
           
-          if (!pageExists.length) res.json({success:true});
-          else {
-            res.json({
-              success:true,
-              versions: pageArchive,
-              modules: modules,
-              pageModules: moduleInstances,
-              scopeTypes: viewScopeTypes,
-              eventTypes: eventTypes.map(function(t) {return t.type}),
-              pageAliases: aliases.map(function(t) {return t.path}),
-              subpages: (Object.size(oSubPages)) ? oSubPages : [],
-              datasources: externalDatasources
-            });
-          }
+          if (!pageExists.length) return res.json({success:true});
+          
+          return res.json({
+            success:true,
+            versions: pageArchive,
+            modules: modules,
+            pageModules: moduleInstances,
+            scopeTypes: viewScopeTypes,
+            eventTypes: eventTypes.map(function(t) {return t.type}),
+            pageAliases: aliases.map(function(t) {return t.path}),
+            subpages: (Object.size(oSubPages)) ? oSubPages : [],
+            datasources: externalDatasources
+          });
         }
       );
     
       break;
       
     case "update":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to update wiki pages."});
-      else {        
-        async.parallel([
-          function(callback) {
-            wiki.getPage(function(_e,current) {
-              callback(_e,current);
-            });
-          },
-          function(callback) {
-            wiki.validatePassword({session:req.session},function(e,validated) {
-              callback(e,validated);
-            });
-          },
-          function(callback) {
-            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
-              callback(e,isAdmin);
-            });
-          }
-        ],
-          function(err,results) {
-            if (err) res.json({success:false, error:err});
-            else {
-              var current = results[0];
-              var validated = results[1];
-              var canUpdate = results[2];
-              
-              if (!validated) res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
-              else if (!canUpdate) res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
-              else {
-                var saveData = {
-                  "$set": {
-                    path: wiki.path,
-                    content_html: info.html,
-                    content_markdown: info.markdown,
-                    updated: new Date(),
-                    updatedBy: {username: username}
-                  }
-                };
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to update wiki pages."});
+
+      async.parallel([
+        function(callback) {
+          wiki.getPage(function(_e,current) {
+            callback(_e,current);
+          });
+        },
+        function(callback) {
+          wiki.validatePassword({session:req.session},function(e,validated) {
+            callback(e,validated);
+          });
+        },
+        function(callback) {
+          Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) return res.json({success:false, error:err});
+          
+          var current = results[0];
+          var validated = results[1];
+          var canUpdate = results[2];
+          
+          if (!validated) return res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
+          if (!canUpdate) return res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
+          
+          var saveData = {
+            "$set": {
+              path: wiki.path,
+              content_html: info.html,
+              content_markdown: info.markdown,
+              updated: new Date(),
+              updatedBy: {username: username}
+            }
+          };
+          
+          //save the data, pull any drafts the user may
+          //have had for this page, archive the former page, write
+          //an entry in the audit log,
+          //and call the event handler for updating a page.
+          async.parallel([
+            function(callback) {
+              config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
+                function(err,doc) {
+                  callback(err,doc);
+                }
+              );
+            },
+            function(callback) {
+              config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
+                function(e,result) {
+                  callback(e,result);
+                }
+              );
+            },
+            function(callback) {
+              if (current.length) {
+                var oArchive = current[0];
+                delete(oArchive["_id"]);
                 
-                //save the data, pull any drafts the user may
-                //have had for this page, archive the former page, write
-                //an entry in the audit log,
-                //and call the event handler for updating a page.
-                async.parallel([
-                  function(callback) {
-                    config.mongodb.db.collection("wikicontent").update({ path:wiki.path },saveData,{ upsert:true },
-                      function(err,doc) {
-                        callback(err,doc);
-                      }
-                    );
-                  },
-                  function(callback) {
-                    config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
-                      function(e,result) {
-                        callback(e,result);
-                      }
-                    );
-                  },
-                  function(callback) {
-                    if (current.length) {
-                      var oArchive = current[0];
-                      delete(oArchive["_id"]);
-                      
-                      config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
-                        callback(err,result);
-                      });
-                    } else {
-                      wiki.event({type:"createpage", params:{username:username}},function(e,result) {if (e) log.error(e);});
-                      callback(err,true);
-                    }
-                  },
-                  function(callback) {
-                    try {
-                      audit.log({type:"Update Page", additional:{path:wiki.path}});
-                      callback(null,true);
-                    } catch(err) {
-                      callback(err,null);
-                    }
-                  },
-                  function(callback) {
-                    try {
-                      wiki.event({type:"updatepage", params:{username:username}},function(e,result) {if (e) log.error(e);});
-                      callback(null,true);
-                    } catch(err) {
-                      callback(err);
-                    }
-                  }
-                ],
-                  function(err,results) {
-                    if (err) {
-                      log.error(err);
-                      res.json({success:false, error:"There was an error saving your information. Please try again."});
-                    } else {
-                      var mailInfo = results[4];
-                      if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
-                      
-                      res.json({success:true});
-                    }
-                  }
-                );
+                config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
+                  callback(err,result);
+                });
+              } else {
+                wiki.event({type:"createpage", params:{username:username}},function(e,result) {if (e) log.error(e);});
+                callback(err,true);
+              }
+            },
+            function(callback) {
+              try {
+                audit.log({type:"Update Page", additional:{path:wiki.path}});
+                callback(null,true);
+              } catch(err) {
+                callback(err,null);
+              }
+            },
+            function(callback) {
+              try {
+                wiki.event({type:"updatepage", params:{username:username}},function(e,result) {if (e) log.error(e);});
+                callback(null,true);
+              } catch(err) {
+                callback(err);
               }
             }
-          }
-        );
-      }
+          ],
+            function(err,results) {
+              if (err) {
+                res.json({success:false, error:"There was an error saving your information. Please try again."});
+                return log.error(err);
+              }
+              
+              var mailInfo = results[4];
+              if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
+              
+              return res.json({success:true});
+            }
+          );
+        }
+      );
+      
       break;
       
     case "delete":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to delete a wiki page."});
-      else {
-        async.parallel([
-          function(callback) {
-            Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
-              callback(e,isAdmin);
-            });
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to delete a wiki page."});
+      
+      async.parallel([
+        function(callback) {
+          Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
+            callback(e,isAdmin);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) {
+            res.json({success:false, error:err});
+            return log.error(err);
           }
-        ],
-          function(err,results) {
-            if (err) {
-              res.json({success:false, error:err});
-              log.error(err);
-            } else {
-              var isAdmin = results[0];
-              
-              if (!isAdmin) res.json({success:false, error:"You must be a page admin to delete a wiki page."});
-              else {
-                wiki.deletePage(function(e) {
-                  if (e) {
-                    res.json({success:false, error:e});
-                    log.error(err);
-                  } else res.json({success:true});
-                });
-              }
+          
+          var isAdmin = results[0];
+          
+          if (!isAdmin) return res.json({success:false, error:"You must be a page admin to delete a wiki page."});
+          
+          wiki.deletePage(function(e) {
+            if (e) {
+              res.json({success:false, error:e});
+              return log.error(err);
             }
-          }
-        );
-      }
+            
+            return res.json({success:true});
+          });
+        }
+      );
     
       break;
       
     case "aliases":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to delete a wiki page."});
-      else {
-        var aliases = info.aliases || [];
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to delete a wiki page."});
+      
+      var aliases = info.aliases || [];
+      
+      wiki.updateAliases({aliases:aliases, Access:Access, username:username},function(err) {
+        if (err) {
+          res.json({success:false, error:(typeof err==="string") ? err : "There was an issue trying to update your page aliases. Please try again."});
+          return log.error(err);
+        }
         
-        wiki.updateAliases({aliases:aliases, Access:Access, username:username},function(err) {
-          if (err) {
-            res.json({success:false, error:(typeof err==="string") ? err : "There was an issue trying to update your page aliases. Please try again."});
-            log.error(err);
-          } else res.json({success:true});
-        });
-      }
+        return res.json({success:true});
+      });
       
       break;
     
@@ -433,23 +432,22 @@
       ],
         function(err,results) {
           if (err) {
-            log.error(err);
             res.json({success:false, error:err});
-          } else {
-            var isAdmin = results[0];
-            
-            if (!isAdmin) res.json({success:false, error:"You need to be a page admin to perform this function."});
-            else {
-              config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $unset:{events:1} },function(_e) {
-                config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $set:{events:events} },function(__e) {
-                  var error = _e || __e || null;
-                  
-                  if (error) res.json({success:false, error:error});
-                  else res.json({success:true});
-                });
-              });
-            }
+            return log.error(err);
           }
+          
+          var isAdmin = results[0];
+          
+          if (!isAdmin) return res.json({success:false, error:"You need to be a page admin to perform this function."});
+          
+          config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $unset:{events:1} },function(_e) {
+            config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $set:{events:events} },function(__e) {
+              var error = _e || __e || null;
+              if (error) return res.json({success:false, error:error});
+              
+              return res.json({success:true});
+            });
+          });
         }
       );
     
