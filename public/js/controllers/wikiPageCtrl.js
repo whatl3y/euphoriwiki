@@ -717,7 +717,11 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       Upload.upload({
         url: '/wikipage',
         file: file,
-        fields: {type:uploadType, scope:$scope.fileUploadScope, page:$scope.pathname}
+        fields: {
+          type: uploadType,
+          scope: $scope.fileUploadScope,
+          page: $scope.pathname
+        }
       })
       .success(function(data) {
         console.log(data);

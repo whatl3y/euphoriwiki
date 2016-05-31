@@ -1,6 +1,6 @@
 function adminTemplateMgmtCtrl($scope,$http,Upload) {
   $scope.templateConfigTypes = [
-    {name:"Image", type:"image"},
+    {name:"File Upload", type:"file"},
     {name:"List", type:"list"},
     {name:"Select List", type:"select"},
     {name:"Text Area", type:"textarea"},
@@ -83,7 +83,7 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
         file: file,
         fields: {
           type: "addOrEditTemplate",
-          template: $scope.newTemplate
+          template: Upload.json($scope.newTemplate)
         }
       })
       .success(function(data) {

@@ -10,7 +10,9 @@ function fileread($window) {
           reader.onload = function (loadEvent) {
             $scope.$apply(function () {
               $scope.fileread = loadEvent.target.result;
-              $scope.$parent.handlers.uploadFile(changeEvent.target.files[0],$attrs.fileread);
+              var file = ($attrs.multiple) ? changeEvent.target.files : changeEvent.target.files[0];
+              
+              $scope.$parent.handlers.uploadFile(file,$attrs.fileread);
             });
           }
           if (changeEvent.target.files[0]) reader.readAsDataURL(changeEvent.target.files[0]);

@@ -100,7 +100,7 @@ function adminModulesCtrl($scope,$http,Upload) {
         file: file,
         fields: {
           type: "uploadModule",
-          module: $scope.newModule
+          module: Upload.json($scope.newModule)
         }
       })
       .success(function(data) {

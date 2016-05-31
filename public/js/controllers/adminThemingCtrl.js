@@ -96,6 +96,7 @@ function adminThemingCtrl($scope,$http,Upload) {
       })
       .success(function(data) {
         if (data.success) {
+          $scope.homeBody = data.homeBody || null;
           $scope.homeBodyFile = (data.homeBody) ? "/file/" + data.homeBody : null;
           
         } else {

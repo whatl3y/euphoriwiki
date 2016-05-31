@@ -65,6 +65,7 @@
           if (pageInfo instanceof Array && pageInfo.length && typeof pageInfo[0].template === "object") {
             oTemplate = {
               isEasyConfig: (pageInfo[0].template.templateId) ? "Yes" : "No",
+              templateId: pageInfo[0].template.templateId,
               config: pageInfo[0].template.config
             };
           }
