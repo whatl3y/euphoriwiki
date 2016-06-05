@@ -99,6 +99,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
               $scope.content.draft = ret.draft || false;
               
               $scope.template = ret.template || {};
+              $scope.template.masterConfig = ret.masterTemplateConfig || [];
               
               angular.element("#rte-editor").html( $scope.content.html );
               
@@ -251,6 +252,21 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           
         case "dec":
           $scope[scopeKey].pop();
+          break;
+      }
+    },
+    
+    updateTemplateConfigArrayLength: function(key,which) {
+      which = which || "inc";
+      $scope.template.config[key] = $scope.template.config[key] || [];
+      
+      switch(which) {
+        case "inc":
+          $scope.template.config[key] = $scope.template.config[key].concat({});
+          break;
+          
+        case "dec":
+          $scope.template.config[key].pop();
           break;
       }
     },
@@ -428,15 +444,27 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       
       delete($scope.saveError);
       
+      if ($scope.template.isEasyConfig == "Yes") return console.log($scope.template);
+      
       if (!draft && (!$scope.content || !$scope.content.html)) {
         $scope.saveError = "Before saving, please ensure you have some content you want to display on the page.";
         return;
       }
       
       new Core.Modals().alertPopup({loading:true});
-      $http.post('/wikipage',{
+      /*$http.post('/wikipage',{
         type: (draft) ? "updateDraft" : "update",
         delete: deleteDraft,
+        template: $scope.template,
+        page: $scope.pathname,
+        html: $scope.content.html,
+        markdown: $scope.content.markdown
+      })*/
+      Upload.upload({
+        url: '/wikipage',
+        type: (draft) ? "updateDraft" : "update",
+        delete: deleteDraft,
+        template: $scope.template,
         page: $scope.pathname,
         html: $scope.content.html,
         markdown: $scope.content.markdown
@@ -708,7 +736,9 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
-    uploadFile: function(file) {
+    uploadFile: function(file,onlyStoreScopeKey) {
+      if (onlyStoreScopeKey) return onlyStoreScopeKey = file;
+      
       delete($scope.fileError);
       
       var uploadType = $scope.functions.pageStateToUploadType();
@@ -801,15 +831,17 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       new Core.Modals().alertPopup({loading:true});
       $http.post('/wikipage',{type:"getTemplate", template:template})
       .success(function(ret) {
-        //console.log(ret);
+        console.log(ret);
+        $scope.templateSelection = "";
         
         if (ret.success) {
           $scope.template = $scope.template || {};
           
           $scope.template.isEasyConfig = ret.templateInfo.isEasyConfig;
-          $scope.template.config = ret.templateInfo.config || [];
+          $scope.template.config = {};
+          $scope.template.masterConfig = ret.templateInfo.config || [];
           
-          $scope.content.html = (append) ? (($scope.content.html || "")+ret.html) : ret.html;
+          $scope.content.html = (append && $scope.template.isEasyConfig != "Yes") ? (($scope.content.html || "")+ret.html) : ret.html;
           $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
           
           $scope.functions.rteInit();
@@ -821,8 +853,20 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       })
       .error(function(data,err) {
         console.log(data,err);
+        $scope.templateSelection = "";
         angular.element( "#loader" ).remove();
       });
+    },
+    
+    clearTemplate: function() {
+      $scope.templateSelection = "";
+      $scope.template = {};
+      
+      $scope.content.html = "";
+      $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
+      
+      $scope.functions.rteInit();
+      $scope.handlers.initializeEdit(true);
     },
     
     updatePageSetting: function(key,value) {

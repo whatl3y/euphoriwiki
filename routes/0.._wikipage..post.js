@@ -24,8 +24,8 @@
           });
         },
         function(callback) {
-          wiki.getPageContent(function(e,html) {
-            callback(e,html);
+          wiki.getPageContent(function(e,html,oTemplateConfig) {
+            callback(e,{html:html, config:oTemplateConfig});
           });
         },
         function(callback) {
@@ -53,7 +53,7 @@
           if (err) return res.json({success:false, error:err});
           
           var pageInfo = results[0];
-          var pageContent = results[1];
+          var oPageContent = results[1];
           var validated = results[2];
           var templates = results[3];
           var canUpdate = results[4];
@@ -81,9 +81,10 @@
               exists: true,
               updateable: canUpdate,
               template: oTemplate,
-              description: pageInfo[0].description,
-              html: pageContent,
+              masterTemplateConfig: oPageContent.config,
+              html: oPageContent.html,
               markdown: pageInfo[0].content_markdown,
+              description: pageInfo[0].description,
               widgets: pageInfo[0].widgets,
               lastUpdate: pageInfo[0].updated,
               person: pageInfo[0].updatedBy,

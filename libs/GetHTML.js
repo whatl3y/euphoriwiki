@@ -64,6 +64,19 @@ GetHTML.prototype.html = function(string,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      htm (PUBLIC)
+|DESCRIPTION:  Alias for this.html
+|PARAMETERS:  1. string(OPT): an optional string of html to prettify
+|             2. cb(REQ): the callback that will return an error or converted HTML string.
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+GetHTML.prototype.htm = function(string,cb) {
+  this.html(string,cb);
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      jade (PUBLIC)
 |DESCRIPTION:  Converts a jade template to html;
 |PARAMETERS:    1. string(OPT): an optional string of jade to render

@@ -78,7 +78,7 @@ div.wrapper
                   div(class="wrapper text-left shadowsmall-subtle light gray padding-small")
                     div(class="text-large header padding-small") Select From a Page Template
                     div(class="padding-medium col-xs-12 col-sm-8 col-sm-offset-2")
-                      select(class="form-control input-lg",data-ng-model="template",data-ng-options="page.file as page.name for page in availablePageTemplates",data-ng-change="handlers.getTemplate(template)")
+                      select(class="form-control input-lg",data-ng-model="templateSelection",data-ng-options="page.file as page.name for page in availablePageTemplates",data-ng-change="handlers.getTemplate(templateSelection)")
         - if (typeof data.EXTRA.pageInfo === "object" && data.EXTRA.pageInfo.content_html)
           div.server-page-html(data-ng-if="!initializedEditInSession")!= data.EXTRA.pageInfo.content_html
         div.client-page-html(data-ng-if="initializedEditInSession && content.html")
@@ -86,34 +86,74 @@ div.wrapper
         div(class="col-xs-12")
           small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ content.person.username }}
       div(data-ng-show="pageState.editHtml")
-        div(class="separate-vert-small")
-          alert(type="success")
-            span You can use Bootstrap 3 
-            a(href="http://getbootstrap.com/css/",target="_blank") CSS
-            span  classes/styles or 
-            a(href="http://getbootstrap.com/components/",target="_blank") Components
-            span  to add great-looking design to your pages!
-        div(class="separate-vert-small")
-          alert
-            span NOTE: Keep these things in mind while you're making page edits
-            ol
-              li
-                span Be sure to use the 
-                b  
-                  a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
-                span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
-              li
-                span Click on the 
-                b  <> Source 
-                span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
-        div(class="rte-editor-wrapper padding-medium",data-ng-show="!rawHTML")
-          include include_bootstraprte.jade
-        div(data-ng-show="rawHTML")
-          div(class="btn-group separate-vert-medium")
-            a(class="btn btn-default active",title="Review Raw HTML",data-ng-click="rawHTML=!rawHTML")
-              i(class="fa fa-code")
-          textarea(id="rte-raw-html",rows="25",class="form-control",data-ng-model="content.html",data-ng-blur="functions.rteInit()")
-        //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
+        div(data-ng-if="template.isEasyConfig == 'Yes'")
+          div.row.separate-vert-small
+            div.col-xs-12.col-md-6
+              h1 Easy Configuration Template
+            div.col-xs-12.col-md-6.text-right
+              div
+                button.btn.btn-danger(data-ng-click="handlers.clearTemplate()") Remove Template
+          div.row
+            div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+              div.separate-vert-small
+                div(data-ng-repeat="conf in template.masterConfig")
+                  div.panel.panel-primary
+                    div.panel-heading
+                      div.text-large {{ conf.name }}
+                    div.panel-body
+                      div(data-ng-if="conf.type == 'textbox'")
+                        input.input-lg.form-control(type="text",data-ng-model="template.config[conf.name]")
+                      div(data-ng-if="conf.type == 'textarea'")
+                        textarea.input-lg.form-control(rows="5",data-ng-model="template.config[conf.name]")
+                      div(data-ng-if="conf.type == 'file'")
+                        input.input-lg.form-control(type="file",multiple,fileread="template.config[conf.name]")
+                      div(data-ng-if="conf.type == 'list'")
+                        div.separate-vert-small.text-center
+                          button(class="btn btn-default",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name)",popover-trigger="mouseenter",popover="Add new view scope.")
+                            span(class="glyphicon glyphicon-plus")
+                          button(class="btn btn-default margin-left-small",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name,'dec')",popover-trigger="mouseenter",popover="Delete last view scope.")
+                            span(class="glyphicon glyphicon-minus")
+                        div(data-ng-repeat="listItems in template.config[conf.name]")
+                          div.padding-small(data-ng-repeat="column in conf.listcols",data-ng-style="{display:'inline-block', width:100/conf.numcols + '%'}")
+                            div.panel.panel-default
+                              div.panel-heading
+                                div.row
+                                  div.col-xs-12.col-sm-6 {{ $parent.$index+1 + '. ' + column.colName }}
+                                  div.col-xs-12.col-sm-6
+                                    div.text-right(data-ng-if="$index == conf.listcols.length-1")
+                                      a(href="javascript:void(0)",data-ng-click="template.config[conf.name].splice($parent.$parent.$index,1)")
+                                        em Delete
+                              div.panel-body
+                                input.form-control(type="text",data-ng-model="template.config[conf.name][$parent.$index][column.colName]")
+        div(data-ng-show="template.isEasyConfig != 'Yes'")
+          div.separate-vert-small
+            alert(type="success")
+              span You can use Bootstrap 3 
+              a(href="http://getbootstrap.com/css/",target="_blank") CSS
+              span  classes/styles or 
+              a(href="http://getbootstrap.com/components/",target="_blank") Components
+              span  to add great-looking design to your pages!
+          div(class="separate-vert-small")
+            alert
+              span NOTE: Keep these things in mind while you're making page edits
+              ol
+                li
+                  span Be sure to use the 
+                  b  
+                    a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
+                  span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
+                li
+                  span Click on the 
+                  b  <> Source 
+                  span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
+          div(class="rte-editor-wrapper padding-medium",data-ng-show="!rawHTML")
+            include include_bootstraprte.jade
+          div(data-ng-show="rawHTML")
+            div(class="btn-group separate-vert-medium")
+              a(class="btn btn-default active",title="Review Raw HTML",data-ng-click="rawHTML=!rawHTML")
+                i(class="fa fa-code")
+            textarea(id="rte-raw-html",rows="25",class="form-control",data-ng-model="content.html",data-ng-blur="functions.rteInit()")
+          //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
       div(data-ng-show="pageState.editMarkup")
         div(class="separate-vert-small panel panel-danger")
           div(class="panel-body")
