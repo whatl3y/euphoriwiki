@@ -444,8 +444,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       
       delete($scope.saveError);
       
-      if ($scope.template.isEasyConfig == "Yes") return console.log($scope.template);
-      
       if (!draft && (!$scope.content || !$scope.content.html)) {
         $scope.saveError = "Before saving, please ensure you have some content you want to display on the page.";
         return;
@@ -462,12 +460,14 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       })*/
       Upload.upload({
         url: '/wikipage',
-        type: (draft) ? "updateDraft" : "update",
-        delete: deleteDraft,
-        template: $scope.template,
-        page: $scope.pathname,
-        html: $scope.content.html,
-        markdown: $scope.content.markdown
+        data: {
+          type: (draft) ? "updateDraft" : "update",
+          delete: deleteDraft,
+          template: Upload.json($scope.template),
+          page: $scope.pathname,
+          html: $scope.content.html,
+          markdown: $scope.content.markdown
+        }
       })
       .success(function(ret) {
         if (ret.success) $scope.functions.initialize();
@@ -837,6 +837,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         if (ret.success) {
           $scope.template = $scope.template || {};
           
+          $scope.template.templateId = ret.templateInfo._id;
           $scope.template.isEasyConfig = ret.templateInfo.isEasyConfig;
           $scope.template.config = {};
           $scope.template.masterConfig = ret.templateInfo.config || [];

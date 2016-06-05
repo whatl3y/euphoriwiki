@@ -193,7 +193,7 @@ WikiHandler.prototype.getPageContent=function(cb) {
           }
         ],
           function(err,html,config) {
-            return callback(err,result,config);
+            return callback(err,html,config);
           }
         );
         

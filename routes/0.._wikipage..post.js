@@ -303,6 +303,13 @@
             }
           };
           
+          //populate template info based on info provided
+          var oTemplate = JSON.parse(info.template || "");
+          saveData["$set"].template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
+            templateId: oTemplate.templateId,
+            config: oTemplate.config
+          } : {};
+          
           //save the data, pull any drafts the user may
           //have had for this page, archive the former page, write
           //an entry in the audit log,
