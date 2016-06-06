@@ -75,9 +75,16 @@ block main
                           span(class="glyphicon glyphicon-minus")
                     div.row(data-ng-repeat="c in newTemplateConfig")
                       div.col-xs-12
-                        div.panel.panel-primary
+                        div.panel.panel-warning
                           div.panel-heading.text-large
-                            strong {{ $index + 1 }}. Configuration
+                            div.row
+                              div.col-xs-8
+                                strong {{ $index + 1 }}. Configuration
+                              div.col-xs-4.text-right
+                                a(href="javascript:void(0)",data-ng-click="functions.updateAryOrder('newTemplateConfig',$index,-1)")
+                                  span.glyphicon.glyphicon-arrow-up
+                                a(href="javascript:void(0)",data-ng-click="functions.updateAryOrder('newTemplateConfig',$index,1)")
+                                  span.glyphicon.glyphicon-arrow-down
                           div.panel-body
                             div.row
                               div.col-xs-12.col-md-6

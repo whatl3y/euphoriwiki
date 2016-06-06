@@ -265,7 +265,9 @@
       
     case "update":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to update wiki pages."});
-
+      
+      var fh = new FileHandler({db:config.mongodb.db});
+      
       async.parallel([
         function(callback) {
           wiki.getPage(function(_e,current) {
@@ -281,6 +283,39 @@
           Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
             callback(e,isAdmin);
           });
+        },
+        function(callback) {
+          //find and upload template files, if applicable
+          var regexTemplateConfigTest = /(templateFiles\[)(.{1,30})(\]\[\d+\])/;
+          var infoTemplateFiles = Object.keys(info).filter(function(_k) {
+            return regexTemplateConfigTest.test(_k);
+          }).map(function(__k) {
+            return {
+              configKey: __k.replace(regexTemplateConfigTest,"$2"),
+              fileName: info[__k].name,
+              filePath: info[__k].path,
+              fileType: info[__k].type
+            }
+          });
+          
+          if (infoTemplateFiles.length) {
+            async.parallel(infoTemplateFiles.map(function(oConf) {
+              return function(_callback) {
+                fh.uploadFile({filename:oConf.fileName, path:oConf.filePath},function(err,newFileName) {
+                  if (err) return _callback(err);
+                  
+                  oConf.newFileName = newFileName;
+                  _callback(err,oConf);
+                  
+                  return fs.unlink(oConf.filePath,function(e) {if (e) log.info(e)});
+                });
+              }
+            }),
+              function(err,oTemplates) {
+                return callback(err,oTemplates);
+              }
+            );
+          } else return callback();
         }
       ],
         function(err,results) {
@@ -289,6 +324,7 @@
           var current = results[0];
           var validated = results[1];
           var canUpdate = results[2];
+          var aTemplateFiles = results[3] || [];
           
           if (!validated) return res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
           if (!canUpdate) return res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
@@ -307,8 +343,15 @@
           var oTemplate = JSON.parse(info.template || "");
           saveData["$set"].template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
             templateId: oTemplate.templateId,
-            config: oTemplate.config
+            config: oTemplate.config || {}
           } : {};
+          
+          aTemplateFiles.forEach(function(oTemp) {
+            if (typeof saveData["$set"].template.config === "object") {
+              saveData["$set"].template.config[oTemp.configKey] = saveData["$set"].template.config[oTemp.configKey] || [];
+              saveData["$set"].template.config[oTemp.configKey] = saveData["$set"].template.config[oTemp.configKey].concat(oTemp.newFileName);
+            }
+          });
           
           //save the data, pull any drafts the user may
           //have had for this page, archive the former page, write

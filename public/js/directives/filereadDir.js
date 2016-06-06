@@ -1,7 +1,9 @@
 function fileread($window) {
   return {
     scope: {
-      fileread: '='
+      fileread: "=",
+      mainkey: "=",
+      nested: "="
     },
     link: function($scope,$element,$attrs) {
       $element.bind('change', function (changeEvent) {
@@ -9,10 +11,9 @@ function fileread($window) {
           var reader = new FileReader();
           reader.onload = function (loadEvent) {
             $scope.$apply(function () {
-              $scope.fileread = loadEvent.target.result;
+              //$scope.fileread = loadEvent.target.result;
               var file = ($attrs.multiple) ? changeEvent.target.files : changeEvent.target.files[0];
-              
-              $scope.$parent.handlers.uploadFile(file,$attrs.fileread);
+              $scope.$parent.handlers.uploadFile(file,$scope.mainkey || $attrs.fileread,$attrs.nested);
             });
           }
           if (changeEvent.target.files[0]) reader.readAsDataURL(changeEvent.target.files[0]);

@@ -98,6 +98,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
               $scope.content.tags = ret.tags || [];
               $scope.content.draft = ret.draft || false;
               
+              $scope.templateFiles = {};
               $scope.template = ret.template || {};
               $scope.template.masterConfig = ret.masterTemplateConfig || [];
               
@@ -458,11 +459,13 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         html: $scope.content.html,
         markdown: $scope.content.markdown
       })*/
+      console.log(typeof $scope.templateFiles["Main Image"],$scope.templateFiles);
       Upload.upload({
         url: '/wikipage',
         data: {
           type: (draft) ? "updateDraft" : "update",
           delete: deleteDraft,
+          templateFiles: $scope.templateFiles,
           template: Upload.json($scope.template),
           page: $scope.pathname,
           html: $scope.content.html,
@@ -736,8 +739,15 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       });
     },
     
-    uploadFile: function(file,onlyStoreScopeKey) {
-      if (onlyStoreScopeKey) return onlyStoreScopeKey = file;
+    uploadFile: function(file,onlyStoreScopeKey,nestedKey) {
+      if (onlyStoreScopeKey) {
+        if (nestedKey) {
+          $scope[nestedKey] = $scope[nestedKey] || {};
+          return $scope[nestedKey][onlyStoreScopeKey] = file;
+        }
+        
+        return $scope[onlyStoreScopeKey] = file;
+      }
       
       delete($scope.fileError);
       
@@ -862,6 +872,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     clearTemplate: function() {
       $scope.templateSelection = "";
       $scope.template = {};
+      $scope.templateFiles = {};
       
       $scope.content.html = "";
       $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);

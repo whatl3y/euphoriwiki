@@ -37,6 +37,17 @@ function adminTemplateMgmtCtrl($scope,$http,Upload) {
       }
     },
     
+    updateAryOrder: function(scopeKey,index,direction) {
+      direction = direction || 1;
+      $scope[scopeKey] = $scope[scopeKey] || [];
+      
+      var newIndex = index + direction;
+      
+      var itemToUpdate = $scope[scopeKey].splice(index,1)[0];
+      console.log(itemToUpdate);
+      $scope[scopeKey].splice(newIndex,0,itemToUpdate);
+    },
+    
     getTemplateTypeName: function(type) {
       return $scope.templateTypes.filter(function(t) {
         return t.key == type;

@@ -107,7 +107,16 @@ div.wrapper
                       div(data-ng-if="conf.type == 'textarea'")
                         textarea.input-lg.form-control(rows="5",data-ng-model="template.config[conf.name]")
                       div(data-ng-if="conf.type == 'file'")
-                        input.input-lg.form-control(type="file",multiple,fileread="template.config[conf.name]")
+                        input.input-lg.form-control(type="file",multiple,fileread,mainkey="conf.name",nested="templateFiles")
+                        div.separate-vert-medium(data-ng-if="template.config[conf.name].length")
+                          div.panel.panel-default
+                            div.panel-body
+                              div.text-large Current Files
+                              div(data-ng-repeat="filename in template.config[conf.name]")
+                                div {{ $index + 1}}. 
+                                  a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
+                      div(data-ng-if="conf.type == 'select'")
+                        select.form-control(data-ng-model="template.config[conf.name]",data-ng-options="")
                       div(data-ng-if="conf.type == 'list'")
                         div.separate-vert-small.text-center
                           button(class="btn btn-default",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name)",popover-trigger="mouseenter",popover="Add new view scope.")
@@ -176,7 +185,7 @@ div.wrapper
           div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-2 col-lg-offset-5")
             div(class="panel-body text-center")
               div(class="separate-vert-small")
-                input(type="file",id="file-input-word",class="sr-only",fileread="uploadedWordDoc")
+                input(type="file",id="file-input-word",class="sr-only",fileread)
                 button(id="upload-file-word",class="btn btn-primary") Upload Word Document
               div(class="separate-vert-medium",data-ng-show="fileError")
                 alert(type="danger") {{ fileError }}
@@ -191,7 +200,7 @@ div.wrapper
               div(class="separate-vert-small")
                 select(class="form-control input-lg",data-ng-model="fileUploadScope",data-ng-options="opt.val as opt.text for opt in fileUploadScopes")
               div(class="separate-vert-small")
-                input(type="file",id="file-input-main",class="sr-only",fileread="uploadedFile")
+                input(type="file",id="file-input-main",class="sr-only",fileread)
                 button(id="upload-file-main",class="btn btn-primary") Add File
               div(class="separate-vert-medium",data-ng-show="fileError")
                 alert(type="danger") {{ fileError }}

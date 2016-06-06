@@ -75,13 +75,14 @@
           var templateId = info.template._id || null;
           var templateName = info.template.name;
           var templateType = info.template.type;
+          var templateFileName = info.template.file;
           var isEasyConfig = info.template.isEasyConfig;
           var templateConfig = _.toArray(info.template.config);
           
           var createOrModify = function(newFileName) {
             var data = {$set: {updated: new Date()}};
             
-            data["$set"].file = newFileName || "NOFILE";
+            data["$set"].file = newFileName || templateFileName || "NOFILE";
             
             if (templateName) data["$set"].name = templateName;
             if (templateType) data["$set"].type = templateType;
