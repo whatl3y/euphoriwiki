@@ -88,53 +88,7 @@ div.wrapper
             small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ content.person.username }}
       div(data-ng-show="pageState.editHtml")
         div(data-ng-if="template.isEasyConfig == 'Yes'")
-          div.row.separate-vert-small
-            div.col-xs-12.col-md-6
-              h1 Easy Configuration Template
-            div.col-xs-12.col-md-6.text-right
-              div
-                button.btn.btn-danger(data-ng-click="handlers.clearTemplate()") Remove Template
-          div.row
-            div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-              div.separate-vert-small
-                div(data-ng-repeat="conf in template.masterConfig")
-                  div.panel.panel-primary
-                    div.panel-heading
-                      div.text-large {{ conf.name }}
-                    div.panel-body
-                      div(data-ng-if="conf.type == 'textbox'")
-                        input.input-lg.form-control(type="text",data-ng-model="template.config[conf.name]")
-                      div(data-ng-if="conf.type == 'textarea'")
-                        textarea.input-lg.form-control(rows="5",data-ng-model="template.config[conf.name]")
-                      div(data-ng-if="conf.type == 'file'")
-                        input.input-lg.form-control(type="file",multiple,fileread,mainkey="conf.name",nested="templateFiles")
-                        div.separate-vert-medium(data-ng-if="template.config[conf.name].length")
-                          div.panel.panel-default
-                            div.panel-body
-                              div.text-large Current Files
-                              div(data-ng-repeat="filename in template.config[conf.name]")
-                                div {{ $index + 1}}. 
-                                  a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
-                      div(data-ng-if="conf.type == 'select'")
-                        select.form-control(data-ng-model="template.config[conf.name]",data-ng-options="")
-                      div(data-ng-if="conf.type == 'list'")
-                        div.separate-vert-small.text-center
-                          button(class="btn btn-default",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name)",popover-trigger="mouseenter",popover="Add new view scope.")
-                            span(class="glyphicon glyphicon-plus")
-                          button(class="btn btn-default margin-left-small",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name,'dec')",popover-trigger="mouseenter",popover="Delete last view scope.")
-                            span(class="glyphicon glyphicon-minus")
-                        div(data-ng-repeat="listItems in template.config[conf.name]")
-                          div.padding-small(data-ng-repeat="column in conf.listcols",data-ng-style="{display:'inline-block', width:100/conf.numcols + '%'}")
-                            div.panel.panel-default
-                              div.panel-heading
-                                div.row
-                                  div.col-xs-12.col-sm-6 {{ $parent.$index+1 + '. ' + column.colName }}
-                                  div.col-xs-12.col-sm-6
-                                    div.text-right(data-ng-if="$index == conf.listcols.length-1")
-                                      a(href="javascript:void(0)",data-ng-click="template.config[conf.name].splice($parent.$parent.$index,1)")
-                                        em Delete
-                              div.panel-body
-                                input.form-control(type="text",data-ng-model="template.config[conf.name][$parent.$index][column.colName]")
+          include include_easyconfig.jade
         div(data-ng-show="template.isEasyConfig != 'Yes'")
           div.separate-vert-small
             alert(type="success")
@@ -165,10 +119,13 @@ div.wrapper
             textarea(id="rte-raw-html",rows="25",class="form-control",data-ng-model="content.html",data-ng-blur="functions.rteInit()")
           //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
       div(data-ng-show="pageState.editMarkup")
-        div(class="separate-vert-small panel panel-danger")
-          div(class="panel-body")
-            b NOTE: Markdown is very different than HTML, so if you are updating the markdown version of the page and there were previous versions with complex HTML or other components, some things will most likely be lost. Continue at your own risk!
-        textarea(class="form-control",rows="20",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
+        div(data-ng-if="template.isEasyConfig == 'Yes'")
+          include include_easyconfig.jade
+        div(data-ng-show="template.isEasyConfig != 'Yes'")
+          div(class="separate-vert-small panel panel-danger")
+            div(class="panel-body")
+              b NOTE: Markdown is very different than HTML, so if you are updating the markdown version of the page and there were previous versions with complex HTML or other components, some things will most likely be lost. Continue at your own risk!
+          textarea(class="form-control",rows="20",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
       div(data-ng-show="pageState.uploadDocx")
         h1 Add Microsoft Word Documents
         div(class="separate-vert-small")

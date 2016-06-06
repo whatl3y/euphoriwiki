@@ -1,0 +1,47 @@
+div.row.separate-vert-small
+  div.col-xs-12.col-md-6
+    h1 Easy Configuration Template
+  div.col-xs-12.col-md-6.text-right
+    div
+      button.btn.btn-danger(data-ng-click="handlers.clearTemplate()") Remove Template
+div.row
+  div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+    div.separate-vert-small
+      div(data-ng-repeat="conf in template.masterConfig")
+        div.panel.panel-primary
+          div.panel-heading
+            div.text-large {{ conf.name }}
+          div.panel-body
+            div(data-ng-if="conf.type == 'textbox'")
+              input.input-lg.form-control(type="text",data-ng-model="template.config[conf.name]")
+            div(data-ng-if="conf.type == 'textarea'")
+              textarea.input-lg.form-control(rows="5",data-ng-model="template.config[conf.name]")
+            div(data-ng-if="conf.type == 'file'")
+              input.input-lg.form-control(type="file",multiple,fileread,mainkey="conf.name",nested="templateFiles")
+              div.separate-vert-medium(data-ng-if="template.config[conf.name].length")
+                div.panel.panel-default
+                  div.panel-body
+                    div.text-large Current Files
+                    div(data-ng-repeat="filename in template.config[conf.name]")
+                      div {{ $index + 1}}. 
+                        a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
+            div(data-ng-if="conf.type == 'select'")
+              select.form-control(data-ng-model="template.config[conf.name]",data-ng-options="data as data for data in (conf.datasourceValues || conf.values.split(','))")
+            div(data-ng-if="conf.type == 'list'")
+              div.separate-vert-small.text-center
+                button(class="btn btn-default",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name)",popover-trigger="mouseenter",popover="Add new view scope.")
+                  span(class="glyphicon glyphicon-plus")
+                button(class="btn btn-default margin-left-small",data-ng-click="functions.updateTemplateConfigArrayLength(conf.name,'dec')",popover-trigger="mouseenter",popover="Delete last view scope.")
+                  span(class="glyphicon glyphicon-minus")
+              div(data-ng-repeat="listItems in template.config[conf.name]")
+                div.padding-small(data-ng-repeat="column in conf.listcols",data-ng-style="{display:'inline-block', width:100/conf.numcols + '%'}")
+                  div.panel.panel-default
+                    div.panel-heading
+                      div.row
+                        div.col-xs-12.col-sm-6 {{ $parent.$index+1 + '. ' + column.colName }}
+                        div.col-xs-12.col-sm-6
+                          div.text-right(data-ng-if="$index == conf.listcols.length-1")
+                            a(href="javascript:void(0)",data-ng-click="template.config[conf.name].splice($parent.$parent.$index,1)")
+                              em Delete
+                    div.panel-body
+                      input.form-control(type="text",data-ng-model="template.config[conf.name][$parent.$index][column.colName]")

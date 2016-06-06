@@ -708,7 +708,7 @@ WikiHandler.prototype.getExternalDatasources=function(options,cb) {
   
   config.mongodb.db.collection("adminsettings").find({domid:"datasources"}).toArray(function(e,datasources) {
     if (e) return cb(e);
-    if (!datasources.length) return cb(null,datasources);
+    if (!datasources.length) return cb(null,[]);
     
     datasources = datasources[0].value;
     

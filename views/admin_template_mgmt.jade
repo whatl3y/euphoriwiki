@@ -64,7 +64,7 @@ block main
                         a(data-ng-href="/file/{{ newTemplate.file }}",target="_blank") {{ newTemplate.file }}
                   div.divider.separate-vert-small
                   div.form-group
-                    label Will this be a standalone template that will take a simple configuration or will a editor be able to manually update the HTML?
+                    label Will this be a standalone template with an easy configuration (DEFAULT: No)?
                     select.form-control(data-ng-model="newTemplate.isEasyConfig",data-ng-options="conf as conf for conf in ['Yes','No']")
                   div.form-group(data-ng-if="newTemplate.isEasyConfig == 'Yes'")
                     div
@@ -85,6 +85,8 @@ block main
                                   span.glyphicon.glyphicon-arrow-up
                                 a(href="javascript:void(0)",data-ng-click="functions.updateAryOrder('newTemplateConfig',$index,1)")
                                   span.glyphicon.glyphicon-arrow-down
+                                a(href="javascript:void(0)",data-ng-click="newTemplateConfig.splice(newTemplateConfig.indexOf(c),1)")
+                                  span.glyphicon.glyphicon-remove
                           div.panel-body
                             div.row
                               div.col-xs-12.col-md-6
