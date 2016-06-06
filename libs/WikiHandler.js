@@ -386,7 +386,7 @@ WikiHandler.prototype.getTemplates=function(cb) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getTemplateInfo (PUBLIC)
-|DESCRIPTION:  Gets all the active templates in the DB that users can use.
+|DESCRIPTION:  Gets specific template information, parses the file HTML, and gets all config info needed.
 |PARAMETERS:  1. templateId(REQ): the template MongoDB _id we're getting information for
 |             2. cb(REQ): the callback functions after we get the templates
 |SIDE EFFECTS:  None
@@ -444,7 +444,7 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
         }
       },
         function(err) {
-          if (err) return callback(null,template);
+          if (err) return callback(err,template);
           
           template.config = template.config.map(function(c) {
             if (queryResults[c.name]) return queryResults[c.name];
