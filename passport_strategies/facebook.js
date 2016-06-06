@@ -17,6 +17,7 @@ module.exports = {
     clientID: config.facebook.appId,
     clientSecret: config.facebook.appSecret,
     callbackURL: config.facebook.loginCallbackUrl(),
+    enableProof: true,
     passReqToCallback: true,
     profileFields: ["id", "emails", "name"]
   },

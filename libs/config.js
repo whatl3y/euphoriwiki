@@ -7,7 +7,7 @@ var self = module.exports = {
     PORT: process.env.PORT || 8000,
     CLUSTERING: process.env.CLUSTERING || false,
     IS_PRODUCTION: process.env.IS_PRODUCTION || false,
-    HOST: process.env.HOSTNAME || "http://pmglap1126"
+    HOST: process.env.HOSTNAME || "http://localhost"
   },
   
   admin: {
