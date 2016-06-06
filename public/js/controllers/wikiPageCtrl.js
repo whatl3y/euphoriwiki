@@ -451,15 +451,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       }
       
       new Core.Modals().alertPopup({loading:true});
-      /*$http.post('/wikipage',{
-        type: (draft) ? "updateDraft" : "update",
-        delete: deleteDraft,
-        template: $scope.template,
-        page: $scope.pathname,
-        html: $scope.content.html,
-        markdown: $scope.content.markdown
-      })*/
-      console.log(typeof $scope.templateFiles["Main Image"],$scope.templateFiles);
       Upload.upload({
         url: '/wikipage',
         data: {
@@ -710,6 +701,8 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       var draft = $scope.content.draft.html;
       
       $scope.content.html = draft;
+      $scope.template = $scope.content.draft.template || {};
+      
       $scope.functions.htmlToMarkdown();
       $scope.functions.rteInit();
       delete($scope.content.draft);

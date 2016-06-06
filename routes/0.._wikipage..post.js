@@ -26,63 +26,21 @@
         function(callback) {
           async.waterfall([
             function(_callback) {
-              wiki.getPageContent(function(e,html,oTemplateConfig) {
-                return _callback(e,{html:html, config:oTemplateConfig});
+              wiki.getPageContent(function(e,html,oTemplateConfig,templateId) {
+                return _callback(e,{html:html, config:oTemplateConfig, templateId:templateId});
               });
             },
             function(oInfo,_callback) {
               if (oInfo.config && oInfo.config.length) {
                 var queryResults = {};
                 
-                async.each(oInfo.config,function(conf,__callback) {
-                  if (conf.valueIsQuery == "Yes") {
-                    wiki.getExternalDatasources({name:conf.datasource},function(err,PARAMS) {
-                      if (err) return __callback(err);
-                      
-                      var queryConfig = {
-                        database: PARAMS.database,
-                        user: PARAMS.username,
-                        password: PARAMS.password
-                      };
-                      if (PARAMS.driver == "mysql" || PARAMS.driver == "postgresql" || PARAMS.driver == "postgres") queryConfig.host = PARAMS.server;
-                      if (PARAMS.driver == "mssql") queryConfig.server = PARAMS.server;
-                      
-                      var sql = new SQLHandler({driver:PARAMS.driver,config:queryConfig});
-                      
-                      sql.connect(function(e) {
-                        if (e) return __callback(e);
-                        
-                        sql.query({query:conf.values, close:true},function(e,results) {
-                          results = (results instanceof Array && results[0] instanceof Array) ? results[0] : results;
-                          results = results.map(function(r) {
-                            return _.values(r)[0];
-                          });
-                          
-                          queryResults[conf.name] = Object.merge(conf,{datasourceValues:results});
-                          __callback(e);
-                        });
-                      });
-                    });
-                    
-                  } else {
-                    return __callback();
-                  }
-                },
-                  function(err) {
-                    if (err) {
-                      log.error(err);
-                      return _callback(null,oInfo);
-                    }
-                    
-                    oInfo.config = oInfo.config.map(function(c) {
-                      if (queryResults[c.name]) return queryResults[c.name];
-                      
-                      return c;
-                    });
-                    
-                    _callback(null,oInfo);
-                  }
-                );
+                wiki.getTemplateInfo(oInfo.templateId,function(e,template) {
+                  return _callback(e,{
+                    html: oInfo.html,
+                    config: template.config,
+                    templateId: oInfo.templateId
+                  });
+                });
                 
               } else {
                 return _callback(null,oInfo);
@@ -753,6 +711,15 @@
           }
         };
         
+        //populate template info based on info provided
+        var oTemplate = JSON.parse(info.template || "");
+        saveData["$push"].drafts.template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
+          isEasyConfig: "Yes",
+          templateId: oTemplate.templateId,
+          masterConfig: oTemplate.masterConfig,
+          config: oTemplate.config || {}
+        } : {};
+        
         async.series([
           function(callback) {
             config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
@@ -787,35 +754,25 @@
     
     case "getTemplate":
       var templateName = info.template;
-    
+      
       var fh = new FileHandler({db:config.mongodb.db});
       var gH = new GetHTML();
       
       async.waterfall([
         function(callback) {
-          config.mongodb.db.collection("wikitemplates").find({file:templateName}).toArray(function(e,result) {
+          config.mongodb.db.collection("wikitemplates").find({file:templateName},{_id:1}).toArray(function(e,result) {
             if (e) return callback(e);
             if (!result || !result.length) return callback(null,null);
             
-            return callback(null,result[0]);
+            return callback(null,result[0]._id);
           });
         },
-        function(oTemplate,callback) {
-          fh.getFile({filename:templateName, encoding:"utf8"},function(err,file) {
-            callback(err,oTemplate,file);
+        function(templateId,callback) {
+          if (!templateId) return callback();
+          
+          wiki.getTemplateInfo(templateId,function(e,template) {
+            return callback(e,template,template.html);
           });
-        },
-        function(oTemplate,file,callback) {
-          try {
-            var method = gH.extension(templateName).substring(1).toLowerCase();
-            
-            gH[method](file,function(err,html) {
-              callback(err,oTemplate,html);
-            });
-            
-          } catch(err) {
-            callback(err);
-          }
         }
       ],
         function(err,oTemplate,templateHtml) {

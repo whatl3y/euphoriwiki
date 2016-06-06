@@ -1,5 +1,7 @@
 var _ = require("underscore");
 var async = require("async");
+var ObjectId = require('mongodb').ObjectID;
+var SQLHandler = require("./SQLHandler.js");
 var FileHandler = require("./FileHandler.js");
 var CodeRunner = require("./CodeRunner.js");
 var config = require('./config.js');
@@ -175,35 +177,28 @@ WikiHandler.prototype.getPageContent=function(cb) {
     function(templateId,html,callback) {
       if (!templateId) return callback(null,html);
       
-      try {
-        var ObjectId = require('mongodb').ObjectID;
-        
-        async.waterfall([
-          function(_callback) {
-            config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1,config:1}).toArray(function(e,result) {
-              _callback(e,result);
-            });
-          },
-          function(template,_callback) {
-            var fh = new FileHandler({db:config.mongodb.db});
-            
-            fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
-              _callback(e,result,template[0].config);
-            });
-          }
-        ],
-          function(err,html,config) {
-            return callback(err,html,config);
-          }
-        );
-        
-      } catch(e) {
-        return callback(e);
-      }
+      async.waterfall([
+        function(_callback) {
+          config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1,config:1}).toArray(function(e,result) {
+            _callback(e,result);
+          });
+        },
+        function(template,_callback) {
+          var fh = new FileHandler({db:config.mongodb.db});
+          
+          fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
+            _callback(e,result,template[0].config,templateId);
+          });
+        }
+      ],
+        function(err,html,config,templateId) {
+          return callback(err,html,config,templateId);
+        }
+      );
     }
   ],
-    function(err,html,templateConfig) {
-      return cb(err,html,templateConfig || null);
+    function(err,html,templateConfig,templateId) {
+      return cb(err,html,templateConfig,templateId);
     }
   );
 }
@@ -387,6 +382,97 @@ WikiHandler.prototype.getTemplates=function(cb) {
   config.mongodb.db.collection("wikitemplates").find({ active:{$ne:false} }).sort({name:1}).toArray(function(_e,templates) {
     cb(_e,templates);
   });
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getTemplateInfo (PUBLIC)
+|DESCRIPTION:  Gets all the active templates in the DB that users can use.
+|PARAMETERS:  1. templateId(REQ): the template MongoDB _id we're getting information for
+|             2. cb(REQ): the callback functions after we get the templates
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
+  var self = this;
+  
+  async.waterfall([
+    function(callback) {
+      config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) }).toArray(function(_e,template) {
+        callback(_e,template);
+      });
+    },
+    function(template,callback) {
+      if (!template.length) return callback();
+      if (!template[0].config || !template[0].config.length) return callback(null,template[0]);
+      
+      template = template[0]
+      var queryResults = {};
+      
+      async.each(template.config,function(conf,__callback) {
+        if (conf.valueIsQuery == "Yes") {
+          self.getExternalDatasources({name:conf.datasource},function(err,PARAMS) {
+            if (err) return __callback(err);
+            
+            var queryConfig = {
+              database: PARAMS.database,
+              user: PARAMS.username,
+              password: PARAMS.password
+            };
+            if (PARAMS.driver == "mysql" || PARAMS.driver == "postgresql" || PARAMS.driver == "postgres") queryConfig.host = PARAMS.server;
+            if (PARAMS.driver == "mssql") queryConfig.server = PARAMS.server;
+            
+            var sql = new SQLHandler({driver:PARAMS.driver,config:queryConfig});
+            
+            sql.connect(function(e) {
+              if (e) return __callback(e);
+              
+              sql.query({query:conf.values, close:true},function(e,results) {
+                results = (results instanceof Array && results[0] instanceof Array) ? results[0] : results;
+                results = results.map(function(r) {
+                  return _.values(r)[0];
+                });
+                
+                queryResults[conf.name] = Object.merge(conf,{datasourceValues:results});
+                __callback(e);
+              });
+            });
+          });
+          
+        } else {
+          return __callback();
+        }
+      },
+        function(err) {
+          if (err) return callback(null,template);
+          
+          template.config = template.config.map(function(c) {
+            if (queryResults[c.name]) return queryResults[c.name];
+            
+            return c;
+          });
+          
+          callback(null,template);
+        }
+      );
+    },
+    function(template,callback) {
+      if (!template) return callback();
+      
+      var fh = new FileHandler({db:config.mongodb.db});
+      
+      fh.getFile({filename:template.file, encoding:"utf8"},function(e,result) {
+        if (e) return callback(e,template);
+        
+        template.html = result;
+        return callback(null,template);
+      });
+    }
+  ],
+    function(err,template) {
+      return cb(err,template);
+    }
+  );
 }
 
 /*-----------------------------------------------------------------------------------------
