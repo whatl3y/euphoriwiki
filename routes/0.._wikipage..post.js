@@ -77,7 +77,7 @@
           if (err) return res.json({success:false, error:err});
           
           var pageInfo = results[0];
-          var oPageContent = results[1];console.log(oPageContent);
+          var oPageContent = results[1];
           var validated = results[2];
           var templates = results[3];
           var canUpdate = results[4];

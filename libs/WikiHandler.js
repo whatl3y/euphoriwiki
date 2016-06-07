@@ -165,7 +165,7 @@ WikiHandler.prototype.getPageContent=function(cb) {
     },
     function(page,callback) {
       if (page && page.length) {
-        if (typeof page[0].template === "object") {
+        if (typeof page[0].template === "object" && page[0].template.templateId) {
           return callback(null,page[0].template.templateId,null);
         }
         
