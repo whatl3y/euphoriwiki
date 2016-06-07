@@ -255,6 +255,30 @@ Authentication.prototype.getUsername = function() {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      getFirstname (PUBLIC)
+|DESCRIPTION:  Determines if a user is logged in and returns the first name if so, false otherwise.
+|PARAMETERS:    None
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <string or false>: string if logged in with first name, else false
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.getFirstname = function() {
+  return (this.isLoggedIn()) ? this.session.firstname : false;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getLastname (PUBLIC)
+|DESCRIPTION:  Determines if a user is logged in and returns the last name if so, false otherwise.
+|PARAMETERS:    None
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <string or false>: string if logged in with last name, else false
+-----------------------------------------------------------------------------------------*/
+Authentication.prototype.getLastname = function() {
+  return (this.isLoggedIn()) ? this.session.lastname : false;
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      getEmail (PUBLIC)
 |DESCRIPTION:  Gets an e-mail address from a logged in user
 |PARAMETERS:  None

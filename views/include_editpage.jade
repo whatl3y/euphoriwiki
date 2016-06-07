@@ -85,7 +85,7 @@ div.wrapper
           div(compile-html="functions.sanitizeHtml(content.html)")
         div.row
           div.col-xs-12
-            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ content.person.username }}
+            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
       div(data-ng-show="pageState.editHtml")
         div(data-ng-if="template.isEasyConfig == 'Yes'")
           include include_easyconfig.jade

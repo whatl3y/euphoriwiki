@@ -309,7 +309,9 @@
           });
         },
         function(callback) {
-          //find and upload template files, if applicable
+          //find and upload template files, only if applicable this
+          //is an easy configuration template and there are files that
+          //need to be uploaded
           var regexTemplateConfigTest = /(templateFiles\[)(.{1,30})(\]\[\d+\])/;
           var infoTemplateFiles = Object.keys(info).filter(function(_k) {
             return regexTemplateConfigTest.test(_k);
@@ -359,7 +361,7 @@
               content_html: info.html,
               content_markdown: info.markdown,
               updated: new Date(),
-              updatedBy: {username: username}
+              updatedBy: {username:username, firstname:A.getFirstname(), lastname:A.getLastname()}
             }
           };
           
