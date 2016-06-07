@@ -865,29 +865,68 @@
       break;
     
     case "deleteFile":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      else {
-        var fileName = info.filename;
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      
+      var fileName = info.filename;
+      
+      var fh = new FileHandler({db:config.mongodb.db});
+      fh.deleteFile({filename:fileName},function(e) {
+        if (e) log.error(e);
         
-        var fh = new FileHandler({db:config.mongodb.db});
-        fh.deleteFile({filename:fileName},function(e) {
-          if (e) log.error(e);
+        var fileScope = info.scope;
+        var coll = (fileScope=="page") ? "wikicontent" : "accounts";
+        var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
+        config.mongodb.db.collection(coll).update(filter,{ "$pull": { files:{ filename:fileName } }},{upsert:true},function(err) {
+          if (err) {
+            res.json({success:false, error:err});
+            return log.error(err);
+          }
           
-          var fileScope = info.scope;
-          var coll = (fileScope=="page") ? "wikicontent" : "accounts";
-          var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
-          config.mongodb.db.collection(coll).update(filter,{ "$pull": { files:{ filename:fileName } }},{upsert:true},function(err) {
-            if (err) {
-              log.error(err);
-              res.json({success:false, error:err});
-            } else res.json({success:true});
-            
-            audit.log({type:"Delete File From GridFS", additional:{fileName:fileName}});
-          });
+          res.json({success:true});
+          audit.log({type:"Delete File From GridFS", additional:{fileName:fileName}});
         });
-        
-        break;
-      }
+      });
+      
+      break;
+    
+    case "deleteTemplateConfigFile":
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
+      
+      var fh = new FileHandler({db:config.mongodb.db});
+      
+      var confKey = info.configKey;
+      var file = info.filename;
+      
+      //{"template.config." + confKey: {$eq:file} }
+      var cond = "template.config." + confKey;
+      var pullCond = {};
+      pullCond[cond] = file;
+      
+      async.parallel([
+        function(callback) {
+          config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$pull:pullCond},
+            function(e,result) {
+              callback(e,result);
+            }
+          );
+        },
+        function(callback) {
+          fh.deleteFile({filename:file},function(e) {
+            callback(e);
+          });
+        }
+      ],
+        function(err,results) {
+          if (err) {
+            res.json({success:false, error:"Something went wrong when deleting your file. Please try again or contact your administrator if the problem persists."});
+            return log.error(err);
+          }
+          
+          return res.json({success:true});
+        }
+      );
+      
+      break;
     
     case "updatePath":
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});

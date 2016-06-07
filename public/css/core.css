@@ -378,6 +378,11 @@ div.asyncloader {
   border-left: 1px solid;
 }
 
+.separate-vert-tiny {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 .separate-vert-small {
   margin-top: 10px;
   margin-bottom: 10px;

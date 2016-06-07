@@ -805,6 +805,22 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       }
     },
     
+    deleteTemplateConfigFile: function(key,filename) {      
+      $http.post('/wikipage',{type:"deleteTemplateConfigFile", page:$scope.pathname, configKey:key, filename:filename})
+      .success(function(ret) {
+        if (ret.success) {
+          console.log($scope.template.config[key]);
+          $scope.template.config[key].splice($scope.template.config[key].indexOf(filename),1);
+          console.log($scope.template.config[key]);
+        } else {
+          console.log("something went wrong",ret);
+        }
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+      });
+    },
+    
     updatePath: function(newPath) {
       if ($scope.pathname != newPath && $scope.pathname != "/"+newPath) {
         if (confirm("Are you sure you want to change the path? This will change the current location where users will find this page.")) {

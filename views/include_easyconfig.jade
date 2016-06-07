@@ -19,12 +19,19 @@ div.row
             div(data-ng-if="conf.type == 'file'")
               input.input-lg.form-control(type="file",multiple,fileread,mainkey="conf.name",nested="templateFiles")
               div.separate-vert-medium(data-ng-if="template.config[conf.name].length")
-                div.panel.panel-default
-                  div.panel-body
-                    div.text-large Current Files
-                    div(data-ng-repeat="filename in template.config[conf.name]")
-                      div {{ $index + 1}}. 
+                div.text-large Current Files
+                div.table-responsive
+                  table.table.table-bordered.table-striped
+                    tr
+                      th #
+                      th File
+                      th Delete
+                    tr(data-ng-repeat="filename in template.config[conf.name]")
+                      td {{ $index+1 }}
+                      td
                         a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
+                      td
+                        a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplateConfigFile(conf.name,filename)") Delete
             div(data-ng-if="conf.type == 'select'")
               select.form-control(data-ng-model="template.config[conf.name]",data-ng-options="data as data for data in (conf.datasourceValues || conf.values.split(','))")
             div(data-ng-if="conf.type == 'list'")
