@@ -3,6 +3,7 @@ var async = require("async");
 var ObjectId = require('mongodb').ObjectID;
 var SQLHandler = require("./SQLHandler.js");
 var FileHandler = require("./FileHandler.js");
+var GetHTML = require("./GetHTML.js");
 var CodeRunner = require("./CodeRunner.js");
 var config = require('./config.js');
 var Object = require("../public/js/Object_prototypes.js");
@@ -187,8 +188,24 @@ WikiHandler.prototype.getPageContent=function(cb) {
           var fh = new FileHandler({db:config.mongodb.db});
           
           fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
-            _callback(e,result,template[0].config,templateId);
+            _callback(e,result,template[0],templateId);
           });
+        },
+        function(fileContents,oTemplate,templateId,_callback) {
+          if (fileContents) {
+            try {
+              var gH = new GetHTML();
+              
+              var method = gH.extension(oTemplate.file).substring(1);
+              gH[method](fileContents,function(e,html) {
+                return _callback(e,html,oTemplate.config,templateId);
+              });
+              
+            } catch (e) {
+              return _callback(e,"",oTemplate.config,templateId);
+            }
+            
+          } else return _callback(null,"",oTemplate.config,templateId);
         }
       ],
         function(err,html,config,templateId) {
@@ -455,18 +472,6 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
           callback(null,template);
         }
       );
-    },
-    function(template,callback) {
-      if (!template) return callback();
-      
-      var fh = new FileHandler({db:config.mongodb.db});
-      
-      fh.getFile({filename:template.file, encoding:"utf8"},function(e,result) {
-        if (e) return callback(e,template);
-        
-        template.html = result;
-        return callback(null,template);
-      });
     }
   ],
     function(err,template) {

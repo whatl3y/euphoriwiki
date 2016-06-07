@@ -770,8 +770,27 @@
           if (!templateId) return callback();
           
           wiki.getTemplateInfo(templateId,function(e,template) {
-            return callback(e,template,template.html);
+            return callback(e,template);
           });
+        },
+        function(template,callback) {
+          fh.getFile({filename:template.file, encoding:"utf8"},function(e,result) {
+            return callback(e,template,result);
+          });
+        },
+        function(template,fileContents,callback) {
+          if (fileContents) {
+            try {
+              var method = gH.extension(template.file).substring(1);
+              gH[method](fileContents,function(e,html) {
+                return callback(e,template,html);
+              });
+              
+            } catch (e) {
+              return callback(e,template,null);
+            }
+            
+          } else return callback(null,template,null);
         }
       ],
         function(err,oTemplate,templateHtml) {
