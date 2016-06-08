@@ -2,7 +2,7 @@
 - var pageTitle = data.title || "Welcome to the Wiki!";
 - var host = data.host || "";
 - var dir = '/public/js/';
-- var globalCSS = (data.settings.length) ? (data.settings.filter(function(s){return s.domid=="globalcss"})[0].value || "") : "";
+- var globalCSS = ((data.settings.length) ? (data.settings.filter(function(s){return s.domid=="globalcss"})[0].value || "") : "").replace("&gt;",">").replace("&lt;","<");
 
 doctype html
 html
