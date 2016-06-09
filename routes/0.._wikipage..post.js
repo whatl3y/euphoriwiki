@@ -1048,17 +1048,18 @@
         if (queryText.length) {
           A.find({query:"(|(sAMAccountName=*" + queryText + "*)(cn=*" + queryText + "*)(givenName=*" + queryText + "*)(surName=*" + queryText + "*)(email=*" + queryText + "*))"},function(err,results) {
             if (err) {
-              log.error(err);
               res.json({success:false});
-            } else {
-              results = (objType == "user" && typeof results==="object") 
-                ? results.users
-                : ((objType == "group" && typeof results==="object")
-                  ? results.groups
-                  : results);
-                  
-              res.json({success:true, objects:results});
+              return log.error(err);
             }
+            
+            results = (objType == "user" && typeof results==="object") 
+              ? results.users
+              : ((objType == "group" && typeof results==="object")
+                ? results.groups
+                : results);
+                
+            log.debug("Found AD results for object type " + objType + ": ",results);
+            return res.json({success:true, objects:results});
           });
         } else res.json({success:false, error:"Please provide search text to search for an AD object."});
       }

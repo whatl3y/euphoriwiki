@@ -22,6 +22,7 @@ function adminVisitorsCtrl($scope,$http) {
         {
           Name: "adminVisitorsCtrl_update",
           Handler: function(updatedVisitors) {
+            //console.log(updatedVisitors);
             $scope.$apply(function() {
               $scope.visitors = updatedVisitors;
             });

@@ -132,6 +132,7 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
     
     self.app.CACHE.sockets[id] = {
       socketId: id,
+      date: new Date(),
       room: room,
       user: req.session.username,
       firstname: req.session.firstname,
@@ -164,6 +165,8 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
 |RETURNS:    <true/false>: success or not
 -----------------------------------------------------------------------------------------*/
 SocketHandler.prototype.disconnect = function(id) {
+  log.debug("Socket just disconnected: " + id);
+  
   var self = this;
   
   try {
