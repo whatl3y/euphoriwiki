@@ -1042,26 +1042,26 @@
     case "adfind":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       
-	var objType = info.objType || "user";
-	var queryText = info.search;
-	
-	if (queryText.length) {
-	  A.find({query:"(|(sAMAccountName=*" + queryText + "*)(cn=*" + queryText + "*)(givenName=*" + queryText + "*)(surName=*" + queryText + "*)(email=*" + queryText + "*))"},function(err,results) {
-		if (err) {
-		  res.json({success:false});
-		  return log.error(err);
-		}
-		
-		results = (objType == "user" && typeof results==="object") 
-		  ? results.users
-		  : ((objType == "group" && typeof results==="object")
-			? results.groups
-			: results);
-			
-		log.debug("Found AD results for object type " + objType + ": ",results);
-		return res.json({success:true, objects:results});
-	  });
-	} else res.json({success:false, error:"Please provide search text to search for an AD object."});
+  var objType = info.objType || "user";
+  var queryText = info.search;
+  
+  if (queryText.length) {
+    A.find({query:"(|(sAMAccountName=*" + queryText + "*)(cn=*" + queryText + "*)(givenName=*" + queryText + "*)(surName=*" + queryText + "*)(email=*" + queryText + "*))"},function(err,results) {
+    if (err) {
+      res.json({success:false});
+      return log.error(err);
+    }
+    
+    results = (objType == "user" && typeof results==="object") 
+      ? results.users
+      : ((objType == "group" && typeof results==="object")
+      ? results.groups
+      : results);
+      
+    log.debug("Found AD results for object type " + objType + ": ",results);
+    return res.json({success:true, objects:results});
+    });
+  } else res.json({success:false, error:"Please provide search text to search for an AD object."});
     
       break;
     
