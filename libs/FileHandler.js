@@ -54,14 +54,13 @@ FileHandler.prototype.findFiles=function(options,cb) {
 FileHandler.prototype.uploadFile=function(options,cb) {
   options = options || {};
   
-  var filePath = options.path;
+  var filePath = options.path || options.filePath;
   var fileName = options.filename;
   var newFileName = (options.exactname) ? fileName : false;
+  
+  newFileName = newFileName || this.getFileName(fileName);
+  
   var readStream = options.readStream || fs.createReadStream(filePath);
-  
-  var lastPeriod = fileName.lastIndexOf(".");
-  newFileName = newFileName || fileName.substring(0,lastPeriod) + "_" + Date.now() + fileName.substring(lastPeriod);
-  
   var writeStream = this.writeStream(newFileName);
   
   //setup event handlers for file stream
@@ -86,7 +85,7 @@ FileHandler.prototype.uploadFile=function(options,cb) {
 FileHandler.prototype.getFile=function(options,cb) {
   options = options || {};
   
-  var filename = options.filename || "";
+  var filename = options.filename || options.file || "";
   var encoding = options.encoding || "";
   
   try {
@@ -141,6 +140,22 @@ FileHandler.prototype.deleteFile=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.writeStream=function(newFileName) {
   return this.gfs.createWriteStream({filename: newFileName});
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      getFileName (PUBLIC)
+|DESCRIPTION:  Takes a file name and appends the epoch time for uniqueness
+|PARAMETERS:  1. fileName(REQ): the file name that the file will be stored as in Grid FS.
+|             2. extraText(OPT): any extra text to append to the file before epoch timestamp.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <string>
+-----------------------------------------------------------------------------------------*/
+FileHandler.prototype.getFileName=function(fileName,extraText) {
+  extraText = extraText || Date.now();
+  
+  var lastPeriod = fileName.lastIndexOf(".");
+  return fileName.substring(0,lastPeriod) + "_" + extraText + fileName.substring(lastPeriod);
 }
 
 //-------------------------------------------------------
