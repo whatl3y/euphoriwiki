@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"wiki.adminsettings"},{"v":1,"key":{"order":1},"name":"order_1","ns":"wiki.adminsettings"},{"v":1,"key":{"active":1},"name":"active_1","ns":"wiki.adminsettings"},{"v":1,"key":{"value.username":1},"name":"value.username_1","ns":"wiki.adminsettings"}]}
