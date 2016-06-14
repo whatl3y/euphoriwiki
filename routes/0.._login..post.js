@@ -2,33 +2,33 @@
   var info = req.body;
   var A = new Auth({session:req.session});
   var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
-  
+
   //built strategy authentications for non built-in passport strategies
   var strategyWaterfallFunctions = [];
   _.each((fs.readdirSync("./passport_strategies") || []).sort(),function(stratFile) {
     try {
       var oStrat = require("./passport_strategies/" + stratFile);
-      
+
       if (oStrat.BUILTIN) return;
       if ((typeof oStrat.condition === "undefined") || oStrat.condition) {
         var stratName = path.basename(stratFile,".js");
-        
+
         return strategyWaterfallFunctions.push(function(un,callback) {
           if (un) return callback(null,un);
-          
+
           passport.authenticate(stratName, function(err,user,passportInfo) {
             if (err) return callback(err);
             return callback(null,user);
-            
+
           })(req, res);
         });
       }
-      
+
     } catch(err) {
       log.error(err);
     }
   });
-  
+
   switch(info.type) {
     case "loginLocal":
       async.waterfall([].concat([
@@ -40,7 +40,7 @@
       [
         function(user,callback) {
           if (!user) return callback("We were unable to authenticate you. Please make sure your username and password are correct and try again or contact your admin if the problem persists.");
-          
+
           A.findOrSaveUser({username:user},function(err,userRecord) {
             callback(err,user,userRecord || false);
           });
@@ -61,12 +61,12 @@
           }
 
           var userExists = existsAlready;
-          var userInfo = (typeof userRecord=="object" && userRecord.username) 
+          var userInfo = (typeof userRecord=="object" && userRecord.username)
             ? userRecord
-            : ((typeof userRecord==="object" && userRecord.users instanceof Array && userRecord.users.length) 
-              ? userRecord.users[0] 
+            : ((typeof userRecord==="object" && userRecord.users instanceof Array && userRecord.users.length)
+              ? userRecord.users[0]
               : {});
-          
+
           var saveData;
           if (userExists) {
             saveData = {
@@ -93,37 +93,37 @@
               email: userInfo.mail || null
             };
           }
-          
-          
+
+
           A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
             if (e) {
               res.json({success:false, error:e});
               return log.error(e);
             }
-            
-            A.login(user,function(_e) {
+
+            A.login(saveData.$set || saveData,function(_e) {
               if (e) {
                 log.error(e);
                 return res.json({success:false, error:"There was an issue trying to log you in. Please try again."});
               }
-              
-              return res.json({success:true});
+
+              res.json({success:true});
             });
-            
+
             new WikiHandler().event({type:"login", params:{username:user}},function(e,result) {if (e) log.error(e);});
             audit.log({type:"Login", user:user});
           });
         }
       );
-      
+
       break;
-      
+
     case "authTypes":
       var authTypes = _.mapObject(config.authtypes,function(val,key) {return (val == "true") ? true : false;});
       res.json({success:true, types:authTypes});
-      
+
       break;
-      
+
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
