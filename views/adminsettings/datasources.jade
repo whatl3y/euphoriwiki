@@ -7,23 +7,24 @@ div.separate-vert-small
       li(class="padding-small",data-ng-repeat="ds in setting.value")
         small
           small
-            table.table.table-responsive.table-bordered.table-striped(style="margin-bottom:0px")
-              tr
-                th Name
-                th Host
-                th Driver
-                th Database
-                th Remove
-              tr
-                td
-                  strong
-                    em {{ ds.name }}
-                td {{ ds.server }}
-                td {{ ds.driver }}
-                td {{ ds.database }}
-                td
-                  a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
-                    em x
+            div.table-responsive
+              table.table.table-bordered.table-striped(style="margin-bottom:0px")
+                tr
+                  th Name
+                  th Host
+                  th Driver
+                  th Database
+                  th Remove
+                tr
+                  td
+                    strong
+                      em {{ ds.name }}
+                  td {{ ds.server }}
+                  td {{ ds.driver }}
+                  td {{ ds.database }}
+                  td
+                    a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
+                      em x
   div(class="separate-vert-small")
     div.padding-small
       div.panel.panel-default

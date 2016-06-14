@@ -9,7 +9,7 @@ var MongoClient = require('mongodb').MongoClient;
 |      go: opens a DB connection, this can happen in the constructor or at a later point
 |      close: closes the DB connection we established with this object
 |ASSUMES:  mongodb native driver in nodejs
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/10/2015 - created
 -----------------------------------------------------------------------------------------*/
 MDB=function(params) {
@@ -17,7 +17,7 @@ MDB=function(params) {
   var config=params.config || config;
   this.MongoClient=params.MongoClient || MongoClient;                    //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
   this.connectionString=params.connectionString || config.mongodb.connectionString();    //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
-  
+
   if (!params.dontopen) {                                  //params.dontopen: if set to true will not automatically open a DB connection
     this.go(params.callback);                              //params.callback: a callback function to be executed in constructor at the time of connecting to DB
   }
@@ -31,16 +31,16 @@ MDB=function(params) {
 |              successfully connect to the DB or an array of callback functions
 |              that will be called sequentially.
 |SIDE EFFECTS:  None
-|CALLED FROM:  
+|CALLED FROM:
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 MDB.prototype.go=function(cb) {
   var self=this;
-  
+
   var main = function(err,db) {
     self.db = db;
-    
+
     if (typeof cb==='function') {
       cb(err,{db:db, self:self});
     } else if (typeof cb==='object') {
@@ -49,7 +49,7 @@ MDB.prototype.go=function(cb) {
       }
     }
   }
-  
+
   //make the initial connection
   this.MongoClient.connect(this.connectionString,function(err,db) {
     if (err!=null) main(err);
@@ -74,31 +74,31 @@ MDB.prototype.go=function(cb) {
 |                options.array[<i>].fields: the specific fields you want to return
 |        2. cb(REQ): callback
 |              cb(err,obj)
-|SIDE EFFECTS:  
-|CALLED FROM:  
+|SIDE EFFECTS:
+|CALLED FROM:
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 MDB.prototype.findRecursive=function(options,cb) {
   var self=this;
-  
+
   options.array = options.array || [];
   options.index = options.index || 0;
   options.object = options.object || {};
-  
+
   if (options.array.length > options.index) {
     var coll = (options.db || config.mongodb.db).collection(options.array[options.index].collection);
     var filter = options.array[options.index].filters || {};
     var sort = options.array[options.index].sort || {order:1};
-    var limit = options.array[options.index].limit || null;
+    var limit = options.array[options.index].limit || 999999;
     var fields = options.array[options.index].fields || {};
-    
+
     coll.find(filter,fields).sort(sort).limit(limit).toArray(function(err,docs) {
       if (err) cb(err,options.object);
       else {
         options.object[options.array[options.index].key] = docs;
         options.index++;
-        
+
         self.findRecursive(options,cb);
       }
     });
@@ -112,7 +112,7 @@ MDB.prototype.findRecursive=function(options,cb) {
 |DESCRIPTION:  Closes the DB connection we established in the constructor.
 |PARAMETERS:  1. db(REQ): the db returned from the MongoClient instance after connecting
 |SIDE EFFECTS:  Closes the DB that is referenced in the parameter
-|CALLED FROM:  
+|CALLED FROM:
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/

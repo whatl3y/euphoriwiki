@@ -30,7 +30,7 @@
     "nodemailer": "^2.2.0",
     "jade": "^1.9.2",
     "html": "^0.0.10",
-    "mongodb": "~1.4.30",
+    "mongodb": "~2.1.18",
     "connect-mongo": "^0.7.0",
     "mysql": "2.9.0",
     "mssql": "3.1.1",
