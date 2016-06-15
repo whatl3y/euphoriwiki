@@ -3,6 +3,7 @@
 - var host = data.host || "";
 - var dir = '/public/js/';
 - var globalCSS = (data.settings.length) ? (data.settings.filter(function(s){return s.domid=="globalcss"})[0].value || "") : "";
+- var globalJs = (data.settings.length) ? (data.settings.filter(function(s){return s.domid=="globaljs"})[0].value || "") : "";
 
 doctype html
 html
@@ -10,24 +11,24 @@ html
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible",content="IE=edge")
     meta(name="viewport",content="width=device-width, initial-scale=1")
-    
+
     - //Font Awesome is currently for icons being used in the RTE
     - // https://fortawesome.github.io/Font-Awesome/icons/
     link(rel='stylesheet',type='text/css',href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css')
-    
+
     link(rel='stylesheet',type='text/css',href='/public/css/core.css')
     link(rel='stylesheet',type='text/css',href=dir+'libraries/bootstrap/3.3.5/css/bootstrap.css')
     link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.min.css')
     link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.structure.min.css')
     link(rel='stylesheet',type='text/css',href=dir+'libraries/jquery/ui/jquery-ui.theme.min.css')
-    
-    
+
+
     script(type='text/javascript').
       LOCAL_DATA=!{JSON.stringify(data.external||{})}
-      
-    //custom styles from admin settings
+
+    - //custom styles from admin settings
     style!= globalCSS
-    
+
     script(src=dir+'libraries/underscore/underscore-1.7.0__dev.js')
     script(src=dir+'libraries/socket.io/socket.io-1.3.5.js')
     script(src=dir+'libraries/jquery/jquery-1.11.0.js')
@@ -41,10 +42,10 @@ html
     script(src=dir+'libraries/es6-promise-polyfill/promise.min.js')
     script(src=dir+'libraries/chart.js/Chart.min.js')
     script(src=dir+'libraries/diff_match_patch/diff_match_patch_uncompressed.js')
-    
+
     script(src=dir+"libraries/upndown.bundle.min.js")
     script(src=dir+"libraries/marked.min.js")
-    
+
     script(src=dir+'String_prototypes.js')
     script(src=dir+'Object_prototypes.js')
     script(src=dir+'jQuery_widgets.js')
@@ -54,19 +55,19 @@ html
     script(src=dir+'Core.DateTime.js')
     script(src=dir+'Core.Modals.js')
     script(src=dir+'Core.SocketHandler.js')
-    
+
     script(src=dir+'directives/ng-file-upload.min_v12.js')
     script(src=dir+'directives/filereadDir.js')
     script(src=dir+'directives/compileHtml.js')
     script(src=dir+'directives/wikiModuleDir.js')
     script(src=dir+'directives/subpageDirectives.js')
-    
+
     - //**************************************************************************
     - //AS OF 20160202 MIGHT CAN DELETE IN FAVOR OF HTML5 WYSIWYG BOOTSTRAP EDITOR: boostrap-wysiwyg
     - //script(src="//cdn.ckeditor.com/4.4.7/standard/ckeditor.js")
     - //script(src=dir+'directives/ng-ckeditor.js')
     - //**************************************************************************
-    
+
     script(src=dir+'controllers/globalCtrl.js')
     script(src=dir+'controllers/mainHomeCtrl.js')
     script(src=dir+'controllers/loginCtrl.js')
@@ -80,21 +81,29 @@ html
     script(src=dir+'controllers/adminTemplateMgmtCtrl.js')
     script(src=dir+'controllers/adminThemingCtrl.js')
     script(src=dir+'apps/AngularJS_Euphoriwiki.js')
-  
+
     title= pageTitle
   body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl")
     div.container-fluid
       div.main-header-wrapper(data-ng-hide="hideAllOfHeader")
         include ./header.jade
-        
+
         div(id="global-error-wrapper",style="display:none")
           alert(type="danger",class="separate-vert-large h3 text-center",data-ng-show="global.error")
             span(class="glyphicon glyphicon-warning-sign")
             span {{ global.error }}
             span(class="glyphicon glyphicon-warning-sign")
-        
+
         - if (!data.session.loggedIn)
           div(class="row")
             include include_login.jade
-      
+
+
+      - //main entry point for any views that
+      - //use layout as its primary page
       block main
+
+
+
+    - //custom Javascript from admin settings
+    script!= globalJs
