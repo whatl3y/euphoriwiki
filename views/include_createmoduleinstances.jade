@@ -9,7 +9,7 @@ form
   div.row
     div.col-xs-12.padding-small.text-center(data-ng-show="!moduleInstances.length")
       alert There are no modules configured.
-    div.col-xs-12.col-md-6.col-lg-4.padding-small(data-ng-repeat="instance in moduleInstances",data-ng-show="moduleInstances.length")
+    div.col-xs-12.col-md-6.padding-small(data-ng-repeat="instance in moduleInstances",data-ng-show="moduleInstances.length")
       div.panel.panel-primary
         div.panel-heading
           div.text-xlarge Module Instance

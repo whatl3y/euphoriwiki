@@ -1,20 +1,20 @@
 (function(req,res) {
   var info = req.body;
-  
+
   var A = new Auth({session:req.session});
   var Access = new AccessManagement({db:config.mongodb.db});
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
-  
+
   if (info.file) {
     var fileInfo = info.file;
     var fileName = fileInfo.name;
     var filePath = fileInfo.path;
     var fileType = fileInfo.type;
   }
-  
+
   var username = A.username;
   var wiki = new WikiHandler({path:decodeURI(info.page)});
-  
+
   switch(info.type) {
     case "init":
       async.parallel([
@@ -33,7 +33,7 @@
             function(oInfo,_callback) {
               if (oInfo.config && oInfo.config.length) {
                 var queryResults = {};
-                
+
                 wiki.getTemplateInfo(oInfo.templateId,function(e,template) {
                   return _callback(e,{
                     html: oInfo.html,
@@ -41,7 +41,7 @@
                     templateId: oInfo.templateId
                   });
                 });
-                
+
               } else {
                 return _callback(null,oInfo);
               }
@@ -75,17 +75,17 @@
       ],
         function(err,results) {
           if (err) return res.json({success:false, error:err});
-          
+
           var pageInfo = results[0];
           var oPageContent = results[1];
           var validated = results[2];
           var templates = results[3];
           var canUpdate = results[4];
           var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
-          
+
           if (!validated) return res.json({success:false, protected:true});
           else if (!canViewPage) return res.json({success:false, outofscope:true});
-          
+
           var oTemplate = {};
           if (pageInfo instanceof Array && pageInfo.length && typeof pageInfo[0].template === "object") {
             oTemplate = {
@@ -94,8 +94,8 @@
               config: pageInfo[0].template.config
             };
           }
-          
-          
+
+
           var oRet;
           if (!pageInfo.length) {
             oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
@@ -121,12 +121,12 @@
               hideAllOfHeader: pageInfo[0].hideAllOfHeader
             };
           }
-          
+
           //get like information and determine if the current logged in user
           //is allowed to like (i.e. whether they've already liked the page)
           if (pageInfo.length && typeof pageInfo[0].likes==="object") {
             oRet.pageLikes = pageInfo[0].likes.number;
-            
+
             if (username) {
               var canLike = true;
               _.each(pageInfo[0].likes.info,function(like) {
@@ -135,32 +135,32 @@
                   return;
                 }
               });
-              
+
               oRet.canLike = canLike;
             }
           }
-          
+
           //add templates to what is returned and save subpages
           oRet.pageTemplates = templates || [];
-          
+
           if (A.isLoggedIn()) {
             config.mongodb.db.collection("accounts").find({username:username},{files:{$slice:100}, drafts:{$elemMatch:{path:wiki.path}}}).toArray(function(_e,userInfo) {
               if (_e) log.error(_e);
               else if (!userInfo.length) log.trace("Tried getting files for user " + username + " but this user does not have an account record yet.");
               else oRet = Object.merge(oRet,{userFiles:userInfo[0].files, draft:(userInfo[0].drafts instanceof Array)?userInfo[0].drafts[0]:false});
-              
+
               res.json(oRet);
             });
           } else {
             res.json(oRet);
           }
-          
+
           wiki.event("visitpage",function(e,result) {if (e) log.error(e);});
         }
       );
-      
+
       break;
-    
+
     case "postinit":
       async.parallel([
         function(callback) {
@@ -194,21 +194,21 @@
             scopetypes = _.values(scopetypes).sort(function(a,b) {
               return (a.name > b.name) ? 1 : -1;
             });
-            
+
             return callback(null,scopetypes);
-            
+
           } catch(e) {
             return callback(e);
-          }          
+          }
         },
         function(callback) {
           config.mongodb.db.collection("adminsettings").find({domid:"event_types"}).toArray(function(e,types) {
             if (e) return callback(e);
             if (!types || !types.length || !(typeof types[0] === "object") || !(types[0].value instanceof Array)) return callback(null,[]);
-            
+
             return callback(null,types[0].value.filter(function(t) {return t.scope == "page"}).sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
           });
-          
+
           // $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
           /*config.mongodb.db.collection("adminsettings").aggregate([
             {
@@ -232,7 +232,7 @@
             function(e,types) {
               if (e) return callback(e);
               if (!types || !types.length || !(typeof types[0] === "object") || !(types[0].value instanceof Array)) return callback(null,[]);
-              
+
               return callback(null,types[0].value.sort(function(a,b) {return (a.type > b.type) ? 1 : -1}));
             }
           );*/
@@ -258,7 +258,7 @@
             res.json({success:false, error:err});
             return log.error(err);
           }
-          
+
           var pageExists = results[0];
           var pageArchive = results[1];
           var modules = results[2];
@@ -268,9 +268,9 @@
           var aliases = results[6];
           var oSubPages = results[7];
           var externalDatasources = results[8];
-          
+
           if (!pageExists.length) return res.json({success:true});
-          
+
           return res.json({
             success:true,
             versions: pageArchive,
@@ -284,14 +284,14 @@
           });
         }
       );
-    
+
       break;
-      
+
     case "update":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to update wiki pages."});
-      
+
       var fh = new FileHandler({db:config.mongodb.db});
-      
+
       async.parallel([
         function(callback) {
           wiki.getPage(function(_e,current) {
@@ -323,16 +323,16 @@
               fileType: info[__k].type
             }
           });
-          
+
           if (infoTemplateFiles.length) {
             async.parallel(infoTemplateFiles.map(function(oConf) {
               return function(_callback) {
                 fh.uploadFile({filename:oConf.fileName, path:oConf.filePath},function(err,newFileName) {
                   if (err) return _callback(err);
-                  
+
                   oConf.newFileName = newFileName;
                   _callback(err,oConf);
-                  
+
                   return fs.unlink(oConf.filePath,function(e) {if (e) log.info(e)});
                 });
               }
@@ -346,15 +346,15 @@
       ],
         function(err,results) {
           if (err) return res.json({success:false, error:err});
-          
+
           var current = results[0];
           var validated = results[1];
           var canUpdate = results[2];
           var aTemplateFiles = results[3] || [];
-          
+
           if (!validated) return res.json({success:false, error:"You cannot edit a password-protected page until you have authenticated with it."});
           if (!canUpdate) return res.json({success:false, error:"You cannot update this page as you do not have appropriate rights to update it. Please contact the page administrators to get access."});
-          
+
           var saveData = {
             "$set": {
               path: wiki.path,
@@ -364,21 +364,21 @@
               updatedBy: {username:username, firstname:A.getFirstname(), lastname:A.getLastname()}
             }
           };
-          
+
           //populate template info based on info provided
           var oTemplate = JSON.parse(info.template || "");
           saveData["$set"].template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
             templateId: oTemplate.templateId,
             config: oTemplate.config || {}
           } : {};
-          
+
           aTemplateFiles.forEach(function(oTemp) {
             if (typeof saveData["$set"].template.config === "object") {
               saveData["$set"].template.config[oTemp.configKey] = saveData["$set"].template.config[oTemp.configKey] || [];
               saveData["$set"].template.config[oTemp.configKey] = saveData["$set"].template.config[oTemp.configKey].concat(oTemp.newFileName);
             }
           });
-          
+
           //save the data, pull any drafts the user may
           //have had for this page, archive the former page, write
           //an entry in the audit log,
@@ -402,7 +402,7 @@
               if (current.length) {
                 var oArchive = current[0];
                 delete(oArchive["_id"]);
-                
+
                 config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
                   callback(err,result);
                 });
@@ -433,21 +433,21 @@
                 res.json({success:false, error:"There was an error saving your information. Please try again."});
                 return log.error(err);
               }
-              
+
               var mailInfo = results[4];
               if (!mailInfo) log.debug("The page update subscriber e-mail did not send either because there are no subscribers or the template is corrupted.");
-              
+
               return res.json({success:true});
             }
           );
         }
       );
-      
+
       break;
-      
+
     case "delete":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to delete a wiki page."});
-      
+
       async.parallel([
         function(callback) {
           Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
@@ -460,46 +460,46 @@
             res.json({success:false, error:err});
             return log.error(err);
           }
-          
+
           var isAdmin = results[0];
-          
+
           if (!isAdmin) return res.json({success:false, error:"You must be a page admin to delete a wiki page."});
-          
+
           wiki.deletePage(function(e) {
             if (e) {
               res.json({success:false, error:e});
               return log.error(err);
             }
-            
+
             return res.json({success:true});
           });
         }
       );
-    
+
       break;
-      
+
     case "aliases":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to delete a wiki page."});
-      
+
       var aliases = info.aliases || [];
-      
+
       wiki.updateAliases({aliases:aliases, Access:Access, username:username},function(err) {
         if (err) {
           res.json({success:false, error:(typeof err==="string") ? err : "There was an issue trying to update your page aliases. Please try again."});
           return log.error(err);
         }
-        
+
         return res.json({success:true});
       });
-      
+
       break;
-    
+
     case "updatePageEvents":
       var events = info.events || [];
       events = events.map(function(e) {
         return Object.removeDollarKeys(e);
       });
-      
+
       async.parallel([
         function(callback) {
           Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
@@ -512,35 +512,35 @@
             res.json({success:false, error:err});
             return log.error(err);
           }
-          
+
           var isAdmin = results[0];
-          
+
           if (!isAdmin) return res.json({success:false, error:"You need to be a page admin to perform this function."});
-          
+
           config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $unset:{events:1} },function(_e) {
             config.mongodb.db.collection("wikicontent").update({ path:wiki.path },{ $set:{events:events} },function(__e) {
               var error = _e || __e || null;
               if (error) return res.json({success:false, error:error});
-              
+
               return res.json({success:true});
             });
           });
         }
       );
-    
+
       break;
-    
+
     case "updatePageModules":
       var modules = info.modules || [];
       modules = modules.map(function(m) {
-        m.path = wiki.path;        
+        m.path = wiki.path;
         if (!m.uid) m.uid = uuid.v1();
-        
+
         return Object.removeDollarKeys(m);
       }).filter(function(_m) {
         return !!_m.modulekey;
       });
-      
+
       async.parallel([
         function(callback) {
           Access.isAdmin({username:username, path:wiki.path},function(e,isAdmin) {
@@ -553,10 +553,10 @@
             res.json({success:false, error:err});
             return log.error(err);
           }
-          
+
           var isAdmin = results[0];
           if (!isAdmin) return res.json({success:false, error:"You need to be a page admin to perform this function."});
-            
+
           async.series([
             function(callback) {
               config.mongodb.db.collection("wiki_modules_instances").remove({ path:wiki.path },function(_e) {
@@ -564,6 +564,8 @@
               });
             },
             function(callback) {
+              if (!modules.length) return callback();
+
               config.mongodb.db.collection("wiki_modules_instances").insert(modules,function(_e) {
                 callback(_e);
               });
@@ -571,27 +573,28 @@
           ],
             function(_err,_results) {
               if (_err) {
-                log.error(_err);
                 res.json({success:false, error:_err});
-                
-              } else res.json({success:true});
+                return log.error(_err);
+              }
+
+              res.json({success:true});
             }
           );
         }
       );
-    
+
       break;
-    
+
     case "prettify":
       var h = info.html || "";
       h = h.replace(/^[\s\t]*(\r\n|\n)/g,"");
-      
+
       var newHtml = new GetHTML().prettify(h);
       if (typeof newHtml==="string") res.json({success:true, html:newHtml});
       else res.json({success:false, error:"There was an issue prettifying your HTML."});
-      
+
       break;
-    
+
     case "password":
       var password = info.password;
       wiki.validatePassword({session:req.session, password:password},function(e,validated) {
@@ -601,32 +604,32 @@
           res.json({success:false, error:"Password is incorrect, please try again."});
         }
       });
-      
+
       break;
-    
+
     case "updatePassword":
       var password = info.password;
-      
+
       var data = (info.clear) ? {$unset:{password:""}} : {$set:{password:password}};
-      
+
       config.mongodb.db.collection("wikicontent").update({ path:wiki.path },data,{ upsert:true },
         function(e,doc) {
           if (err) res.json({success:false, error:err});
           else res.json({success:true});
-          
+
           audit.log({type:"Update Page Password", additional:{path:wiki.path}});
         }
       );
-      
+
       break;
-      
+
     case "subscribe":
       var unsubscribe = info.unsubscribe || false;
       var useaccount = info.useaccount || 'no';
       var email = info.email || "";
-      
+
       var updateData = {};
-      
+
       if (unsubscribe) {
         if (useaccount=="yes") {
           updateData["$pull"] = {"subscribers.username":username};
@@ -651,21 +654,21 @@
           }
         }
       }
-      
+
       config.mongodb.db.collection("wikicontent").update({ path:wiki.path },updateData,{upsert:true},function(e,doc) {
         if (e) {
           log.error(e);
           res.json({success:false, error:e});
         } else {
           res.json({success:true});
-          
+
           audit.log({type:"New Subscriber", additional:{path:wiki.path, email:email}});
           wiki.event({type:"newpagesubscriber", params:{email:email}},function(e,result) {if (e) log.error(e);});
         }
       });
-      
+
       break;
-    
+
     case "like":
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to like a wiki page."});
       else {
@@ -674,7 +677,7 @@
             function(err,doc) {
               if (err) res.json({success:false, error:err});
               else res.json({success:true});
-              
+
               audit.log({type:"Unlike", additional:{path:wiki.path}});
               wiki.event({type:"pageunliked", params:{username:username}},function(e,result) {if (e) log.error(e);});
             }
@@ -687,19 +690,19 @@
             function(err,doc) {
               if (err) res.json({success:false, error:err});
               else res.json({success:true});
-              
+
               audit.log({type:"Like", additional:{path:wiki.path}});
               wiki.event({type:"pageliked", params:{username:username}},function(e,result) {if (e) log.error(e);});
             }
           );
         }
       }
-      
+
       break;
-    
+
     case "updateDraft":
       var onlyDelete = (info.delete==="false") ? false : (info.delete || false);
-      
+
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to update wiki pages."});
       else {
         var saveData = {
@@ -711,7 +714,7 @@
             }
           }
         };
-        
+
         //populate template info based on info provided
         var oTemplate = JSON.parse(info.template || "");
         saveData["$push"].drafts.template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
@@ -720,7 +723,7 @@
           masterConfig: oTemplate.masterConfig,
           config: oTemplate.config || {}
         } : {};
-        
+
         async.series([
           function(callback) {
             config.mongodb.db.collection("accounts").update({username:username},{$pull:{drafts: {path:wiki.path}}},
@@ -731,7 +734,7 @@
           },
           function(callback) {
             if (onlyDelete) return callback();
-            
+
             config.mongodb.db.collection("accounts").update({username:username},saveData,{upsert:true},
               function(er,result) {
                 callback(er,result);
@@ -744,33 +747,33 @@
               res.json({success:false, error:"There was an error saving your draft. Please try again."});
               return log.error(er);
             }
-            
+
             res.json({success:true});
             audit.log({type:"Update Draft", additional:{path:wiki.path}});
           }
         );
       }
-      
+
       break;
-    
+
     case "getTemplate":
       var templateName = info.template;
-      
+
       var fh = new FileHandler({db:config.mongodb.db});
       var gH = new GetHTML();
-      
+
       async.waterfall([
         function(callback) {
           config.mongodb.db.collection("wikitemplates").find({file:templateName},{_id:1}).toArray(function(e,result) {
             if (e) return callback(e);
             if (!result || !result.length) return callback(null,null);
-            
+
             return callback(null,result[0]._id);
           });
         },
         function(templateId,callback) {
           if (!templateId) return callback();
-          
+
           wiki.getTemplateInfo(templateId,function(e,template) {
             return callback(e,template);
           });
@@ -787,11 +790,11 @@
               gH[method](fileContents,function(e,html) {
                 return callback(e,template,html);
               });
-              
+
             } catch (e) {
               return callback(e,template,null);
             }
-            
+
           } else return callback(null,template,null);
         }
       ],
@@ -800,13 +803,13 @@
             res.json({success:false, error:(typeof err === "string") ? err : "There was a problem getting your template."});
             return log.error(err);
           }
-          
+
           res.json({success:true, html:templateHtml, templateInfo:oTemplate});
         }
       );
-      
+
       break;
-    
+
     case "wordToHtml":
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
@@ -824,9 +827,9 @@
           res.json({wordsuccess:false, error:"Uh oh, this doesn't appear to be a valid Microsoft Word document that we can parse and convert. Please try again."});
         }
       }
-      
+
       break;
-    
+
     case "uploadFile":
       if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
       else {
@@ -837,15 +840,15 @@
             res.json({filesuccess:false, error:err});
           } else {
             log.debug("File created and piped to GridFS. Filename: "+newFileName);
-            
+
             var newFileInfo = {
               uploadedTime: new Date(),
               origFilename: fileName,
               filename: newFileName
             };
-            
+
             res.json({filesuccess:true, fileInfo:newFileInfo});
-            
+
             var fileScope = info.scope;
             var coll = (fileScope=="page") ? "wikicontent" : "accounts";
             var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
@@ -855,24 +858,24 @@
               }
             },{upsert:true},function(err) {
               if (err) log.error(err);
-              
+
               audit.log({type:"Upload File to GridFS", additional:{fileInfo:newFileInfo}});
             });
           }
         });
       }
-      
+
       break;
-    
+
     case "deleteFile":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      
+
       var fileName = info.filename;
-      
+
       var fh = new FileHandler({db:config.mongodb.db});
       fh.deleteFile({filename:fileName},function(e) {
         if (e) log.error(e);
-        
+
         var fileScope = info.scope;
         var coll = (fileScope=="page") ? "wikicontent" : "accounts";
         var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
@@ -881,27 +884,27 @@
             res.json({success:false, error:err});
             return log.error(err);
           }
-          
+
           res.json({success:true});
           audit.log({type:"Delete File From GridFS", additional:{fileName:fileName}});
         });
       });
-      
+
       break;
-    
+
     case "deleteTemplateConfigFile":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      
+
       var fh = new FileHandler({db:config.mongodb.db});
-      
+
       var confKey = info.configKey;
       var file = info.filename;
-      
+
       //{"template.config." + confKey: {$eq:file} }
       var cond = "template.config." + confKey;
       var pullCond = {};
       pullCond[cond] = file;
-      
+
       async.parallel([
         function(callback) {
           config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$pull:pullCond},
@@ -921,19 +924,19 @@
             res.json({success:false, error:"Something went wrong when deleting your file. Please try again or contact your administrator if the problem persists."});
             return log.error(err);
           }
-          
+
           return res.json({success:true});
         }
       );
-      
+
       break;
-    
+
     case "updatePath":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      
+
       var newPath = info.newPath;
       newPath = (newPath.indexOf("/") == 0) ? newPath : "/"+newPath;
-      
+
       async.parallel([
         function(callback) {
           wiki.allowedPath(newPath,function(e,isAllowed) {
@@ -956,15 +959,15 @@
             res.json({success:false, error:"There was an issue trying to update your path. Please try again."});
             return log.error(err);
           }
-          
+
           var allowed = results[0];
           var page = results[1];
           var canUpdate = results[2];
-          
+
           if (!canUpdate) return res.json({success:false, error:"You cannot update the path as you do not have appropriate rights. Contact the page administrator to get access."});
           else if (!allowed) return res.json({success:false, error:"Path " + newPath + " is not a valid path to change to. Please try another path."});
           else if (page.length) return res.json({success:false, error:"The path, " + newPath + ", already exists and can't be overwritten. Please try another path or delete/move the page at " + newPath + " and try again."});
-          
+
           async.parallel([
             function(callback) {
               config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$set:{path:newPath, updated:new Date()}},function(err) {
@@ -979,18 +982,18 @@
           ],
             function(err,results) {
               if (err) return res.json({success:false, error:err});
-              
+
               res.json({success:true});
-              
+
               audit.log({type:"Update Page Path", additional:{formerPath:wiki.path, newPath:newPath}});
               wiki.event({type:"updatepagepath", params:{username:username, formerPath:wiki.path, newPath:newPath}},function(e,result) {if (e) log.error(e);});
             }
           );
         }
       );
-      
+
       break;
-    
+
     case "updatePageSetting":
       async.parallel([
         function(callback) {
@@ -1009,66 +1012,66 @@
       ],
         function(err,results) {
           if (err) return res.json({success:false, error:err});
-          
+
           var isLoggedIn = results[0];
           var canEdit = results[1];
-          
+
           if (!isLoggedIn) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
           if (!canEdit) return res.json({success:false, error:"You must be a page administrator to make edits to page settings."});
-          
+
           var key = info.key;
           var val = info.value;
-          
+
           if (key=="widgets") for (var _k in val) val[_k].enabled = (val[_k].enabled=="false" || val[_k].enabled=="0") ? false : (!!val[_k].enabled);
           if (key=="settings.viewscope") for (var _k in val) val[_k] = Object.removeDollarKeys(val[_k]);
           if (val === "false") val = false;
-          
+
           var o = {};
           o[key] = val;
           var saveData = {}
           saveData[(val)?"$set":"$unset"] = o;
-          
+
           config.mongodb.db.collection("wikicontent").update({path:wiki.path},saveData,{ upsert:true },function(err) {
             if (err) res.json({success:false, error:err});
             else res.json({success:true});
-            
+
             audit.log({type:"Update Page Setting", additional:{path:wiki.path,settingInfo:o}});
           });
         }
       );
-      
+
       break;
-    
+
     case "adfind":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      
+
       var objType = info.objType || "user";
       var queryText = info.search;
-      
+
       if (queryText.length) {
         A.find({query:"(|(sAMAccountName=*" + queryText + "*)(cn=*" + queryText + "*)(givenName=*" + queryText + "*)(surName=*" + queryText + "*)(email=*" + queryText + "*))"},function(err,results) {
         if (err) {
           res.json({success:false});
           return log.error(err);
         }
-        
-        results = (objType == "user" && typeof results==="object") 
+
+        results = (objType == "user" && typeof results==="object")
           ? results.users
           : ((objType == "group" && typeof results==="object")
           ? results.groups
           : results);
-          
+
         log.debug("Found AD results for object type " + objType + ": ",results);
         return res.json({success:true, objects:results});
         });
       } else return res.json({success:false, error:"Please provide search text to search for an AD object."});
-    
+
       break;
-    
+
     case "spreadsheetToTable":
-      
+
       break;
-    
+
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }

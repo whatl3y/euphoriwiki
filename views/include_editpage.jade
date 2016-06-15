@@ -25,7 +25,7 @@ div.wrapper
           div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4")
             alert(type="danger",class="text-large")
               div
-                span You have a saved draft for this page from 
+                span You have a saved draft for this page from
                 b {{ functions.formatDateTime(content.draft.date) }}
                 span . Would you like to continue where you left off, or delete the draft?
               div(class="separate-vert-small")
@@ -69,7 +69,7 @@ div.wrapper
           div(class="text-center col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3")
             h3
               alert {{ emptyPageError }}
-            
+
             - //MAKE SURE USER IS LOGGED IN HERE TO SHOW TEMPLATES
             - if (data.session.loggedIn)
               div(data-ng-show="availablePageTemplates.length")
@@ -92,9 +92,9 @@ div.wrapper
         div(data-ng-show="template.isEasyConfig != 'Yes'")
           div.separate-vert-small
             alert(type="success")
-              span You can use Bootstrap 3 
+              span You can use Bootstrap 3
               a(href="http://getbootstrap.com/css/",target="_blank") CSS
-              span  classes/styles or 
+              span  classes/styles or
               a(href="http://getbootstrap.com/components/",target="_blank") Components
               span  to add great-looking design to your pages!
           div(class="separate-vert-small")
@@ -102,13 +102,13 @@ div.wrapper
               span NOTE: Keep these things in mind while you're making page edits
               ol
                 li
-                  span Be sure to use the 
-                  b  
-                    a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page 
+                  span Be sure to use the
+                  b
+                    a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
                   span  tab above after making changes and before saving, as what is shown in the Rich Text Editor might not match what the page will actually look like.
                 li
-                  span Click on the 
-                  b  <> Source 
+                  span Click on the
+                  b  <> Source
                   span  button in the Rich Text Editor to see and/or update and add to the raw HTML for the page.
           div(class="rte-editor-wrapper padding-medium",data-ng-show="!rawHTML")
             include include_bootstraprte.jade
@@ -138,14 +138,15 @@ div.wrapper
                 li Uploading a new document does not save your page. You still need to save your changes above for the changes to take place.
                 li When you upload a word document, upon successful conversion you will get redirected to the Preview Page tab and the converted document will be appended to your page.
                 li This conversion is not perfect, and formatting changes might be lost from your Word Document in the HTML conversion. You might need to update them manually in the Rich Text Editor to get back the exact formatting.
-        div(class="separate-vert-medium")
-          div(class="panel panel-default col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-2 col-lg-offset-5")
-            div(class="panel-body text-center")
-              div(class="separate-vert-small")
-                input(type="file",id="file-input-word",class="sr-only",fileread)
-                button(id="upload-file-word",class="btn btn-primary") Upload Word Document
-              div(class="separate-vert-medium",data-ng-show="fileError")
-                alert(type="danger") {{ fileError }}
+        div.row
+          div.separate-vert-medium.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.col-lg-3.col-lg-offset-4
+            div.panel.panel-default
+              div.panel-body.text-center
+                div.separate-vert-small
+                  input(type="file",id="file-input-word",class="sr-only",fileread)
+                  button(id="upload-file-word",class="btn btn-primary") Upload Word Document
+                div(class="separate-vert-medium",data-ng-show="fileError")
+                  alert(type="danger") {{ fileError }}
       div(data-ng-show="pageState.uploadFile")
         h1 Upload Files to Download or Link To
         div(class="separate-vert-medium")
@@ -163,7 +164,7 @@ div.wrapper
                 alert(type="danger") {{ fileError }}
           div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
             h3
-              u(popover-trigger="mouseenter",popover-append-to-body="true",popover="These files can be seen and controlled by anyone with editing privileges on this wiki page. If the files won't be used anywhere other than this page, use this scope.") Page Files for 
+              u(popover-trigger="mouseenter",popover-append-to-body="true",popover="These files can be seen and controlled by anyone with editing privileges on this wiki page. If the files won't be used anywhere other than this page, use this scope.") Page Files for
                 em {{ pathname }}
             table(class="table table-striped table-bordered",data-ng-show="pagefiles.length")
               tr
@@ -228,8 +229,8 @@ div.wrapper
       div(data-ng-show="pageState.wikiEvents")
         h2 Custom Page Events
         div.
-          You can configure custom events that are fired for a page at particular times in the standard page evolution or "workflow". 
-          For example, you can fire an event at the time someone visits a page, updates a page, likes a page, subscribes to a page, etc. 
+          You can configure custom events that are fired for a page at particular times in the standard page evolution or "workflow".
+          For example, you can fire an event at the time someone visits a page, updates a page, likes a page, subscribes to a page, etc.
           Use the form below to add and remove events that are specific to this page below.
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")
           form
