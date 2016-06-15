@@ -59,7 +59,7 @@ input.emphasize {
 }
 
 #rte-raw-html {
-  
+
 }
 
 #rte-toolbar-wrapper {
@@ -199,7 +199,7 @@ colgroup col.info {
 .module-placeholder {
   border-radius: 5px;
   background: #F5F5F5;
-  min-height: 300px;
+  /*min-height: 300px;*/
   margin: 10px;
 }
 
