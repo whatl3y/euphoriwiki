@@ -13,14 +13,14 @@ var Object = require("../public/js/Object_prototypes.js");
 |PURPOSE:  Handles all things to do with getting information about a wiki page.
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|      
+|
 |ASSUMES:  mongodb native driver in nodejs
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
 WikiHandler=function(options) {
   options = options || {};
-  
+
   this.sanitizePath(options.path);
 }
 
@@ -52,7 +52,7 @@ WikiHandler.prototype.initQueries=function(cb) {
   ],
     function(err,queries,oData) {
       if (err) return cb(err);
-      
+
       try {
         cb(null,{queries:queries, oData:oData});
       } catch(err) {
@@ -75,44 +75,25 @@ WikiHandler.prototype.initQueries=function(cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getSubPages=function(cb,returnAry) {
   var self=this;
-  
+
   var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
   //var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
-  
+
   this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
-    if (_e) cb(_e);
-    else {
-      if (returnAry) cb(null,pages);
-      else {
-        var aryToNestedObj = function(ary,obj,val) {
-          obj = obj || {};
-          val = val || "";
-          
-          var key = ary[0];
-          var newAry = ary.slice(1);
-          obj[key] = {};
-          val += "/" + key;
-          
-          if (newAry.length > 1) obj[key] = aryToNestedObj(newAry,{/*value:val*/},val);
-          else obj[key][newAry[0]] = {/*value:val*/};
-          
-          return obj;
-        };
-        
-        var oPages = {};
-        var pagesSplit = [];
-        var thisPathPagesSplit = self.path.split("/").slice(1);
-        for (var _i=0;_i<pages.length;_i++) {
-          
-          pagesSplit = pages[_i].path.split("/").slice(1);
-          //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
-          
-          oPages = Object.merge(oPages,aryToNestedObj(pagesSplit));
-        }
-        
-        cb(null,oPages);
-      }
+    if (_e) return cb(_e);
+    if (returnAry) return cb(null,pages);
+
+    var oPages = {};
+    var pagesSplit = [];
+    var thisPathPagesSplit = self.path.split("/").slice(1);
+    for (var _i=0;_i<pages.length;_i++) {
+      pagesSplit = pages[_i].path.split("/").slice(1);
+      //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
+
+      oPages = Object.merge(oPages,self.aryToNestedObj(pagesSplit));
     }
+
+    return cb(null,oPages);
   })
 }
 
@@ -133,13 +114,13 @@ WikiHandler.prototype.getSubPages=function(cb,returnAry) {
 WikiHandler.prototype.getPage=function(options,cb) {
   cb = (typeof options==="function") ? options : cb;
   options = (typeof options==="function") ? {} : (options || {});
-  
+
   var coll = (typeof options==="string") ? "wikicontent" : ((options.archive) ? "wikicontent_archive" : "wikicontent");
   var path = (typeof options==="string") ? options : (options.path || this.path);
   var filters = (typeof options==="string") ? {path:path} : (options.filters || {path:path});
   var fields = (typeof options==="string") ? {} : (options.fields || {});
   var sort = (typeof options==="string") ? {} : (options.sort || {});
-  
+
   config.mongodb.db.collection(coll).find(filters,fields).sort(sort).toArray(function(_e,pageInfo) {
     if (_e) cb(_e);
     else cb(null,pageInfo);
@@ -157,7 +138,7 @@ WikiHandler.prototype.getPage=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getPageContent=function(cb) {
   var self = this;
-  
+
   async.waterfall([
     function(callback) {
       self.getPage({fields:{content_html:1, template:1}}, function(e,page) {
@@ -169,15 +150,15 @@ WikiHandler.prototype.getPageContent=function(cb) {
         if (typeof page[0].template === "object" && page[0].template.templateId) {
           return callback(null,page[0].template.templateId,null);
         }
-        
+
         return callback(null,null,page[0].content_html);
       }
-      
+
       return callback(null,null,null);
     },
     function(templateId,html,callback) {
       if (!templateId) return callback(null,html);
-      
+
       async.waterfall([
         function(_callback) {
           config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1,config:1}).toArray(function(e,result) {
@@ -186,7 +167,7 @@ WikiHandler.prototype.getPageContent=function(cb) {
         },
         function(template,_callback) {
           var fh = new FileHandler({db:config.mongodb.db});
-          
+
           fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
             _callback(e,result,template[0],templateId);
           });
@@ -195,16 +176,16 @@ WikiHandler.prototype.getPageContent=function(cb) {
           if (fileContents) {
             try {
               var gH = new GetHTML();
-              
+
               var method = gH.extension(oTemplate.file).substring(1);
               gH[method](fileContents,function(e,html) {
                 return _callback(e,html,oTemplate.config,templateId);
               });
-              
+
             } catch (e) {
               return _callback(e,"",oTemplate.config,templateId);
             }
-            
+
           } else return _callback(null,"",oTemplate.config,templateId);
         }
       ],
@@ -241,9 +222,9 @@ WikiHandler.prototype.getPageContent=function(cb) {
 WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB,finalCB) {
   var filters = options.filters || {};
   var fields = options.fields || {};
-  
+
   var indErrors = null;
-  
+
   config.mongodb.db.collection("wikicontent").find(filters,fields).each(function(err,doc) {
     if (err) singleDocUpdateCB(err);
     else {
@@ -256,7 +237,7 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
       });
     }
   });
-  
+
   finalCB(indErrors);
 }
 
@@ -264,7 +245,7 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
 |NAME:      updateAliases (PUBLIC)
 |DESCRIPTION:  Updates page aliases.
 |PARAMETERS:  1. options(REQ): options for this method
-|                    options.aliases: array of aliases 
+|                    options.aliases: array of aliases
 |                       ['alias1','alias2',...]
 |                    options.Access: instance of AccessManagement
 |                    options.username: username of user logged in
@@ -275,17 +256,17 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.updateAliases=function(options,cb) {
   options = options || {};
-  
+
   var aliases = options.aliases || [];
   var Access = options.Access;
   var username = options.username;
   var self = this;
-  
+
   var aliasesOrig = aliases.map(function(a){return (a[0]=="/") ? a : "/"+a});;
   aliases = aliasesOrig.map(function(a){return {path:a}});
-  
+
   var check = {$or:aliases};
-  
+
   if (aliases.length) {
     async.parallel([
       function(callback) {
@@ -316,11 +297,11 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
           function(err) {
             callback(err,notAllowed);
           });
-          
+
         } catch(e) {
           callback(e)
         }
-        
+
       }
     ],
       function(err,results) {
@@ -330,15 +311,15 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
           var alreadyUsed = results[1];
           var currentAliases = results[2];
           var notAllowedPath = results[3];
-          
+
           var currentAliasesOnlyPaths = currentAliases.map(function(c){return c.path});
           var aliasesToDelete = _.difference(currentAliasesOnlyPaths,aliasesOrig).map(function(a){return {path:a}});
-          
+
           if (alreadyUsed.length) {
             aliases = aliases.filter(function(a){return _.findIndex(alreadyUsed,function(used){return a.path == used.path}) == -1});
             alreadyUsed = alreadyUsed.filter(function(a){return typeof a.aliasfor==="undefined" || a.aliasfor != self.path});
           }
-          
+
           if (!isAdmin) cb("You must be a page admin to update the page aliases.");
           else {
             if (notAllowedPath) {
@@ -355,7 +336,7 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
                   a.updatedBy = {username: username};
                   return a;
                 });
-                
+
                 config.mongodb.db.collection("wikicontent").insert(docs,function(err,result) {
                   if (err) cb(err);
                   else {
@@ -412,7 +393,7 @@ WikiHandler.prototype.getTemplates=function(cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
   var self = this;
-  
+
   async.waterfall([
     function(callback) {
       config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) }).toArray(function(_e,template) {
@@ -422,15 +403,15 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
     function(template,callback) {
       if (!template.length) return callback();
       if (!template[0].config || !template[0].config.length) return callback(null,template[0]);
-      
+
       template = template[0]
       var queryResults = {};
-      
+
       async.each(template.config,function(conf,__callback) {
         if (conf.valueIsQuery == "Yes") {
           self.getExternalDatasources({name:conf.datasource},function(err,PARAMS) {
             if (err) return __callback(err);
-            
+
             var queryConfig = {
               database: PARAMS.database,
               user: PARAMS.username,
@@ -438,37 +419,37 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
             };
             if (PARAMS.driver == "mysql" || PARAMS.driver == "postgresql" || PARAMS.driver == "postgres") queryConfig.host = PARAMS.server;
             if (PARAMS.driver == "mssql") queryConfig.server = PARAMS.server;
-            
+
             var sql = new SQLHandler({driver:PARAMS.driver,config:queryConfig});
-            
+
             sql.connect(function(e) {
               if (e) return __callback(e);
-              
+
               sql.query({query:conf.values, close:true},function(e,results) {
                 results = (results instanceof Array && results[0] instanceof Array) ? results[0] : results;
                 results = results.map(function(r) {
                   return _.values(r)[0];
                 });
-                
+
                 queryResults[conf.name] = Object.merge(conf,{datasourceValues:results});
                 __callback(e);
               });
             });
           });
-          
+
         } else {
           return __callback();
         }
       },
         function(err) {
           if (err) return callback(err,template);
-          
+
           template.config = template.config.map(function(c) {
             if (queryResults[c.name]) return queryResults[c.name];
-            
+
             return c;
           });
-          
+
           callback(null,template);
         }
       );
@@ -491,32 +472,32 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.searchPages=function(query,cb) {
   query = query.toLowerCase();
-  
+
   var queryExact = "";
   if (query.indexOf('"') > -1) {
     queryExact = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$3");
     query = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$1$5");
   }
-  
+
   var regEx = new RegExp(".*" + query + ".*");
   var querySplit = query.split(" ");
   querySplit.push(query);
-  
+
   //an array of regular expressions to split the entire query up and see if
   //anything matches the END of a path of a page
   //i.e. "customer axiom" would match the path "/something/axiom"
   var regExQuerySplit = [];
-  
+
   _.each(querySplit,function(word) {
     regExQuerySplit.push(new RegExp(".*" + word + "$"/* + ".*"*/));
   });
-  
+
   var returnedFields = {path:1,description:1,tags:1,pageViews:1,updated:1,_id:0};
-  
+
   var filters = {path:/.*/};
   if (query) filters = {$or: [{path:regEx},{tags:{$in:querySplit}},{path:{$in:regExQuerySplit}}]};
   if (queryExact) filters = {$and:[{content_html:new RegExp(".*" + queryExact + ".*","gmi")},filters]};
-  
+
   this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},function(e,pages) {
     if (e) cb(e);
     else cb(null,pages);
@@ -533,13 +514,13 @@ WikiHandler.prototype.searchPages=function(query,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.pageTree=function(path) {
   path = path || this.path || "";
-  
+
   var pages=[];
-  
+
   //pages.push({text:'home',link:"/"});
   var splitPages=path.split('/');
   var tempLink="";
-  
+
   for (var _i=0;_i<splitPages.length;_i++) {
     tempLink+="/"+splitPages[_i];
     pages.push({
@@ -547,7 +528,7 @@ WikiHandler.prototype.pageTree=function(path) {
       link: tempLink
     });
   }
-  
+
   return pages;
 }
 
@@ -576,7 +557,7 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      allowedPath (PUBLIC)
 |DESCRIPTION:  Takes a path provided and determines if it's allowed for a page to have this path.
-|PARAMETERS:  1. path(REQ): 
+|PARAMETERS:  1. path(REQ):
 |             2. cb(REQ): the callback to return an error or results of if path is okay
 |                     cb(<err>,<boolean: is allowed to use this path>)
 |SIDE EFFECTS:  None
@@ -585,18 +566,18 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.allowedPath=function(path,cb) {
   if (typeof path!=="string") return cb(null,false);
-  
+
   async.waterfall([
     function(callback) {
       config.mongodb.db.collection("adminsettings").find({domid:"forbidden_paths"},{value:1}).toArray(function(_e,paths) {
         if (_e) return callback(_e);
         if (!paths || !paths.length || typeof paths[0] !== "object" || !paths[0].value) return callback(null,true);
-        
+
         var invalid = [];
         paths[0].value.forEach(function(p) {
           invalid.push(new RegExp("^\/" + p + "[\/]*.*$"));
         });
-        
+
         callback(null,invalid);
       });
     },
@@ -628,9 +609,9 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
   var pagePW = options.pagePW;
   var session = options.session;
   var pageInfo = options.info || null;
-  
+
   var self = this;
-  
+
   var validate = function(actualPW) {
     if (typeof session[self.path]==="object" && session[self.path].auth) {
       cb(null,true);
@@ -642,7 +623,7 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
       cb(null,false);
     }
   }
-  
+
   if (pagePW) {
     validate(pagePW);
   } else {
@@ -671,7 +652,7 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
     if (typeof pageInfo.password === "string") cb(null,pageInfo.password);
     else cb(null,false);
   }
-  
+
   if (typeof info==="object" && info!=null) {
     check(info);
   } else {
@@ -697,28 +678,28 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.event=function(options,cb) {
   options = options || {};
-  
+
   var type = (typeof options==="string") ? options : (options.type || "");
   var params = (typeof options==="string") ? {} : (options.params || {});
-  
+
   var self = this;
-  
+
   if (!type) {
     cb("No type provided");
     return;
   }
-  
+
   async.parallel([
     function(callback) {
       config.mongodb.db.collection("wikicontent").find({path:self.path}).toArray(function(e,doc) {
         if (e) return callback(e);
         if (!doc || !doc.length || !(typeof doc[0] === "object") || !(doc[0].events instanceof Array)) return callback(null,[]);
-        
+
         doc[0].events = doc[0].events.filter(function(ev) {return ev.type == type});
-        
+
         return callback(e,doc);
       });
-      
+
       /* $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
       config.mongodb.db.collection("wikicontent").aggregate([
         {
@@ -750,25 +731,25 @@ WikiHandler.prototype.event=function(options,cb) {
   ],
     function(err,results) {
       if (err) return cb(err);
-      
+
       var pageEvents = (results[0].length && typeof results[0][0]==="object") ? results[0][0].events : [];
       var defaultEvents = results[1] || [];
-      
+
       var aggregatedEvents = [].concat(pageEvents,defaultEvents);
-      
+
       if (aggregatedEvents.length) {
         var asyncParallel = aggregatedEvents.map(function(event) {
           event = event || {};
           var parameters = Object.merge(params,event.params || {});
-          
+
           return function(callback) {
             var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
-            
+
             if (!(result instanceof Error)) callback(null,true);
             else callback(result);
           }
         });
-        
+
         async.parallel(asyncParallel,function(err,results) {
           if (err) cb(err);
           else cb(null,true);
@@ -783,7 +764,7 @@ WikiHandler.prototype.event=function(options,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      getExternalDatasources (PUBLIC)
 |DESCRIPTION:  Gets available modules from the DB a user can configure as instances on their page(s).
-|PARAMETERS:    1. options(OPT): options to include 
+|PARAMETERS:    1. options(OPT): options to include
 |                       options.name
 |               2. cb(REQ): the callback function
 |                 cb(err,<array/object>:);
@@ -794,23 +775,23 @@ WikiHandler.prototype.event=function(options,cb) {
 WikiHandler.prototype.getExternalDatasources=function(options,cb) {
   cb = (typeof options === "function") ? options : cb;
   options = (typeof options === "function") ? {} : (options || {});
-  
+
   var dsName = (typeof options === "string") ? options : (options.name || null);
-  
+
   config.mongodb.db.collection("adminsettings").find({domid:"datasources"}).toArray(function(e,datasources) {
     if (e) return cb(e);
     if (!datasources.length) return cb(null,[]);
-    
+
     datasources = datasources[0].value;
-    
+
     if (dsName) {
       datasources = datasources.filter(function(ds) {
         return ds.name == dsName;
       })[0];
-      
+
       return cb(null,datasources);
     }
-    
+
     return cb(null,datasources);
   });
 }
@@ -818,7 +799,7 @@ WikiHandler.prototype.getExternalDatasources=function(options,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      getModules (PUBLIC)
 |DESCRIPTION:  Gets available modules from the DB a user can configure as instances on their page(s).
-|PARAMETERS:    1. options(OPT): options to include 
+|PARAMETERS:    1. options(OPT): options to include
 |               2. cb(REQ): the callback function
 |                 cb(err,true/false);
 |SIDE EFFECTS:  None
@@ -827,10 +808,10 @@ WikiHandler.prototype.getExternalDatasources=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getModules=function(options,cb) {
   options = options || {};
-  
+
   var filters = options.filters || { active:{$ne:false} };
   var fields = options.fields || {};
-  
+
   async.parallel([
     function(callback) {
       config.mongodb.db.collection("wiki_modules").find(filters,fields).toArray(function(e,modules) {
@@ -857,9 +838,9 @@ WikiHandler.prototype.getModules=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.getModuleInstances=function(path,cb) {
   path = path || this.path;
-  
+
   var self = this;
-  
+
   async.parallel([
     function(callback) {
       self.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
@@ -877,12 +858,12 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
       else {
         var modules = results[0];
         var moduleInstances = results[1];
-        
+
         _.each(moduleInstances,function(instance,_index) {
           var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
           moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
         });
-        
+
         cb(null,moduleInstances);
       }
     }
@@ -899,7 +880,7 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
 -----------------------------------------------------------------------------------------*/
 WikiHandler.prototype.deletePage=function(cb) {
   var self = this;
-  
+
   async.series([
     function(callback) {
       self.getPage(function(e,page) {
@@ -907,7 +888,7 @@ WikiHandler.prototype.deletePage=function(cb) {
         else {
           var oArchive = page[0];
           delete(oArchive["_id"]);
-          
+
           config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
             callback(err,result);
           });
@@ -929,6 +910,29 @@ WikiHandler.prototype.deletePage=function(cb) {
       cb(err);
     }
   );
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      aryToNestedObj (PUBLIC)
+|DESCRIPTION:  Takes an array and turns it into a nested object
+|PARAMETERS:  1. cb(OPT): the callback
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <object>
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.aryToNestedObj=function(ary,obj,val) {
+  obj = obj || {};
+  val = val || "";
+
+  var key = ary[0];
+  var newAry = ary.slice(1);
+  obj[key] = {};
+  val += "/" + key;
+
+  if (newAry.length > 1) obj[key] = this.aryToNestedObj(newAry,{/*value:val*/},val);
+  else obj[key][newAry[0]] = {/*value:val*/};
+
+  return obj;
 }
 
 /*-----------------------------------------------------------------------------------------

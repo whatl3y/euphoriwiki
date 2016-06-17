@@ -1,12 +1,12 @@
 (function(req,res) {
   var info = req.body;
-  
+
   var A = new Auth({session:req.session});
   var username = A.username;
-  
+
   var Access = new AccessManagement({db:config.mongodb.db});
   var wiki = new WikiHandler();
-  
+
   switch(info.type) {
     case "init":
       async.waterfall([
@@ -28,18 +28,18 @@
       ],
         function(err,filteredPages,themeInfo) {
           if (err) {
-            log.error(err);
-            return res.json({success:false, error:err});
+            res.json({success:false, error:err});
+            return log.error(err);
           }
-          
+
           var theme = (themeInfo instanceof Array && themeInfo.length) ? themeInfo[0] : {};
-          
+
           return res.json({success:true, allpages:filteredPages, logo:theme.header_logo, logoLink:theme.header_logo_link});
         }
       );
-      
+
       break;
-    
+
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }

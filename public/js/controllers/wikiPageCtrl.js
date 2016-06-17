@@ -112,6 +112,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
               $scope.canLike = (ret.canLike == false) ? false : true;
               $scope.pageadmins = ret.pageadmins || [];
               $scope.viewscopes =  ret.viewscopes || [];
+              $scope.subpages = ret.subpages || [];
 
               $scope.availablePageTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="page";});
               $scope.availableComponentTemplates = (ret.pageTemplates || []).filter(function(p) {return p.type=="component";});
@@ -150,7 +151,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.scopeTypes = ret.scopeTypes || [];
           $scope.eventTypes = ret.eventTypes || [];
           $scope.aliases = ret.pageAliases || [];
-          $scope.subpages = ret.subpages || [];
           $scope.externalDatasources = ret.datasources || [];
         }
 

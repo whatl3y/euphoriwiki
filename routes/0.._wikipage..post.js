@@ -71,6 +71,39 @@
           Access.canViewPage({session:req.session, username:username, path:wiki.path},function(e,canView) {
             callback(e,canView);
           });
+        },
+        function(callback) {
+          async.waterfall([
+            function(_callback) {
+              wiki.getSubPages(function(e,aPages) {
+                _callback(e,aPages);
+              }, true);
+            },
+            function(aPages,_callback) {
+              Access.onlyViewablePaths({username:username, paths:aPages, session:req.session},function(_err,filteredPages) {
+                filteredPagesOnlyPaths = filteredPages.map(function(p) {return p.path});
+                _callback(_err,filteredPagesOnlyPaths);
+              });
+            },
+            function(filteredPages,_callback) {
+              try {
+                var oPages = {};
+                var pagesSplit = [];
+                for (var _i=0; _i<filteredPages.length; _i++) {
+                  pagesSplit = filteredPages[_i].split("/").slice(1);
+                  oPages = Object.merge(oPages,wiki.aryToNestedObj(pagesSplit));
+                }
+
+                return _callback(null,oPages);
+              } catch(_e) {
+                return _callback(_e);
+              }
+            }
+          ],
+            function(err,oFilteredPages) {
+              return callback(err,oFilteredPages);
+            }
+          );
         }
       ],
         function(err,results) {
@@ -82,6 +115,7 @@
           var templates = results[3];
           var canUpdate = results[4];
           var canViewPage = results[4] || results[5];   //if wiki admin then true, otherwise check view access scope
+          var oSubPages = results[6];
 
           if (!validated) return res.json({success:false, protected:true});
           else if (!canViewPage) return res.json({success:false, outofscope:true});
@@ -118,6 +152,7 @@
               pageadmins: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.admins : [],
               viewscopes: (typeof pageInfo[0].settings==="object") ? pageInfo[0].settings.viewscope : [],
               pageEvents: pageInfo[0].events,
+              subpages: (Object.size(oSubPages)) ? oSubPages : [],
               hideAllOfHeader: pageInfo[0].hideAllOfHeader
             };
           }
@@ -243,11 +278,6 @@
           });
         },
         function(callback) {
-          wiki.getSubPages(function(e,oPages) {
-            callback(e,oPages);
-          });
-        },
-        function(callback) {
           wiki.getExternalDatasources(function(e,datasources) {
             callback(e,datasources);
           });
@@ -266,8 +296,7 @@
           var viewScopeTypes = results[4];
           var eventTypes = results[5];
           var aliases = results[6];
-          var oSubPages = results[7];
-          var externalDatasources = results[8];
+          var externalDatasources = results[7];
 
           if (!pageExists.length) return res.json({success:true});
 
@@ -279,7 +308,6 @@
             scopeTypes: viewScopeTypes,
             eventTypes: eventTypes.map(function(t) {return t.type}),
             pageAliases: aliases.map(function(t) {return t.path}),
-            subpages: (Object.size(oSubPages)) ? oSubPages : [],
             datasources: externalDatasources
           });
         }
