@@ -11,14 +11,28 @@
     case "init":
       async.waterfall([
         function(callback) {
-          wiki.getPage({filters:{aliasfor:{$exists:false}},fields:{path:1,_id:0},sort:{path:1}},function(e,pages) {
-            callback(e,pages);
-          });
+          wiki.getSubPages(function(e,oPages) {
+            callback(e,oPages);
+          },true);
         },
         function(pages,callback) {
           Access.onlyViewablePaths({session:req.session, username:username, paths:pages},function(err,filteredPages) {
             callback(err,filteredPages);
           });
+        },
+        function(filteredPages,callback) {
+          try {
+            var oPages = {};
+            var pagesSplit = [];
+            for (var _i=0; _i<filteredPages.length; _i++) {
+              pagesSplit = (filteredPages[_i].path || "").split("/").slice(1);
+              oPages = Object.merge(oPages,wiki.aryToNestedObj(pagesSplit));
+            }
+
+            return callback(null,oPages);
+          } catch(_e) {
+            return callback(_e,{});
+          }
         },
         function(filteredPages,callback) {
           config.mongodb.db.collection("themes").find({type:"global"}).toArray(function(e,themeInfo) {

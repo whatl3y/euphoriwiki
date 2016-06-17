@@ -807,6 +807,8 @@
           });
         },
         function(template,callback) {
+          if (typeof template !== "object" || !template.file) return callback(null,template,"");
+
           fh.getFile({filename:template.file, encoding:"utf8"},function(e,result) {
             return callback(e,template,result);
           });

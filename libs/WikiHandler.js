@@ -76,7 +76,7 @@ WikiHandler.prototype.initQueries=function(cb) {
 WikiHandler.prototype.getSubPages=function(cb,returnAry) {
   var self=this;
 
-  var children = new RegExp("^"+this.escapePath()+"/.+$");      //all nested children
+  var children = new RegExp("^"+(this.escapePath() || ".*")+"/.+$");      //all nested children
   //var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
 
   this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
@@ -920,17 +920,15 @@ WikiHandler.prototype.deletePage=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <object>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.aryToNestedObj=function(ary,obj,val) {
-  obj = obj || {};
-  val = val || "";
+WikiHandler.prototype.aryToNestedObj=function(ary) {
+  var obj = {};
 
   var key = ary[0];
   var newAry = ary.slice(1);
   obj[key] = {};
-  val += "/" + key;
 
-  if (newAry.length > 1) obj[key] = this.aryToNestedObj(newAry,{/*value:val*/},val);
-  else obj[key][newAry[0]] = {/*value:val*/};
+  if (newAry.length > 1) obj[key] = this.aryToNestedObj(newAry);
+  else if (newAry[0]) obj[key][newAry[0]] = {};
 
   return obj;
 }
