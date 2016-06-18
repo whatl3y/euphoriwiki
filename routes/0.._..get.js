@@ -11,40 +11,50 @@
     function(theme,callback) {
       if (theme instanceof Array && theme.length) {
         var homeBodyFile = theme[0].home_page;
-        if (!homeBodyFile) return callback(null,"","");
+        if (!homeBodyFile) return callback(null,theme[0],"","");
 
         fh.getFile({filename:homeBodyFile, encoding:"utf8"},function(e,data) {
-          callback(e,homeBodyFile,data);
+          callback(e,theme[0],homeBodyFile,data);
         });
       } else {
-        return callback(null,"","");
+        return callback(null,{},"","");
       }
 
     },
-    function(filename,fileContent,callback) {
+    function(theme,filename,fileContent,callback) {
       if (fileContent) {
         try {
           var method = gH.extension(filename).substring(1).toLowerCase();
 
           gH[method](fileContent,function(err,html) {
-            return callback(err,html);
+            return callback(err,theme,html);
           });
 
         } catch(err) {
-          return callback(err);
+          return callback(err,theme,"");
         }
       } else {
-        return callback(null,"");
+        return callback(null,theme,"");
       }
     }
   ],
-    function(err,bodyHtml) {
+    function(err,theme,bodyHtml) {
       if (err) {
         res.render("index",config.view.send(req));
         return log.error(err);
       }
 
-      res.render("index",config.view.send(req,{iobj:{homeBody:bodyHtml}}));
+      var mainColumnLength = 12;
+      if (typeof theme.home_page_addons === "object") {
+        for (var _k in theme.home_page_addons) {
+          if (theme.home_page_addons[_k].alignment === "left" || theme.home_page_addons[_k].alignment === "right")
+            mainColumnLength -= 3;
+        }
+      } else {
+        mainColumnLength = 6;
+      }
+
+      res.render("index",config.view.send(req,{iobj:{homeBody:bodyHtml, theme:theme, mainColumnLength:mainColumnLength}}));
 
       var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
       audit.log({type:"Visit Home Page"});

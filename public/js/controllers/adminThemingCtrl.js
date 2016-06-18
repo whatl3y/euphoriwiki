@@ -1,6 +1,20 @@
 function adminThemingCtrl($scope,$http,Upload) {
   $scope.pathname = decodeURI(location.pathname);
 
+  var layoutColumnsClasses = function(which) {
+    var baseClass = "col-md-3";
+
+    switch(which) {
+      case "left":
+        return baseClass + " pull-left";
+
+      case "right":
+        return baseClass + " pull-right";
+    }
+
+    return "";
+  }
+
   $scope.functions= {
     initialize: function() {
       $scope.functions.ajax("init",{page:$scope.pathname},function(e,ret) {
@@ -11,6 +25,8 @@ function adminThemingCtrl($scope,$http,Upload) {
 
           $scope.homeBody = ret.homeBody || null;
           $scope.homeBodyFile = ($scope.homeBody) ? "/file/" + $scope.homeBody : null;
+
+          $scope.columns = ret.addons;
         }
         //console.log(e,ret);
       });
@@ -110,6 +126,23 @@ function adminThemingCtrl($scope,$http,Upload) {
       .error(function(ret,_err) {
         console.log(ret,_err);
         $scope.error = "There was a problem creating your module. Please try again.";
+        loader.remove();
+      });
+    },
+
+    updateMainBodyColumns: function(columns) {
+      for (var _key in columns) {
+        columns[_key].classes = layoutColumnsClasses(columns[_key].alignment);
+      }
+
+      var loader = new Core.Modals().asyncLoader({message:"Updating your add-ons!"});
+      $http.post('/admin/theming',{type:"updateAddOns", addons:columns})
+      .success(function(ret) {
+        console.log(ret);
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
         loader.remove();
       });
     }

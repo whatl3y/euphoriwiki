@@ -50,8 +50,9 @@
 
               var logo = themeInfo.header_logo;
               var homeBody = themeInfo.home_page;
+              var addons = themeInfo.home_page_addons;
 
-              return res.json({success:true, logo:logo, homeBody:homeBody});
+              return res.json({success:true, logo:logo, homeBody:homeBody, addons:addons});
             }
           );
 
@@ -135,7 +136,7 @@
             function(mainFileName,callback) {
               config.mongodb.db.collection("themes").update({type:"global"},{$set:{home_page:mainFileName}},{upsert:true},function(err) {
                 return callback(err,mainFileName);
-              })
+              });
             }
           ],
             function(err,mainFileName) {
@@ -147,6 +148,18 @@
               return res.json({success:true, homeBody:mainFileName});
             }
           );
+
+          break;
+
+        case "updateAddOns":
+          config.mongodb.db.collection("themes").update({type:"global"},{$set:{home_page_addons:info.addons || {}}},{upsert:true},function(err) {
+            if (err) {
+              res.json({success:false, error:err});
+              return log.error(err);
+            }
+
+            return res.json({success:true});
+          });
 
           break;
 

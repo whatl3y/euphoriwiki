@@ -1,31 +1,39 @@
+- homeBody = data.EXTRA.homeBody
+- addons = data.EXTRA.theme.home_page_addons || {pagesearch:{}, categories:{alignment:"left", classes:"col-md-3"}, widgets:{alignment:"right", classes:"col-md-3 pull-right"}}
+- homeColLength = data.EXTRA.mainColumnLength
+- reverseMap = {right:"left", left:"right"}
+
 div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
-  div.hidden-xs.hidden-sm.col-md-2
-    div.padding-small.border-right.border-soft.minH300
-      include include_categorylist.jade
-  div.col-xs-12.col-sm-7
+  - if (addons.categories && addons.categories.alignment !== "disabled")
+    div.hidden-xs.hidden-sm(class=addons.categories.classes)
+      div.padding-small.border-soft.minH300(class="border-"+reverseMap[addons.categories.alignment])
+        include include_categorylist.jade
+  - if (addons.widgets && addons.widgets.alignment !== "disabled")
+    div.hidden-xs.col-sm-5(class=addons.widgets.classes)
+      div.padding-medium.border-soft.minH300(class="border-"+reverseMap[addons.widgets.alignment])
+        div.row
+          include include_search.jade
+          include include_homepagewidgets.jade
+  div.col-xs-12(class="col-sm-"+homeColLength)
     div.row
       - if (data.EXTRA.homeBody)
         div!= data.EXTRA.homeBody
-      div.col-xs-12
-        div.row
-          div.col-xs-12.separate-vert-small
-            div.panel.panel-primary
-              div.panel-heading
-                div Create or Go To Existing Page
-              div.panel-body
-                form(data-ng-submit="handlers.newPage(newPagePath)")
-                  div(class="form-group text-center")
-                    label(for="newPage",class="control-label col-sm-12") 
-                      - //div(class="text-large") Create a new or go to an existing page
-                      div Enter a page path like, 'yourname' or 'yourname/page1'
-                    div(class="separate-vert-small col-xs-12")
-                      input(type="text",placeholder="yourname, yourname/page1",class="form-control input-lg",id="newPage",name="newPage",data-ng-model="newPagePath")
-                    div.col-xs-12
-                      input(type="submit",class="btn btn-primary",value="Go To Page")
-                    div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
-                      alert(type="danger") {{ newPageError }}
-  div.hidden-xs.col-sm-5.col-md-3
-    div.padding-left-large.border-left.border-soft.minH300
-      div.row
-        include include_search.jade
-        include include_homepagewidgets.jade
+      - if (addons.pagesearch.enabled !== "disabled")
+        div.col-xs-12
+          div.row
+            div.col-xs-12.separate-vert-small
+              div.panel.panel-primary
+                div.panel-heading
+                  div Create or Go To Existing Page
+                div.panel-body
+                  form(data-ng-submit="handlers.newPage(newPagePath)")
+                    div(class="form-group text-center")
+                      label(for="newPage",class="control-label col-sm-12")
+                        - //div(class="text-large") Create a new or go to an existing page
+                        div Enter a page path like, 'yourname' or 'yourname/page1'
+                      div(class="separate-vert-small col-xs-12")
+                        input(type="text",placeholder="yourname, yourname/page1",class="form-control input-lg",id="newPage",name="newPage",data-ng-model="newPagePath")
+                      div.col-xs-12
+                        input(type="submit",class="btn btn-primary",value="Go To Page")
+                      div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")
+                        alert(type="danger") {{ newPageError }}
