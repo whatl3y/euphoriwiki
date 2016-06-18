@@ -1,15 +1,15 @@
 extends layout
 
-block main  
+block main
   div(class="row",data-ng-controller="adminModulesCtrl")
     div(class="col-xs-12")
       include include_adminnav.jade
     div.col-xs-12.col-md-10.col-md-offset-1
       div
         h1 Module Management
-      div(class="separate-vert-small")
-        div(data-ng-if="modules.length")
-          table(class="table table-striped table-responsive table-bordered")
+      div.separate-vert-small
+        div.table-responsive(data-ng-if="modules.length")
+          table(class="table table-striped table-bordered")
             tr
               th #
               th Module Key
@@ -30,7 +30,7 @@ block main
               td {{ functions.formatDateTime(module.updated) }}
               td
                 a(href="javascript:void(0)",data-ng-click="handlers.editModule(module)") Edit
-                span  / 
+                span  /
                 a(href="javascript:void(0)",data-ng-click="handlers.deleteModule(module.key,module.template,$index)") Delete
         h2(class="text-center",data-ng-if="!modules.length")
           alert There are no modules available to review.
@@ -61,14 +61,14 @@ block main
                           textarea(class="form-control",id="description",name="description",data-ng-model="newModule.description")
                         div(class="form-group")
                           label(for="template",popover="This is an HTML or Jade template file we will use to replace the module with after retrieving and processing it.",popover-trigger="mouseenter")
-                            span Module View Template File 
+                            span Module View Template File
                             span(class="glyphicon glyphicon-info-sign")
                           input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
                         div(class="form-group")
                           div(class="panel")
                             div(class="panel-heading")
                               label(popover="A list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
-                                span Module Configuration Options 
+                                span Module Configuration Options
                                 span(class="glyphicon glyphicon-info-sign")
                             div(class="panel-body")
                               div(class="separate-vert-small text-center")

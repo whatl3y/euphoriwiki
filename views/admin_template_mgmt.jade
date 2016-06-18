@@ -1,6 +1,6 @@
 extends layout
 
-block main  
+block main
   div.row(data-ng-controller="adminTemplateMgmtCtrl")
     div.col-xs-12
       include include_adminnav.jade
@@ -11,25 +11,26 @@ block main
           alert(type="danger") {{ error }}
         div.row.separate-vert-medium
           div.col-xs-12
-            table.table.table-striped.table-responsive.table-bordered
-              tr
-                th #
-                th Type
-                th Name
-                th Is easy config?
-                th View
-                th Edit/Delete
-              tr(data-ng-repeat="template in templates")
-                td {{ $index+1 }}
-                td {{ functions.getTemplateTypeName(template.type) }}
-                td {{ template.name }}
-                td {{ template.isEasyConfig || "No" }}
-                td
-                  a(data-ng-href="/file/{{ template.file }}",target="_blank") {{ template.file }}
-                td
-                  a(href="javascript:void(0)",data-ng-click="handlers.editTemplate(template)") Edit
-                  span  /  
-                  a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplate(template)") Delete
+            div.table-responsive
+              table.table.table-striped.table-bordered
+                tr
+                  th #
+                  th Type
+                  th Name
+                  th Is easy config?
+                  th View
+                  th Edit/Delete
+                tr(data-ng-repeat="template in templates")
+                  td {{ $index+1 }}
+                  td {{ functions.getTemplateTypeName(template.type) }}
+                  td {{ template.name }}
+                  td {{ template.isEasyConfig || "No" }}
+                  td
+                    a(data-ng-href="/file/{{ template.file }}",target="_blank") {{ template.file }}
+                  td
+                    a(href="javascript:void(0)",data-ng-click="handlers.editTemplate(template)") Edit
+                    span  /
+                    a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplate(template)") Delete
         div.row
           div.col-xs-12.col-md-8.col-md-offset-2
             div.panel.panel-success
@@ -50,7 +51,7 @@ block main
                       input.form-control(type="text",data-ng-model="newTemplate.name")
                   div.form-group
                     label
-                      span 
+                      span
                         div New Template (.html/.jade file)
                         div
                           i
