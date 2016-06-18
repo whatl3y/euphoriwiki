@@ -18,7 +18,7 @@ div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
     div.row
       - if (data.EXTRA.homeBody)
         div!= data.EXTRA.homeBody
-      - if (addons.pagesearch.enabled !== "disabled")
+      - if (addons.pagesearch && addons.pagesearch.enabled !== "disabled")
         div.col-xs-12
           div.row
             div.col-xs-12.separate-vert-small
