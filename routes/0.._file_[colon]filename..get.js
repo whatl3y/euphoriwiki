@@ -3,7 +3,7 @@
 
   if (!filename) return res.send("Please enter a valid filename.");
 
-  var fh = new FileHandler({db:config.mongodb.db});
+  var fh = new FileHandler({db:config.mongodb.filedb});
   fh.findFiles({filename:filename,one:true},function(err,file) {
     if (err) return res.send(err);
     if (!file) return res.send("Sorry, we could not file a file with filename: " + filename + ".");

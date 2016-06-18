@@ -14,6 +14,7 @@
 
   var username = A.username;
   var wiki = new WikiHandler({path:decodeURI(info.page)});
+  var fh = new FileHandler({db:config.mongodb.filedb});
 
   switch(info.type) {
     case "init":
@@ -317,8 +318,6 @@
 
     case "update":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to update wiki pages."});
-
-      var fh = new FileHandler({db:config.mongodb.db});
 
       async.parallel([
         function(callback) {
@@ -786,8 +785,6 @@
 
     case "getTemplate":
       var templateName = info.template;
-
-      var fh = new FileHandler({db:config.mongodb.db});
       var gH = new GetHTML();
 
       async.waterfall([
@@ -861,39 +858,37 @@
       break;
 
     case "uploadFile":
-      if (!A.isLoggedIn()) res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-      else {
-        var fh = new FileHandler({db:config.mongodb.db});
-        fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
-          if (err) {
-            log.error(err);
-            res.json({filesuccess:false, error:err});
-          } else {
-            log.debug("File created and piped to GridFS. Filename: "+newFileName);
+      if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
 
-            var newFileInfo = {
-              uploadedTime: new Date(),
-              origFilename: fileName,
-              filename: newFileName
-            };
+      fh.uploadFile({filename:fileName, path:filePath},function(err,newFileName) {
+        if (err) {
+          log.error(err);
+          res.json({filesuccess:false, error:err});
+        } else {
+          log.debug("File created and piped to GridFS. Filename: "+newFileName);
 
-            res.json({filesuccess:true, fileInfo:newFileInfo});
+          var newFileInfo = {
+            uploadedTime: new Date(),
+            origFilename: fileName,
+            filename: newFileName
+          };
 
-            var fileScope = info.scope;
-            var coll = (fileScope=="page") ? "wikicontent" : "accounts";
-            var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
-            config.mongodb.db.collection(coll).update(filter,{
-              "$push": {
-                files: newFileInfo
-              }
-            },{upsert:true},function(err) {
-              if (err) log.error(err);
+          res.json({filesuccess:true, fileInfo:newFileInfo});
 
-              audit.log({type:"Upload File to GridFS", additional:{fileInfo:newFileInfo}});
-            });
-          }
-        });
-      }
+          var fileScope = info.scope;
+          var coll = (fileScope=="page") ? "wikicontent" : "accounts";
+          var filter = (fileScope=="page") ? {path:wiki.path} : {username:username};
+          config.mongodb.db.collection(coll).update(filter,{
+            "$push": {
+              files: newFileInfo
+            }
+          },{upsert:true},function(err) {
+            if (err) log.error(err);
+
+            audit.log({type:"Upload File to GridFS", additional:{fileInfo:newFileInfo}});
+          });
+        }
+      });
 
       break;
 
@@ -901,8 +896,6 @@
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
 
       var fileName = info.filename;
-
-      var fh = new FileHandler({db:config.mongodb.db});
       fh.deleteFile({filename:fileName},function(e) {
         if (e) log.error(e);
 
@@ -924,8 +917,6 @@
 
     case "deleteTemplateConfigFile":
       if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to perform this function. Please log in and try again."});
-
-      var fh = new FileHandler({db:config.mongodb.db});
 
       var confKey = info.configKey;
       var file = info.filename;

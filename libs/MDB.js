@@ -13,10 +13,10 @@ var MongoClient = require('mongodb').MongoClient;
 |      *LJW 2/10/2015 - created
 -----------------------------------------------------------------------------------------*/
 MDB=function(params) {
-  params=params || {};
-  var config=params.config || config;
-  this.MongoClient=params.MongoClient || MongoClient;                    //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
-  this.connectionString=params.connectionString || config.mongodb.connectionString();    //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
+  params = params || {};
+  var config = params.config || config;
+  this.MongoClient = params.MongoClient || MongoClient;                    //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
+  this.connectionString = params.connectionString || config.mongodb.connectionString();    //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
 
   if (!params.dontopen) {                                  //params.dontopen: if set to true will not automatically open a DB connection
     this.go(params.callback);                              //params.callback: a callback function to be executed in constructor at the time of connecting to DB

@@ -1,5 +1,5 @@
 (function(req,res) {
-  var fh = new FileHandler({db:config.mongodb.db});
+  var fh = new FileHandler({db:config.mongodb.filedb});
   var gH = new GetHTML();
 
   async.waterfall([

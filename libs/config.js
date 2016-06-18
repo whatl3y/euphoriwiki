@@ -1,4 +1,5 @@
 var path = require("path");
+var async = require("async");
 var MDB = require('./MDB.js');
 var Object = require("../public/js/Object_prototypes.js");
 
@@ -9,24 +10,24 @@ var self = module.exports = {
     IS_PRODUCTION: process.env.IS_PRODUCTION || false,
     HOST: process.env.HOSTNAME || "http://localhost"
   },
-  
+
   admin: {
     SETTINGS: []
   },
-  
+
   view: {
     NAVLINKS: [],              //placeholder where all links will be stored once we retrieve them from our persistent store
     send: function(req,opts) {
       opts = opts || {};
       var obj = opts.obj || {};
       var iobj = opts.iobj || {};
-      
+
       var routeInfo = opts.routeInfo || {};
-      
+
       var protocol = (req.secure) ? "https": "http";
       var host= "";
       var wshost=  "";
-      
+
       return {
         data: {
           external: {
@@ -44,14 +45,14 @@ var self = module.exports = {
       };
     }
   },
-  
+
   socketio: {
     DEFAULTNAMESPACE: '/',
     DEFAULTROOM: '/',
     NUM_MESSAGES: process.env.NUM_MESSAGES || 25,
     CACHE: {}
   },
-  
+
   session: {
     sessionSecret: process.env.SESSION_SECRET,
     sessionCookieKey: process.env.SESSION_COOKIE_KEY,
@@ -62,7 +63,7 @@ var self = module.exports = {
       };
     }
   },
-  
+
   mongodb: {
     access: {
       FULL_URI:  process.env.MONGODB_FULLURI || null,
@@ -74,13 +75,15 @@ var self = module.exports = {
       TESTDB:    process.env.MONGODB_DB_DEV,
       PRODDB:     process.env.MONGODB_DB
     },
-    
-    MDB:    {},                //will be the instance of MDB we use to open a connection with the mongodb server
+
+    MDB:    {},                 //will be the instance of MDB we use to open a connection with the mongodb server
     db:      {},                //the object we'll be using to create cursors and return/set data in mongoDB
-    
+    fileMDB:    {},
+    filedb:      {},
+
     dbInfo:  function() {
       var db= (self.server.IS_PRODUCTION) ? this.access.PRODDB : this.access.TESTDB;
-      
+
       return {
         full:  this.access.FULL_URI,
         p:    this.access.PROTOCOL,
@@ -91,39 +94,76 @@ var self = module.exports = {
         db:    db
       }
     },
-    
-    connectionString: function() {
-      var dbInfo=this.dbInfo() || {};
-      
-      var protocol=dbInfo.p;
-      var host=dbInfo.h;
-      var user=dbInfo.user;
-      var password=dbInfo.pw;
-      var port=dbInfo.port;
-      var db=dbInfo.db;
-      
+
+    connectionString: function(options) {
+      options = options || {};
+      var dbInfo = this.dbInfo() || {};
+
+      var protocol =  options.protocol || dbInfo.p;
+      var host =      options.host || dbInfo.h;
+      var user =      options.user || dbInfo.user;
+      var password =  options.password || dbInfo.pw;
+      var port =      options.port || dbInfo.port;
+      var db =        options.db || dbInfo.db;
+
       var auth = (user && password) ? user+":"+password+"@" : "";
-      
-      return dbInfo.full || protocol+'://'+auth+host+':'+port+'/'+db;
+
+      return ((options.host) ? options.full : dbInfo.full) || protocol+'://'+auth+host+':'+port+'/'+db;
     },
-          
+
     initialize:  function(cb) {
       var oSelf=this;
-      new MDB({config:self, callback:function(err,opts) {
-          oSelf.db=opts.db;
-          oSelf.MDB=opts.self;
-          
-          if (typeof cb==='function') cb(err,opts);
+
+      async.waterfall([
+        function(callback) {
+          new MDB({config:self, callback:function(err,opts) {
+              if (err) return callback(err);
+
+              oSelf.db = opts.db;
+              oSelf.MDB = opts.self;
+
+              callback(null,opts);
+            }
+          });
+        },
+        function(opts,callback) {
+          if (process.env.MONGODB_FILE_HOST) {
+            new MDB({config:self, connectionString:oSelf.connectionString({
+              host: process.env.MONGODB_FILE_HOST,
+              user: process.env.MONGODB_FILE_USER,
+              password: process.env.MONGODB_FILE_PASSWORD,
+              port: process.env.MONGODB_FILE_PORT,
+              db: process.env.MONGODB_FILE_DB
+            }), callback:
+              function(err,opts2) {
+                if (err) return callback(err);
+
+                oSelf.filedb = opts2.db;
+                oSelf.fileMDB = opts2.self;
+
+                return callback(null,opts);
+              }
+            });
+          } else {
+            oSelf.filedb = opts.db;
+            oSelf.fileMDB = opts.self;
+
+            return callback(null,opts);
+          }
         }
-      });
+      ],
+        function(err,opts) {
+          if (typeof cb === "function") return cb(err,opts);
+        }
+      );
     },
-    
+
     REFERENCE: {                //shouldn't probably be using these values, just for reference
       DEVFILES: 'data/wiki/dev',        //relative to the mongodb folder
       PRODFILES: 'data/wiki/prod'
     }
   },
-  
+
   smtp: {
     core: {
       pool: process.env.SMTP_POOL,
@@ -134,15 +174,15 @@ var self = module.exports = {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD
       },
-      
+
       tls: {
         ciphers: process.env.SMTP_TLSCIPHERS
       },
-      
+
       defaultEmail: process.env.SMTP_DEFAULTEMAIL,
       defaultName: process.env.SMTP_DEFAULTNAME
     },
-    
+
     nodemailerconfig: function() {
       if (this.core.host) {
         var o = {
@@ -151,16 +191,16 @@ var self = module.exports = {
           port: Number(this.core.port || 587),
           secure: this.core.secure || false
         };
-        
+
         if (typeof this.core.auth==="object" && this.core.auth.user) {
           o.auth = {
             user: this.core.auth.user,
             pass: this.core.auth.pass
           };
         }
-        
+
         if (this.core.tls.ciphers) o.tls = this.core.tls;
-        
+
         return o;
       } else {
         return {
@@ -173,12 +213,12 @@ var self = module.exports = {
       }
     }
   },
-  
+
   authtypes: {
     local: "true",
     facebook: "false"
   },
-  
+
   ldap: {
     protocol: process.env.LDAP_PROTOCOL,
     url: process.env.LDAP_URL,
@@ -187,7 +227,7 @@ var self = module.exports = {
     password: process.env.LDAP_PASSWORD,
     suffix: process.env.LDAP_SUFFIX
   },
-  
+
   facebook: {
     appId: process.env.FACEBOOK_APP_ID,
     appSecret: process.env.FACEBOOK_APP_SECRET,
@@ -195,7 +235,7 @@ var self = module.exports = {
       return self.server.HOST + "/login/facebook/callback";
     }
   },
-  
+
   google: {
     appId: process.env.GOOGLE_APP_ID,
     appSecret: process.env.GOOGLE_APP_SECRET,
@@ -203,12 +243,12 @@ var self = module.exports = {
       return self.server.HOST + "/login/google/callback";
     }
   },
-  
+
   cryptography: {
     algorithm: "aes-256-ctr",
     password: process.env.CRYPT_SECRET
   },
-  
+
   logger: {
     options: function(app) {
       return {

@@ -62,7 +62,7 @@
           var currentLogoFileName = info.currentLogoFile;
           var link = info.logoLink || "";
 
-          var fh = new FileHandler({db:config.mongodb.db});
+          var fh = new FileHandler({db:config.mongodb.filedb});
 
           async.waterfall([
             function(callback) {
@@ -114,7 +114,7 @@
           if (!fileName) return res.json({success:false, error:"Please make sure you have uploaded a file to be replaced as your new home page."});
 
           var currentBodyFile = info.currentFile || null;
-          var fh = new FileHandler({db:config.mongodb.db});
+          var fh = new FileHandler({db:config.mongodb.filedb});
 
           async.waterfall([
             function(callback) {

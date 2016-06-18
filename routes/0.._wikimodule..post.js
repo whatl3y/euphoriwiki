@@ -12,7 +12,7 @@
     case "getModule":
       var uid = info.id;
       var path = info.path;
-      var fh = new FileHandler({db:config.mongodb.db});
+      var fh = new FileHandler({db:config.mongodb.filedb});
       var gH = new GetHTML();
       
       //will be set in waterfall to be used in final callback because

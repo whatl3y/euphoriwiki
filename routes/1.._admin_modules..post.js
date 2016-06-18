@@ -73,7 +73,7 @@
               break;
 
             case "uploadModule":
-              var fh = new FileHandler({db:config.mongodb.db});
+              var fh = new FileHandler({db:config.mongodb.filedb});
 
               info.module = JSON.parse(info.module);
               var moduleKey = info.module.key;
@@ -141,7 +141,7 @@
               break;
 
             case "deleteModule":
-              var fh = new FileHandler({db:config.mongodb.db});
+              var fh = new FileHandler({db:config.mongodb.filedb});
               var moduleKey = info.key;
               var moduleTemplate = info.template;
 

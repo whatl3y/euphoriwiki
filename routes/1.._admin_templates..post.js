@@ -69,7 +69,7 @@
           break;
 
         case "addOrEditTemplate":
-          var fh = new FileHandler({db:config.mongodb.db});
+          var fh = new FileHandler({db:config.mongodb.filedb});
 
           info.template = JSON.parse(info.template);
           var templateId = info.template._id || null;
@@ -135,7 +135,7 @@
           break;
 
         case "deleteTemplate":
-          var fh = new FileHandler({db:config.mongodb.db});
+          var fh = new FileHandler({db:config.mongodb.filedb});
 
           async.parallel([
             function(callback) {

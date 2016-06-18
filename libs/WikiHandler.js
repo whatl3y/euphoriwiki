@@ -166,7 +166,7 @@ WikiHandler.prototype.getPageContent=function(cb) {
           });
         },
         function(template,_callback) {
-          var fh = new FileHandler({db:config.mongodb.db});
+          var fh = new FileHandler({db:config.mongodb.filedb});
 
           fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
             _callback(e,result,template[0],templateId);
