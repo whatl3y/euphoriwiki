@@ -131,7 +131,7 @@ var self = module.exports = {
             new MDB({config:self, connectionString:oSelf.connectionString({
               host: process.env.MONGODB_FILE_HOST,
               user: process.env.MONGODB_FILE_USER,
-              password: process.env.MONGODB_FILE_PASSWORD,
+              password: process.env.MONGODB_FILE_PW,
               port: process.env.MONGODB_FILE_PORT,
               db: process.env.MONGODB_FILE_DB
             }), callback:
