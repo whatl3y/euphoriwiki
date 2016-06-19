@@ -6,7 +6,7 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
    * The workhorse; converts an object to x-www-form-urlencoded serialization.
    * @param {Object} obj
    * @return {String}
-   */ 
+   */
   var param = function(obj) {
     var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
 
@@ -48,6 +48,8 @@ var app=angular.module('Euphoriwiki',['ngFileUpload','ui.bootstrap','ngAnimate'/
 .directive('wikiModule',wikiModuleDir)
 .directive('subpage',subpageDir)
 .directive('subpageMember',subpageMemberDir)
+.directive('comments',commentsDir)
+.directive('subComments',subCommentsDir)
 .controller('globalCtrl',globalCtrl)
 .controller('mainHomeCtrl',mainHomeCtrl)
 .controller('loginCtrl',loginCtrl)

@@ -152,6 +152,22 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.eventTypes = ret.eventTypes || [];
           $scope.aliases = ret.pageAliases || [];
           $scope.externalDatasources = ret.datasources || [];
+          $scope.pageComments = ret.comments || [{
+            content: "This is a test comment...",
+            altemail: "test@email.com",
+            subcomments: [{
+              content: "SUB - This is a test comment...",
+              altemail: "SUB - test@email.com",
+              subcomments: [{
+                content: "SUBSUB - This is a test comment...",
+                altemail: "SUBSUB - test@email.com"
+              }]
+            }]
+          },
+          {
+            content: "c2 - This is a test comment...",
+            altemail: "c2 - test@email.com"
+          }];
         }
 
         loader.remove();
@@ -384,7 +400,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         var enabled = false;
 
         for (var _w in $scope.widgets) {
-          if ($scope.widgets[_w].enabled) {
+          if (_w != "comments" && $scope.widgets[_w].enabled) {
             enabled = true;
             break;
           }
@@ -405,7 +421,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
             var numWidgets = 0;
 
             for (var _widget in $scope.widgets) {
-              if ($scope.widgets[_widget].enabled) numWidgets++;
+              if (_widget != "comments" && $scope.widgets[_widget].enabled) numWidgets++;
             }
 
             return classMap[(numWidgets) ? 1 : 0];

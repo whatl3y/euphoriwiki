@@ -85,7 +85,14 @@ div.wrapper
           div(compile-html="functions.sanitizeHtml(content.html)")
         div.row
           div.col-xs-12
-            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by user {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
+            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
+
+        - //COMMENTS WIDGET
+        div.row(data-ng-if="widgets.comments.enabled")
+          div.col-xs-12
+            div.divider.thick
+            include include_wikicomments.jade
+
       div(data-ng-show="pageState.editHtml")
         div(data-ng-if="template.isEasyConfig == 'Yes'")
           include include_easyconfig.jade

@@ -1,0 +1,27 @@
+h2
+  u Comments
+div.row(data-ng-if="pageComments.length")
+  div.col-xs-12.separate-vert-medium
+    comments(comments="pageComments")
+div.row(data-ng-if="!pageComments.length")
+  div.col-xs-12.text-center.text-large
+    div.panel.panel-warning(style="display:inline-block")
+      div.panel-heading
+        em No comments yet...
+div.row
+  div.col-xs-12.col-md-10.col-md-offset-1.col-lg-6.col-lg-offset-3
+    div.divider
+    h3
+      u New Comment
+    div.form-group
+      label Comment
+      textarea.form-control(rows="10",data-ng-model="newcomment.comment")
+    div.form-group
+      label Alternate Email
+      input.form-control(type="text",data-ng-model="newcomment.altemail")
+    div.form-group
+      label Website
+      input.form-control(type="text",data-ng-model="newcomment.website")
+    div.form-group
+      div.text-center
+        button.btn.btn-success(data-ng-click="") Add Comment

@@ -11,9 +11,9 @@ div(class="row")
       div
         div(class="separate-vert-small text-theme-color")
           em.
-            This will determine a subset of people who have access to edit 
-            this AND any subpages to this page. If no one here is specified, 
-            then this setting will ascend up the page tree to see if there are administrators 
+            This will determine a subset of people who have access to edit
+            this AND any subpages to this page. If no one here is specified,
+            then this setting will ascend up the page tree to see if there are administrators
             specified there. If there are none at any level above this page, anyone can edit this page.
         div
           span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
@@ -132,7 +132,7 @@ div(class="row")
             div.form-group
               div.panel.panel-success
                 div.panel-heading
-                  div.text-large Page navigation tree
+                  div.text-large Page Navigation Tree
                 div.panel-body
                   div.text-center
                     input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
@@ -142,13 +142,23 @@ div(class="row")
             div.form-group
               div.panel.panel-success
                 div.panel-heading
-                  div.text-large Public page chat
+                  div.text-large Page Chat Room
                 div.panel-body
                   div.text-center
-                    input(type="radio",id="subpagesWidgetEnabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="true")
-                    label(for="subpagesWidgetEnabled") Enabled
-                    input(type="radio",id="subpagesWidgetDisabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="false")
-                    label(for="subpagesWidgetDisabled") Disabled
+                    input(type="radio",id="chatWidgetEnabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="true")
+                    label(for="chatWidgetEnabled") Enabled
+                    input(type="radio",id="chatWidgetDisabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="false")
+                    label(for="chatWidgetDisabled") Disabled
+            div.form-group
+              div.panel.panel-success
+                div.panel-heading
+                  div.text-large Page Comments
+                div.panel-body
+                  div.text-center
+                    input(type="radio",id="commentsWidgetEnabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="true")
+                    label(for="commentsWidgetEnabled") Enabled
+                    input(type="radio",id="commentsWidgetDisabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="false")
+                    label(for="commentsWidgetDisabled") Disabled
             div(class="separate-vert-small form-group text-center")
               button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
   div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
