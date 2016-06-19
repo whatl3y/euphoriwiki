@@ -548,3 +548,18 @@ div.asyncloader {
 .new-template label {
   display: block;
 }
+
+.page-comments li.comment {
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.page-comments li.comment > .heading {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+li.comment .comment {
+  background: #FAFAFA;
+}

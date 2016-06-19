@@ -200,7 +200,7 @@
     case "postinit":
       async.parallel([
         function(callback) {
-          wiki.getPage({fields:{_id:0, path:1}},function(e,pageInfo) {
+          wiki.getPage({fields:{_id:0, path:1, comments:1}},function(e,pageInfo) {
             callback(e,pageInfo);
           });
         },
@@ -290,7 +290,7 @@
             return log.error(err);
           }
 
-          var pageExists = results[0];
+          var pageDetails = results[0];
           var pageArchive = results[1];
           var modules = results[2];
           var moduleInstances = results[3];
@@ -299,7 +299,7 @@
           var aliases = results[6];
           var externalDatasources = results[7];
 
-          if (!pageExists.length) return res.json({success:true});
+          if (!pageDetails.length) return res.json({success:true});
 
           return res.json({
             success:true,
@@ -309,7 +309,8 @@
             scopeTypes: viewScopeTypes,
             eventTypes: eventTypes.map(function(t) {return t.type}),
             pageAliases: aliases.map(function(t) {return t.path}),
-            datasources: externalDatasources
+            datasources: externalDatasources,
+            comments: pageDetails[0].comments
           });
         }
       );
@@ -1088,6 +1089,31 @@
       } else return res.json({success:false, error:"Please provide search text to search for an AD object."});
 
       break;
+
+      case "addComment":
+        if (!A.isLoggedIn()) return res.json({success:false, error:"You must be logged in to add a comment. Please log in above and try again."});
+
+        var comment = info.comment;
+
+        comment.username = A.username;
+        comment.firstname = A.getFirstname();
+        comment.lastname = A.getLastname();
+        comment.email = A.getEmail();
+        comment.date = new Date();
+
+        config.mongodb.db.collection("wikicontent").update({path:wiki.path},{$push:{comments:comment}},function(err) {
+          if (err) {
+            res.json({success:false});
+            return log.error(err);
+          }
+
+          res.json({success:true, comment:comment});
+
+          audit.log({type:"Add Page Comment", additional:{path:wiki.path,comment:comment}});
+          wiki.event({type:"addpagecomment", params:{comment:comment}},function(e,result) {if (e) log.error(e);});
+        });
+
+        break;
 
     case "spreadsheetToTable":
 

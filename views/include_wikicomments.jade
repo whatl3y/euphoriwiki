@@ -10,19 +10,20 @@ div.row(data-ng-if="!pageComments.length")
         em No comments yet...
 div.row
   div.col-xs-12.col-md-10.col-md-offset-1.col-lg-6.col-lg-offset-3
+    div(data-ng-if="!isLoggedIn")
+      alert.text-center You must be logged in to add a comment. Scroll up and login through one of the approved methods to add a comment!
     div(data-ng-if="isLoggedIn")
       div.divider
       h3
         u New Comment
       div.form-group
         label Comment
-        textarea.form-control(rows="10",data-ng-model="newcomment.comment")
-      div.form-group
-        label Alternate Email
-        input.form-control(type="text",data-ng-model="newcomment.altemail")
+        textarea.form-control(rows="10",data-ng-model="newcomment.content")
       div.form-group
         label Website
         input.form-control(type="text",data-ng-model="newcomment.website")
+      div.form-group(data-ng-if="newcommentError")
+        alert.text-center {{ newcommentError }}
       div.form-group
         div.text-center
-          button.btn.btn-success(data-ng-click="") Add Comment
+          button.btn.btn-success(data-ng-click="handlers.addPageComment(newcomment);newcomment={}") Add Comment

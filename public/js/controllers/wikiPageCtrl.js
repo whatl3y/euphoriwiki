@@ -153,22 +153,38 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.eventTypes = ret.eventTypes || [];
           $scope.aliases = ret.pageAliases || [];
           $scope.externalDatasources = ret.datasources || [];
-          $scope.pageComments = ret.comments || [{
+          $scope.pageComments = ret.comments || [/*{
             content: "This is a test comment...",
+            date: "2016-06-11 22:00:00",
             altemail: "test@email.com",
+            username: "test",
+            firstname: "user",
+            lastname: "userln",
             subcomments: [{
               content: "SUB - This is a test comment...",
+              date: "2016-06-11 22:00:00",
               altemail: "SUB - test@email.com",
+              username: "test",
+              firstname: "user",
+              lastname: "userln",
               subcomments: [{
                 content: "SUBSUB - This is a test comment...",
-                altemail: "SUBSUB - test@email.com"
+                date: "2016-06-11 22:00:00",
+                altemail: "SUBSUB - test@email.com",
+                username: "test",
+                firstname: "user",
+                lastname: "userln"
               }]
             }]
           },
           {
             content: "c2 - This is a test comment...",
-            altemail: "c2 - test@email.com"
-          }];
+            date: "2016-06-11 22:00:00",
+            altemail: "c2 - test@email.com",
+            username: "test",
+            firstname: "user",
+            lastname: "userln"
+          }*/];
         }
 
         loader.remove();
@@ -920,6 +936,33 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       })
       .error(function(data,err) {
         console.log(data,err);
+        loader.remove();
+      });
+    },
+
+    addPageComment: function(oComment) {
+      delete($scope.newcommentError);
+
+      if (!$scope.isLoggedIn) return $scope.newcommentError = "You must be logged in to add a comment.";
+      if (!oComment || !oComment.content) return $scope.newcommentError = "Please make sure to add a comment to submit.";
+
+      var loader = new Core.Modals().asyncLoader({message:"Adding your comment!"});
+      $http.post('/wikipage',{type:"addComment", page:$scope.pathname, comment:oComment})
+      .success(function(ret) {
+        //console.log(ret);
+
+        if (ret.success) {
+          delete(oComment);
+          $scope.pageComments.push(ret.comment);
+        } else {
+          $scope.newcommentError = ret.error;
+        }
+
+        loader.remove();
+      })
+      .error(function(data,err) {
+        console.log(data,err);
+        $scope.newcommentError = "There was an issue adding your comment. Please try again or contact the administrator if the problem persists.";
         loader.remove();
       });
     },
