@@ -2,6 +2,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
   $scope.pathname = decodeURI(location.pathname);
   $scope.newPathname = decodeURI(location.pathname);
 
+  $scope.isLoggedIn = LOCAL_DATA.EXTRA.loggedIn;
   $scope.pagePieces = [{text:"home",link:"/"}].concat(LOCAL_DATA.EXTRA.pagePieces || []);
   $scope.emptyPageError = "There is no content on this page yet. Feel free to log in and add content now by selecting from a template below or clicking to Edit Page link at the top right of your page!";
   $scope.content = {};
