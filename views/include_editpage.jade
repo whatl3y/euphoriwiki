@@ -26,7 +26,7 @@ div.wrapper
             alert(type="danger",class="text-large")
               div
                 span You have a saved draft for this page from
-                b {{ functions.formatDateTime(content.draft.date) }}
+                strong  {{ functions.formatDateTime(content.draft.date) }}
                 span . Would you like to continue where you left off, or delete the draft?
               div(class="separate-vert-small")
                 button(class="btn btn-success",data-ng-click="handlers.replaceWithDraft()") Finish Draft
