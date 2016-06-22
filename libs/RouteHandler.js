@@ -2,36 +2,37 @@ var fs = require("fs");
 var async = require("async");
 var MDB = require("./MDB.js");
 var config = require("./config.js");
+var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    RouteHandler.js
 |PURPOSE:  Handles creating routes in the database where they're stored.
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|      update: updates the routes 
-|ASSUMES:  
-|REVISION HISTORY:  
+|      update: updates the routes
+|ASSUMES:
+|REVISION HISTORY:
 |      *LJW 1/25/2016 - created
 -----------------------------------------------------------------------------------------*/
 RouteHandler=function(options) {
   options = options || {};
-  
+
   this.path = options.path || "routes";
   this.collection = options.collection || "routes";
 }
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      update (PUBLIC)
-|DESCRIPTION:  
+|DESCRIPTION:
 |PARAMETERS:  1. cb(OPT): callback function to execute after routes have been updates
 |SIDE EFFECTS:  None
-|CALLED FROM:  
+|CALLED FROM:
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 RouteHandler.prototype.update=function(cb) {
   var self=this;
-  
+
   async.waterfall([
     function(callback) {
       new MDB({config:config, callback:function(err,opts) {
@@ -50,6 +51,8 @@ RouteHandler.prototype.update=function(cb) {
     },
     function(db,files,callback) {
       async.each(files,function(file,_callback) {
+        log.debug("Staging route file: " + file);
+
         async.waterfall([
           function(__callback) {
             fs.readFile(self.path+"/"+file,{encoding:"utf8"},function(_err,content) {
@@ -61,7 +64,7 @@ RouteHandler.prototype.update=function(cb) {
             var routeOrder = Number(routeInfo[0] || 0);
             var routePath = routeInfo[1];
             var routeVerb = routeInfo[2] || "get";
-            
+
             db.collection(self.collection).update({path:routePath,verb:routeVerb},{
               "$set": {
                 verb: routeVerb,
@@ -81,6 +84,8 @@ RouteHandler.prototype.update=function(cb) {
         );
       },
       function(err) {
+        log.debug("Finished staging all routes.");
+
         callback(err);
       });
     }
