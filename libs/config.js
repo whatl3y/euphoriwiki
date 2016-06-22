@@ -4,6 +4,15 @@ var MDB = require('./MDB.js');
 var Object = require("../public/js/Object_prototypes.js");
 
 var self = module.exports = {
+  app: {
+    name: "Euphoriwiki"
+  },
+
+  newrelic: {
+    key: process.env.NEWRELIC_KEY,
+    level: process.env.NEWRELIC_LEVEL || 'info'
+  },
+
   server: {
     PORT: process.env.PORT || 8000,
     CLUSTERING: process.env.CLUSTERING || false,

@@ -94,7 +94,7 @@ RouteHandler.prototype.update=function(cb) {
     }
   ],
     function(err) {
-      if (typeof cb==="function") cb(err);
+      if (typeof cb === "function") cb(err);
     }
   );
 }

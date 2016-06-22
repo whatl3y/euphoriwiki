@@ -14,6 +14,7 @@
     "test": "mocha"
   },
   "dependencies": {
+    "newrelic": "^1.28.2",
     "bunyan": "1.5.1",
     "node-uuid": "^1.4.7",
     "express": "^4.8.0",
