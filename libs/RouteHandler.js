@@ -74,6 +74,9 @@ RouteHandler.prototype.update=function(cb) {
                 active: true
               }
             },{upsert:true},function(_e,result) {
+              log.debug("Finished staging route: VERB > " + routeVerb + " - PATH > " + routePath);
+              content = null;
+
               __callback(_e)
             });
           }
