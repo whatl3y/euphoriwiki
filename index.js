@@ -100,8 +100,8 @@ function main(notClustering) {
       app.set("views", path.join(__dirname, "views"));
       app.set("view engine", "jade");
 
-      app.use(bodyParser.urlencoded({extended:true, limit:"50mb"}));
-      app.use(bodyParser.json({limit:"50mb"}));
+      app.use(bodyParser.urlencoded({extended:true, limit:"10mb"}));
+      app.use(bodyParser.json({limit:"1mb"}));
       app.use(formidable.parse());
       app.use(cookieParser(config.session.sessionSecret));
 

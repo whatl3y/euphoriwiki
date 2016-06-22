@@ -8,16 +8,16 @@ var self = module.exports = {
     name: "Euphoriwiki"
   },
 
-  newrelic: {
-    key: process.env.NEWRELIC_KEY,
-    level: process.env.NEWRELIC_LEVEL || 'info'
-  },
-
   server: {
     PORT: process.env.PORT || 8000,
     CLUSTERING: process.env.CLUSTERING || false,
     IS_PRODUCTION: process.env.IS_PRODUCTION || false,
     HOST: process.env.HOSTNAME || "http://localhost"
+  },
+
+  newrelic: {
+    key: process.env.NEWRELIC_KEY,
+    level: process.env.NEWRELIC_LEVEL || 'info'
   },
 
   admin: {

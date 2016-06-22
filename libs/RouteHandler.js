@@ -36,17 +36,17 @@ RouteHandler.prototype.update=function(cb) {
   async.waterfall([
     function(callback) {
       new MDB({config:config, callback:function(err,opts) {
-        callback(err,opts.db);
+        return callback(err,opts.db);
       }});
     },
     function(db,callback) {
       db.collection(self.collection).remove({},null,function(err) {
-        callback(err,db);
+        return callback(err,db);
       });
     },
     function(db,callback) {
       fs.readdir(self.path,function(err,files) {
-        callback(err,db,files);
+        return callback(err,db,files);
       });
     },
     function(db,files,callback) {
@@ -56,7 +56,7 @@ RouteHandler.prototype.update=function(cb) {
         async.waterfall([
           function(__callback) {
             fs.readFile(self.path+"/"+file,{encoding:"utf8"},function(_err,content) {
-              __callback(_err,content);
+              return __callback(_err,content);
             });
           },
           function(content,__callback) {
@@ -77,24 +77,24 @@ RouteHandler.prototype.update=function(cb) {
               log.debug("Finished staging route: VERB > " + routeVerb + " - PATH > " + routePath);
               content = null;
 
-              __callback(_e)
+              return __callback(_e)
             });
           }
         ],
           function(err) {
-            _callback(err);
+            return _callback(err);
           }
         );
       },
       function(err) {
         log.debug("Finished staging all routes.");
 
-        callback(err);
+        return callback(err);
       });
     }
   ],
     function(err) {
-      if (typeof cb === "function") cb(err);
+      if (typeof cb === "function") return cb(err);
     }
   );
 }
