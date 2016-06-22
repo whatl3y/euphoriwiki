@@ -69,17 +69,18 @@ try {
 
 //FUNCTIONS
 function main(notClustering) {
-  async.series([
+  async.waterfall([
     function(callback) {
       config.mongodb.initialize(function(err,options) {
         callback(err,options);
       });
     },
-    function(callback) {
+    function(options,callback) {
       //go get all the routes available for express to serve and bind
       //them to listeners, then get all the links we'll need for the header
       //header navigation bar, then initialize web server
-      new RouteHandler().update(function(err) {
+      var db = options.db;
+      new RouteHandler().update(db,function(err) {
         callback(err);
       });
     },
@@ -93,8 +94,8 @@ function main(notClustering) {
       if (err) return log.error(err);
 
       //var options = results[0];
-      var queries = results[2].queries;
-      var oData = results[2].oData;
+      var queries = results.queries;
+      var oData = results.oData;
 
       //view engine setup
       app.set("views", path.join(__dirname, "views"));

@@ -1,7 +1,7 @@
 var fs = require("graceful-fs");
 var path = require("path");
-var crypto = require("crypto");
 var async = require("async");
+var Encryption = require("./Encryption.js");
 var Object = require("../public/js/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
@@ -9,14 +9,14 @@ var Object = require("../public/js/Object_prototypes.js");
 |PURPOSE:  Handles all things to do with getting information about a wiki page.
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|      
+|
 |ASSUMES:  mongodb native driver in nodejs
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor=function(options) {
   options = options || {};
-  
+
   this.dirpath = options.dirpath;
   this.savepath = options.savepath || path.join(__dirname,"..","files","diff");
 }
@@ -39,15 +39,15 @@ DirectoryProcessor=function(options) {
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
   options = options || {};
-  
+
   var dirpath = options.dirpath || this.dirpath;
   var recurse = options.recurse || false;
   var encoding = options.encoding || null;
   var individual = options.processIndividually || false;
-  
+
   var self = this;
   var ret = [];
-  
+
   var process = function(data,foo) {
     try {
       if (individual) cbIndividual(data);
@@ -57,13 +57,13 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
       }
     } catch(err) {}
   }
-  
+
   fs.readdir(dirpath,function(err,files) {
     if (err) cb(err);
     else {
       async.each(files,function(file,callback) {
         var fp = self.makePath([dirpath,file]);
-        
+
         fs.stat(fp,function(err,stats) {
           if (stats.isDirectory()) {
             if (recurse) {
@@ -91,7 +91,7 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
               if (e) callback(e);
               else {
                 o.info = Object.merge(o.info,r);
-                
+
                 process(o,"push");
                 callback()
               }
@@ -118,17 +118,17 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor.prototype.processFile=function(filepath,cb,encoding) {
   var self=this;
-  
+
   if (this.fileOrDirExists(filepath,"file")) {
     self.fileToHash(filepath,function(e,hash) {
       if (e) cb(e);
       else {
         var o = {};
         o.hash = hash;
-        
+
         if (encoding) {
           encoding = (typeof encoding==="string") ? encoding : null;
-          
+
           fs.readFile(filepath,encoding,function(_e,data) {
             o.data = data || "";
             cb(_e,o);
@@ -152,9 +152,7 @@ DirectoryProcessor.prototype.processFile=function(filepath,cb,encoding) {
 |RETURNS:    <string>: a string that is MD5 hashed
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor.prototype.stringToHash=function(string) {
-  var md5Sum = crypto.createHash("md5");
-  md5Sum.update(string);
-  return md5Sum.digest("hex");
+  return new Encryption().stringToHash(string);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -168,13 +166,7 @@ DirectoryProcessor.prototype.stringToHash=function(string) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 DirectoryProcessor.prototype.fileToHash=function(filePath,cb) {
-  filePath = filePath || this.dirpath;
-  
-  var md5Sum = crypto.createHash("md5");
-  var s = fs.ReadStream(filePath);
-  
-  s.on("data",function(data) {md5Sum.update(data);});
-  s.on("end",function() {cb(null,md5Sum.digest("hex"));});
+  return new Encryption().fileToHash(filePath,cb);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -189,11 +181,11 @@ DirectoryProcessor.prototype.fileToHash=function(filePath,cb) {
 DirectoryProcessor.prototype.fileOrDirExists=function(dir,type) {
   dir = dir || this.dirpath;
   type = type || "directory";
-  
+
   try {
     var stat = fs.statSync(dir);
     return (type == "file") ? stat.isFile() : stat.isDirectory();
-    
+
   } catch(e) {
     return false;
   }
@@ -216,26 +208,26 @@ DirectoryProcessor.prototype.makePath=function(p,ary) {
     if (typeof ary[0]==="string") {
       p = path.join(p,ary[0]);
       ary.shift();
-      
+
       return this.makePath(p,ary);
     } else {
       return p;
     }
-    
+
   } else if (p && !ary) {
-    
+
     ary = (p instanceof Array) ? p : p.split(/[\\\/,\|\^]{1,2}/g);
     p = "";
-    
+
     if (ary.length <= 1) return path.join(ary[0] || "");
     else {
       p = path.join(ary[0]);
       ary.shift();
-      
+
       return this.makePath(p,ary);
     }
   }
-  
+
   return p;
 }
 
