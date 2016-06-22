@@ -5,7 +5,7 @@ var Object = require("../public/js/Object_prototypes.js");
 
 var self = module.exports = {
   app: {
-    name: "Euphoriwiki"
+    name: process.env.APP_NAME || "Euphoriwiki"
   },
 
   server: {
@@ -16,8 +16,8 @@ var self = module.exports = {
   },
 
   newrelic: {
-    key: process.env.NEWRELIC_KEY,
-    level: process.env.NEWRELIC_LEVEL || 'info'
+    key: process.env.NEW_RELIC_LICENSE_KEY,
+    level: process.env.NEW_RELIC_LOGGING_LEVEL || 'info'
   },
 
   admin: {

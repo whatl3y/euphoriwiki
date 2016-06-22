@@ -1,5 +1,6 @@
 # ignore
-.DS_Store
+*.log
+*.DS_Store
 /EXTRAS
 /tests
 /logs
