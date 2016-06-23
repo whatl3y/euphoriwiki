@@ -49,7 +49,9 @@ try {
 
       // Count CPUs, max CLUSTER_MAX_CPUS forks
       var cpuCount = os.cpus().length;
+      log.debug("Number of CPUs on machine: " + cpuCount);
       cpuCount = (cpuCount > config.server.CLUSTER_MAX_CPUS) ? config.server.CLUSTER_MAX_CPUS : cpuCount;
+      log.debug("Number of CPUs we're using: " + cpuCount);
 
       // Create a worker for each CPU
       for (var _i=0;_i<cpuCount;_i++) {
@@ -79,6 +81,7 @@ function main(notClustering) {
   async.waterfall([
     function(callback) {
       config.mongodb.initialize(function(err,options) {
+        log.debug("Finished setting up MongoDB database instances.");
         callback(err,options);
       });
     },
@@ -88,11 +91,13 @@ function main(notClustering) {
       //header navigation bar, then initialize web server
       var db = options.db;
       new RouteHandler().update(db,function(err) {
+        log.debug("Finished setting up routes.");
         callback(err);
       });
     },
     function(callback) {
       new WikiHandler().initQueries(function(err,data) {
+        log.debug("Finished initialization tasks in WikiHandler().initQueries().");
         callback(err,data);
       });
     }
@@ -147,7 +152,7 @@ function main(notClustering) {
       //setup route handlers in the express app
       _.each(oData.routes,function(route) {
         try {
-          app[route.verb.toLowerCase()](route.path,/*eval(route.callback)*/oRoutes[route.file]);
+          app[route.verb.toLowerCase()](route.path,oRoutes[route.file]);
         } catch(err) {
           log.error(err,"Error binding route to express; method: " + route.verb + "; path: " + route.path);
         }
