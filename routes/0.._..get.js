@@ -1,4 +1,11 @@
-(function(req,res) {
+var async = require("async");
+var FileHandler = require("../libs/FileHandler.js");
+var GetHTML = require("../libs/GetHTML.js");
+var Audit = require("../libs/Audit.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var fh = new FileHandler({db:config.mongodb.filedb});
   var gH = new GetHTML();
 
@@ -60,4 +67,4 @@
       audit.log({type:"Visit Home Page"});
     }
   );
-})
+}

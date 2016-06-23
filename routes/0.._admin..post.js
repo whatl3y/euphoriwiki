@@ -1,4 +1,13 @@
-(function(req,res) {
+var fs = require("fs");
+var _ = require("underscore");
+var async = require("async");
+var GetHTML = require("../libs/GetHTML.js");
+var Authentication = require("../libs/Authentication.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var info = req.body;
 
   var gH = new GetHTML();
@@ -13,7 +22,7 @@
 
         var settingHtml = {};
         async.each(settings,function(setting,callback) {
-          fs.readFile(__dirname+'/views/adminsettings/'+setting.include,{encoding:"utf8"},function(_e,contents) {
+          fs.readFile(__dirname+'/../views/adminsettings/'+setting.include,{encoding:"utf8"},function(_e,contents) {
             if (_e) return callback(_e);
 
             try {
@@ -37,17 +46,6 @@
 
           return res.json({success:true, settings:settings});
         });
-
-        // for (var _i=0; _i<settings.length; _i++) {
-        //   try {
-        //     var h = jade.renderFile(__dirname+'/views/adminsettings/'+settings[_i].include);
-        //     settings[_i].html = h;
-        //
-        //   } catch(err) {
-        //     log.error(err);
-        //     settings[_i].html = "";
-        //   }
-        // }
       });
 
       break;
@@ -141,4 +139,4 @@
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
-})
+}

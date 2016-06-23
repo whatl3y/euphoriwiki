@@ -1,11 +1,18 @@
-(function(req,res) {
+var _ = require("underscore");
+var async = require("async");
+var Auth = require("../libs/Authentication.js");
+var AccessManagement = require("../libs/AccessManagement.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var info = req.body;
-  
+
   var A = new Auth({session:req.session});
   var username = A.username;
-  
+
   var Access = new AccessManagement({db:config.mongodb.db});
-  
+
   switch(info.type) {
     case "initialize":
       async.parallel([
@@ -38,16 +45,16 @@
             log.error(err);
             res.json({success:false, error:err});
           }
-          
+
           var categories = results[0] || [];
           var widgets = results[1] || [];
-          
+
           log.debug("Got widgets: ",widgets);
-          
+
           var aWidgets = _.map(widgets,function(widget) {
             var sortObject = {};
             if (widget.orderField) sortObject[widget.orderField] = widget.orderDirection;
-            
+
             return {
               collection: widget.collection,
               key: widget.name,
@@ -57,7 +64,7 @@
               fields: widget.fields || {}
             };
           });
-          
+
           config.mongodb.MDB.findRecursive({
             db: config.mongodb.db,
             array: aWidgets
@@ -65,14 +72,14 @@
             if (err) res.json({success:false, error:err});
             else {
               log.debug("Got data for widgets: ",oData);
-              
+
               var keys = _.keys(oData);
-              
+
               //filter out any paths in the widgets that the user cannot
               //view based on admin and view scope settings.
               async.each(keys,function(k,callback) {
                 log.debug("Looping through widgets to filter paths:",k,oData[k]);
-                
+
                 Access.onlyViewablePaths({session:req.session, username:username, paths:oData[k]},function(err,filtered) {
                   oData[k] = filtered;
                   callback(err)
@@ -90,7 +97,7 @@
                         name: k
                       });
                     });
-                    
+
                     res.json({success:true, widgets:returnedWidgets, categories:categories});
                     log.debug("Widgets returning to client: ",returnedWidgets);
                   }
@@ -100,15 +107,15 @@
           });
         }
       );
-      
+
       break;
-      
+
     case "somethingelse":
-      
-      
+
+
       break;
-      
+
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
-})
+}

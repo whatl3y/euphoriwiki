@@ -1,1 +1,3 @@
-passport.authenticate("google",{scope: ["profile", "email"]});
+var passport = require("passport");
+
+module.exports = passport.authenticate("google",{scope: ["profile", "email"]});

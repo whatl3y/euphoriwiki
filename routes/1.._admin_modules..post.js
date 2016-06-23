@@ -1,4 +1,13 @@
-(function(req,res) {
+var async = require("async");
+var Auth = require("../libs/Authentication.js");
+var AccessManagement = require("../libs/AccessManagement.js");
+var Audit = require("../libs/Audit.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var FileHandler = require("../libs/FileHandler.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var info = req.body;
   if (info.file) {
     var fileInfo = info.file;
@@ -171,4 +180,4 @@
       }
     }
   );
-})
+}

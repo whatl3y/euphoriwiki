@@ -1,4 +1,19 @@
-(function(req,res) {
+var fs = require("fs");
+var _ = require("underscore");
+var async = require("async");
+var uuid = require('node-uuid');
+var Auth = require("../libs/Authentication.js");
+var AccessManagement = require("../libs/AccessManagement.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var Audit = require("../libs/Audit.js");
+var GetHTML = require("../libs/GetHTML.js");
+var FileHandler = require("../libs/FileHandler.js");
+var CodeRunner = require("../libs/CodeRunner.js");
+var ChildProcesses = require("../libs/ChildProcesses.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var info = req.body;
 
   var A = new Auth({session:req.session});
@@ -1122,4 +1137,4 @@
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
-})
+}

@@ -1,13 +1,30 @@
-(function(req,res) {
+var fs = require("fs");
+var path = require("path");
+var _ = require("underscore");
+var async = require("async");
+var passport = require("passport");
+var Auth = require("../libs/Authentication.js");
+var Audit = require("../libs/Audit.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+var oStrats = {};
+var strats = fs.readdirSync(path.join(".","passport_strategies")) || [];
+for (var _i = 0; _i < strats.length; _i++) {
+  oStrats[strats[_i]] = require("../passport_strategies/" + strats[_i]);
+}
+
+module.exports = function(req,res) {
   var info = req.body;
   var A = new Auth({session:req.session});
   var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
 
   //built strategy authentications for non built-in passport strategies
   var strategyWaterfallFunctions = [];
-  _.each((fs.readdirSync("./passport_strategies") || []).sort(),function(stratFile) {
+  _.each(strats.sort(),function(stratFile) {
     try {
-      var oStrat = require("./passport_strategies/" + stratFile);
+      var oStrat = oStrats[stratFile];
 
       if (oStrat.BUILTIN) return;
       if ((typeof oStrat.condition === "undefined") || oStrat.condition) {
@@ -127,4 +144,4 @@
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
-})
+}

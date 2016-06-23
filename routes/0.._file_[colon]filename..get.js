@@ -1,4 +1,7 @@
-(function(req,res) {
+var FileHandler = require("../libs/FileHandler.js");
+var config = require("../libs/config.js");
+
+module.exports = function(req,res) {
   var filename = req.params.filename;
 
   if (!filename) return res.send("Please enter a valid filename.");
@@ -15,4 +18,4 @@
     var readStream = fh.gfs.createReadStream({filename:filename});
     readStream.pipe(res);
   });
-})
+}

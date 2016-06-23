@@ -37,6 +37,12 @@ var log = require("bunyan").createLogger(config.logger.options());
 var Object = require("./public/js/Object_prototypes.js");
 
 try {
+  var aRoutes = fs.readdirSync("routes");
+  var oRoutes = {};
+  for (var _i=0; _i < aRoutes.length; _i++) {
+    oRoutes[aRoutes[_i]] = require("./routes/" + aRoutes[_i]);
+  }
+
   if (config.server.CLUSTERING) {
     if (!sticky.listen(http,config.server.PORT)) {    //if (cluster.isMaster) {}
       http.once("listening",function() {log.info("listening on *:"+config.server.PORT);});
@@ -140,7 +146,7 @@ function main(notClustering) {
       //setup route handlers in the express app
       _.each(oData.routes,function(route) {
         try {
-          app[route.verb.toLowerCase()](route.path,eval(route.callback));
+          app[route.verb.toLowerCase()](route.path,/*eval(route.callback)*/oRoutes[route.file]);
         } catch(err) {
           log.error(err,"Error binding route to express; method: " + route.verb + "; path: " + route.path);
         }

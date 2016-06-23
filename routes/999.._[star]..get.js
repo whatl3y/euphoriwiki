@@ -1,4 +1,12 @@
-(function(req,res) {
+var async = require("async");
+var Auth = require("../libs/Authentication.js");
+var AccessManagement = require("../libs/AccessManagement.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var Audit = require("../libs/Audit.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var wiki = new WikiHandler({path:req.originalUrl});
   var A = new Auth({session:req.session});
   var Access = new AccessManagement({db: config.mongodb.db});
@@ -74,4 +82,4 @@
   } else {
     res.render("wikipage",config.view.send(req,{obj:oView}));
   }
-})
+}

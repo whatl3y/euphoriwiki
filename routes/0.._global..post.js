@@ -1,4 +1,11 @@
-(function(req,res) {
+var async = require("async");
+var Auth = require("../libs/Authentication.js");
+var AccessManagement = require("../libs/AccessManagement.js");
+var WikiHandler = require("../libs/WikiHandler.js");
+var config = require("../libs/config.js");
+var log = require("bunyan").createLogger(config.logger.options());
+
+module.exports = function(req,res) {
   var info = req.body;
 
   var A = new Auth({session:req.session});
@@ -57,4 +64,4 @@
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
-})
+}
