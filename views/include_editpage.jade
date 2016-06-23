@@ -90,7 +90,9 @@ div.wrapper
         - //COMMENTS WIDGET
         div.row(data-ng-if="widgets.comments.enabled")
           div.col-xs-12
-            div.divider.thick
+            div.row
+              div.col-xs-12.col-md-8.col-md-offset-2
+                div.divider
             include include_wikicomments.jade
 
       div(data-ng-show="pageState.editHtml")

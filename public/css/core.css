@@ -299,7 +299,15 @@ ul.subpages div.subpage-page:hover {
 }
 
 ul.list-left {
+  margin-left: 5px;
+}
+
+ul.list-left {
   margin-left: 10px;
+}
+
+ul.list-left-lg {
+  margin-left: 25px;
 }
 
 ul.nav > li {
