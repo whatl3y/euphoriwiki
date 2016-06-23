@@ -47,8 +47,9 @@ try {
     if (!sticky.listen(http,config.server.PORT)) {    //if (cluster.isMaster) {}
       http.once("listening",function() {log.info("listening on *:"+config.server.PORT);});
 
-      // Count CPUs
+      // Count CPUs, max CLUSTER_MAX_CPUS forks
       var cpuCount = os.cpus().length;
+      cpuCount = (cpuCount > config.server.CLUSTER_MAX_CPUS) ? config.server.CLUSTER_MAX_CPUS : cpuCount;
 
       // Create a worker for each CPU
       for (var _i=0;_i<cpuCount;_i++) {

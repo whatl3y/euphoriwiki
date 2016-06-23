@@ -11,6 +11,7 @@ var self = module.exports = {
   server: {
     PORT: process.env.PORT || 8000,
     CLUSTERING: process.env.CLUSTERING || false,
+    CLUSTER_MAX_CPUS: process.env.CLUSTER_MAX_CPUS || 5,
     IS_PRODUCTION: process.env.IS_PRODUCTION || false,
     HOST: process.env.HOSTNAME || "http://localhost"
   },
