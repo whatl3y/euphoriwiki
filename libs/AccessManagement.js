@@ -8,7 +8,7 @@ var async = require("async");
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:  socket.io
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
 AccessManagement = function(options) {
@@ -31,9 +31,9 @@ AccessManagement.prototype.isAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
   var editOnly = (options.editOnly === false) ? false : true;
-  
+
   var self = this;
-  
+
   async.parallel([
     function(callback) {
       self.isPageAdmin({username:username, path:path, editOnly:editOnly},function(e,isAdmin) {
@@ -68,11 +68,11 @@ AccessManagement.prototype.isAdmin = function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.isWikiAdmin = function(username,cb) {
   if (!username) return cb(null,false);
-  
+
   this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
     if (e) return cb(e);
     else if (admin.length) return cb(null,true);
-    
+
     return cb(null,false);
   });
 }
@@ -97,23 +97,23 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
   var username = options.username;
   var path = options.path;
   var editOnly = options.editOnly || false;
-  
+
   var self = this;
-  
+
   if (!username || !path) {
     cb(null,false);
   } else {
     var pathFilter = this.createInheritanceFilter(path);
     pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
-    
+
     var oFilters = {$and: [pathFilter, {"settings.admins":{$exists:1}}]};
-    
+
     this.db.collection("wikicontent").find(oFilters,{"settings.admins":1}).toArray(function(e,pages) {
       if (e) cb(e);
       else {
         if (pages.length) {
           pages = self.sortWikiResults(pages);
-          
+
           var isAdmin = null;
           _.each(pages,function(p) {
             if (!(p.settings.admins instanceof Array) || !p.settings.admins.length) return;
@@ -122,13 +122,13 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
                 if (isAdmin != null) return;
                 else if (adminUsername.toLowerCase() == username.toLowerCase()) isAdmin = true;
               });
-              
+
               if (isAdmin == null) isAdmin = false;
-            }            
+            }
           });
-          
+
           cb(null,((isAdmin == null) ? editOnly : isAdmin));
-          
+
         } else cb(null,editOnly);
       }
     });
@@ -137,7 +137,7 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      onlyViewablePaths (PUBLIC)
-|DESCRIPTION:  Takes an array of paths and username and filters the list of paths based on whether 
+|DESCRIPTION:  Takes an array of paths and username and filters the list of paths based on whether
 |             the specified user is either an administrator or can view these pages.
 |PARAMETERS:  1. options(REQ): options to check if a user is an administrator on a particular page.
 |                     options.username
@@ -156,14 +156,14 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
   var paths = options.paths || [];
   var session = options.session;
   var adminOnly = options.adminOnly || false;
-  
+
   var self = this;
-  
+
   if (paths.length) {
     var asyncParallel = [];
     _.each(paths,function(pageOrPath,_i) {
       var path = (typeof pageOrPath==="object") ? pageOrPath.path : pageOrPath;
-      
+
       if (path) {
         asyncParallel.push(function(callback1) {
           async.parallel([
@@ -188,7 +188,7 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
         });
       }
     });
-    
+
     async.parallel(asyncParallel,
       function(err,results) {
         if (err) cb(err);
@@ -199,7 +199,7 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
             }).map(function(__p) {
               return __p.path;
             });
-            
+
             cb(null,filteredPages);
           } catch(_err) {
             cb(_err);
@@ -207,8 +207,8 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
         }
       }
     );
-    
-  } else cb(null,[]);  
+
+  } else cb(null,[]);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -227,53 +227,54 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.canViewPage = function(options,cb) {
   options = options || {};
-  
+
   var self = this;
-  
+
   var session = options.session;
   var username = options.username;
   var path = options.path;
-  
+
   var pathFilter = this.createInheritanceFilter(path);
   pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
-  
+
   var oFilters = {$and: [pathFilter, {"settings.viewscope":{$exists:1}}]};
-    
-  this.db.collection("wikicontent").find(oFilters,{"settings.viewscope":1}).toArray(function(e,pages) {
-    if (e) cb(e);
-    else {
-      if (pages.length) {
-        pages = self.sortWikiResults(pages);
-        
-        var canView = null;
-        async.each(pages,function(p,callback1) {
-          var scopes = p.settings.viewscope;
-          
-          async.each(scopes,function(scope,callback2) {
-            var evalFunction = self.getMemberScopeEvalFunction(scope.type);
-            
-            evalFunction(username,path,scope.data || session,function(__err,result) {
-              if (!__err) {
-                if (canView == null && !result) canView = false;
-                else if (result) canView = true;
-              }
-              
-              callback2(__err);
-            });
-          },
-          function(_err) {
-            if (_err) callback1(_err);
-            else {
-              canView = (canView == null) ? true : canView;
-              callback1();
+
+  this.db.collection("wikicontent").find(oFilters,{path:1,"settings.viewscope":1}).toArray(function(e,pages) {
+    if (e) return cb(e);
+
+    if (pages.length) {
+      pages = self.sortWikiResults(pages);
+
+      var canView = null;
+      async.each(pages,function(p,callback1) {
+        var scopes = p.settings.viewscope;
+
+        async.each(scopes,function(scope,callback2) {
+          var evalFunction = self.getMemberScopeEvalFunction(scope.type);
+
+          evalFunction(username,path,scope.data || session,function(__err,result) {
+            if (!__err) {
+              if (canView == null && !result) canView = false;
+              else if (result) canView = true;
             }
-          });          
+
+            callback2(__err);
+          });
         },
-        function(err) {
-          cb(err,canView);
+        function(_err) {
+          if (_err) callback1(_err);
+          else {
+            canView = (canView == null) ? true : canView;
+            callback1();
+          }
         });
-        
-      } else cb(null,true);
+      },
+      function(err) {
+        cb(err,canView);
+      });
+
+    } else {
+      return cb(null,true);
     }
   });
 }
@@ -301,13 +302,13 @@ AccessManagement.prototype.getMemberScopeEvalFunction = function(type) {
 -----------------------------------------------------------------------------------------*/
 AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
   var self = this;
-  
+
   return {
     loggedin: {
       name: "User is Logged In",
       eval: function(username,path,session,cb) {
         var Auth = require("./Authentication.js");
-        
+
         try {
           var isLoggedIn = new Auth({session:session}).isLoggedIn();
           cb(null,isLoggedIn);
@@ -316,7 +317,7 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
         }
       }
     },
-    
+
     groupmembership: {
       name: "User is in Specified Group(s)",
       eval: function(username,path,aGroupDNs,cb) {
@@ -324,9 +325,9 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           cb(null,false);
           return;
         }
-        
+
         aGroupDNs = aGroupDNs || [];
-        
+
         if (aGroupDNs.length) {
           var Auth = require("./Authentication.js");
           var asyncParallelFunctions = [];
@@ -337,7 +338,7 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
               });
             });
           });
-          
+
           async.parallel(asyncParallelFunctions,
             function(err,results) {
               if (err) cb(err);
@@ -346,16 +347,16 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
                 for (var _i=0;_i<results.length;_i++) {
                   isMember = isMember || results[_i];
                 }
-                
+
                 cb(null,isMember);
               }
             }
           );
         } else cb(null,true);
-        
+
       }
     },
-    
+
     username: {
       name: "Specific Users You Specify",
       eval: function(username,path,aUsers,cb) {
@@ -363,23 +364,23 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           cb(null,false);
           return;
         }
-        
+
         aUsers = aUsers || [];
-        
+
         try {
           var match = false;
           _.each(aUsers,function(u) {
             match = match || (username.toLowerCase() == u.toLowerCase());
           });
-          
+
           cb(null,match);
-          
+
         } catch(err) {
           cb(err);
         }
       }
     },
-    
+
     wikiadmin: {
       name: "Wiki Administrator",
       eval: function(username,path,temp,cb) {
@@ -387,13 +388,13 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           cb(null,false);
           return;
         }
-        
+
         self.isWikiAdmin(username,function(e,isAdmin) {
           cb(e,isAdmin);
         });
       }
     },
-    
+
     pageadmin: {
       name: "Page Administrator",
       eval: function(username,path,temp,cb) {
@@ -401,22 +402,38 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           cb(null,false);
           return;
         }
-        
+
         self.isPageAdmin({username:username, path:path},function(e,isAdmin) {
           cb(e,isAdmin);
         });
       }
     },
-    
-    upnsuffix: {
-      name: "UPN Suffix (e.x. @upn.local)",
-      eval: function(username,path,data,cb) {
-        cb(null,true);
-      }
-    },
-    
+
     emailsuffix: {
       name: "Email Suffix (e.x. @email.com)",
+      eval: function(username,path,emailSuffixes,cb) {
+        if (!(emailSuffixes instanceof Array) || !emailSuffixes) return cb(null,true);
+
+        var Auth = require("./Authentication.js");
+
+        emailSuffixes = emailSuffixes.map(function(s) {
+          return (s.lastIndexOf("@") > -1) ? s.substring(s.lastIndexOf("@") + 1) : s;
+        });
+
+        new Auth().findOrSaveUser({username:username, fields:{username:1,email:1}},function(e,user) {
+          if (e) return cb(e);
+          if (!user.email) return cb(null,false);
+
+          usersEmailSuffix = user.email.substring(user.email.lastIndexOf("@") + 1);
+          isValid = _.indexOf(emailSuffixes,usersEmailSuffix) > -1;
+
+          return cb(null,isValid);
+        });
+      }
+    },
+
+    upnsuffix: {
+      name: "UPN Suffix (e.x. @upn.local)",
       eval: function(username,path,data,cb) {
         cb(null,true);
       }
@@ -438,12 +455,15 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
 AccessManagement.prototype.sortWikiResults=function(ary,parentsFirst) {
   ary = ary || [];
   parentsFirst = parentsFirst || false;
-  
+
   try {
     return ary.sort(function(a,b) {
-      return ((parentsFirst) ? 1 : -1)*(a.path.length - b.path.length);
+      var aSubs = (typeof a === "object") ? a.path.split("/") : a.split("/");
+      var bSubs = (typeof b === "object") ? b.path.split("/") : b.split("/");
+
+      return ((parentsFirst) ? 1 : -1)*(aSubs.length - bSubs.length);
     });
-    
+
   } catch(err) {
     return err;
   }
@@ -464,20 +484,20 @@ AccessManagement.prototype.sortWikiResults=function(ary,parentsFirst) {
 AccessManagement.prototype.createInheritanceFilter=function(path) {
   try {
     path = path || "";
-    
+
     var pathAry = path.split("/");
     pathAry.shift();
-    
+
     var pathString = "";
     var oFilter = {$or:[]};
-    
+
     oFilter["$or"] = _.map(pathAry,function(piece) {
       pathString += "/" + (piece || "");
       return {path:pathString};
     });
-    
+
     return oFilter;
-    
+
   } catch(err) {
     return err;
   }

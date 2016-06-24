@@ -10,17 +10,17 @@ var config = require("./config.js");
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:  socket.io
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
 Authentication = function(options) {
   options = options || {};
-  
+
   this.session = options.session;        //the session object we will be able to save for future requests
   this.username = this.getUsername();
-  
+
   this.accountsTable = "accounts";
-  
+
   this.encryption = new Encryption();
   this.ldap = new LDAPHandler();
   this.GLOBAL_ADMIN = process.env.GLOBAL_USERNAME;
@@ -42,13 +42,14 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
   var username = (data.$set) ? data.$set.username : data.username;
   var upsert = data.upsert || false;
   var update = data.update || false;
-  
+  var fields = data.fields || {};
+
   delete(data.upsert);
   delete(data.update);
-  
+
   async.series([
     function(callback) {
-      config.mongodb.db.collection("accounts").find({username:username}).toArray(function(e,record) {
+      config.mongodb.db.collection("accounts").find({username:username},fields).toArray(function(e,record) {
           if (e) callback(e);
           else callback(null,(record instanceof Array) ? record[0]: record);
         }
@@ -66,13 +67,13 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
   ],
     function(err,results) {
       if (err) return cb(err);
-      
+
       var origRecord = results[0];
       var updatedOrNewRecord = results[1];
-      
+
       if (upsert || update) return cb(null,updatedOrNewRecord);
       else if (origRecord) return cb(null,origRecord);
-      
+
       return cb(null,false);
     }
   );
@@ -81,7 +82,7 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      auth (PUBLIC)
 |DESCRIPTION:  Tries to authenticate a user based on a username/password combination.
-|PARAMETERS:  1. options(REQ): 
+|PARAMETERS:  1. options(REQ):
 |            options.username
 |            options.password
 |        2. cb(REQ): callback function to return back whether the user successfully authenticated.
@@ -91,13 +92,13 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
 -----------------------------------------------------------------------------------------*/
 Authentication.prototype.auth = function(options,cb) {
   options = options || {};
-  
+
   switch (options.type) {
     case "activedirectory":
       options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
       this.ldap.auth(options,cb);
       break;
-      
+
     default:
       options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
       this.ldap.auth(options,cb);
@@ -106,9 +107,9 @@ Authentication.prototype.auth = function(options,cb) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      validatePassword (PUBLIC)
-|DESCRIPTION:  
-|PARAMETERS:  1. enteredPassword(REQ): 
-|            2. encryptedPassword(REQ): 
+|DESCRIPTION:
+|PARAMETERS:  1. enteredPassword(REQ):
+|            2. encryptedPassword(REQ):
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    <boolean>: determines if password is valid
@@ -120,7 +121,7 @@ Authentication.prototype.validatePassword = function(enteredPassword,encryptedPa
 /*-----------------------------------------------------------------------------------------
 |NAME:      find (PUBLIC)
 |DESCRIPTION:  Gets a user's information either in a DB or AD/LDAP store
-|PARAMETERS:  1. options(REQ): 
+|PARAMETERS:  1. options(REQ):
 |            options.query: if provided, is a full LDAP query to search AD for, otherwise need options.attribute and options.value populated
 |            options.attribute
 |            options.value
@@ -136,7 +137,7 @@ Authentication.prototype.find = function(options,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      getGroupMembershipForUser (PUBLIC)
 |DESCRIPTION:  Returns all groups the user specified is a member of.
-|PARAMETERS:  1. options(REQ): 
+|PARAMETERS:  1. options(REQ):
 |               options.username: sAMAccountName, UPN, or DN of user
 |             2. cb(REQ): callback function to return back whether the user successfully authenticated.
 |ASSUMES:    Nothing
@@ -149,7 +150,7 @@ Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
 /*-----------------------------------------------------------------------------------------
 |NAME:      isUserMemberOf (PUBLIC)
 |DESCRIPTION:  Determine if a user is a member of a group.
-|PARAMETERS:  1. options(REQ): 
+|PARAMETERS:  1. options(REQ):
 |               options.username: sAMAccountName, UPN, or DN of user
 |               options.groupName: cn or dn of group
 |             2. cb(REQ): callback function to return back whether the user successfully authenticated.
@@ -178,10 +179,10 @@ Authentication.prototype.isAuthTypeEnabled = function(type,cb) {
   var oFilter = {};
   oFilter["domid"] = "authtypes";
   oFilter["value." + type] = "true";
-  
+
   config.mongodb.db.collection("adminsettings").find(oFilter,{_id:1}).toArray(function(e,isEnabled) {
     if (e) return cb(e);
-    
+
     return cb(null,!!isEnabled.length);
   });
 }
@@ -201,9 +202,9 @@ Authentication.prototype.login = function(objOrUpn,cb) {
     : ((typeof objOrUpn === "string")
       ? objOrUpn + ((objOrUpn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix)
       : objOrUpn);
-  
+
   var self = this;
-  
+
   //does the actual saving to the session
   //and calls the callback function
   var saveInfo = function(userInfo) {
@@ -211,35 +212,35 @@ Authentication.prototype.login = function(objOrUpn,cb) {
     for (var _k = 0; _k < userKeys.length; _k++) {
       self.session[userKeys[_k]] = userInfo[userKeys[_k]];
     }
-    
+
     self.session.username = (self.session.username || self.session.sAMAccountName || "").toLowerCase();
     self.session.email = (self.session.email || self.session.mail || "").toLowerCase();
     self.session.firstname = self.session.firstname || self.session.givenName || "";
     self.session.lastname = self.session.lastname || self.session.familyName || self.session.sn || "";
-    
+
     self.session.loggedIn = true;
-    
+
     new Access({db:config.mongodb.db}).isWikiAdmin(self.session.username,function(err,isAdmin) {
       self.session.isFullAdmin = isAdmin || false;
-      
+
       self.session.save();
       return cb(err);
     });
   }
-  
+
   if (objOrUpn == this.GLOBAL_ADMIN) return saveInfo({ADMIN:true, username:this.GLOBAL_ADMIN});
   else if (typeof objOrUpn === "object") return saveInfo(objOrUpn);
-  
+
   this.isAuthTypeEnabled("ldap",function(err,isEnabled) {
     if (err) return cb(err);
     if (!isEnabled) return cb();
-    
+
     self.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
       if (err) return cb(err);
-      
+
       return saveInfo(info.users[0]);
     });
-  });  
+  });
 }
 
 /*-----------------------------------------------------------------------------------------

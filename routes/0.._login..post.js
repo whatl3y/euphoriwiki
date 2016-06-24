@@ -94,7 +94,7 @@ module.exports = function(req,res) {
                 lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
                 sAMAccountName: userInfo.sAMAccountName || null,
                 distinguishedName: userInfo.dn || null,
-                email: userInfo.mail || null
+                email: userInfo.email || userInfo.mail || null
               }
             }
           } else {
@@ -107,7 +107,7 @@ module.exports = function(req,res) {
               lastname: userInfo.lastname || userInfo.familyName || userInfo.sn,
               sAMAccountName: userInfo.sAMAccountName || null,
               distinguishedName: userInfo.dn || null,
-              email: userInfo.mail || null
+              email: userInfo.email || userInfo.mail || null
             };
           }
 

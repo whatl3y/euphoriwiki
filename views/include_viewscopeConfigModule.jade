@@ -12,7 +12,7 @@ div(class="row")
       div(class="col-xs-12",data-ng-show="!" + scopeAry + ".length")
         alert There are no configured scopes for who can view this page.
       div(data-ng-show=scopeAry + ".length")
-        div(class="col-xs-12 col-sm-6 col-md-4",data-ng-repeat="scope in " + scopeAry)
+        div(class="col-xs-12 col-md-6",data-ng-repeat="scope in " + scopeAry)
           div(class="panel panel-info")
             div(class="panel-heading") Scope Type Configuration
             div(class="panel-body")
@@ -78,7 +78,20 @@ div(class="row")
               div(data-ng-if="scope.type == 'loggedin'")
                 div This will require the viewing user to be logged into the wiki to view this page.
               div(data-ng-if="scope.type == 'emailsuffix'")
-                div NOT SUPPORTED YET
+                div(class="separate-vert-medium")
+                  div(class="wrapper",data-ng-show="scope.data.length")
+                    span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="suffix in scope.data")
+                      span {{ suffix.substring(0,15) }}
+                        small(class="margin-left-small")
+                          a(href="javascript:void(0)",data-ng-click="scope.data.splice($index,1)")
+                            em x
+                  div(data-ng-show="!scope.data.length")
+                    alert There are no email suffixes configured.
+                  div(class="col-xs-12 separate-vert-small")
+                    form(class="form-inline",data-ng-submit="scope.data=scope.data||[];scope.data.push(pageViewScopeEmailSuffix);pageViewScopeEmailSuffix=''")
+                      div(class="form-group")
+                        input(type="text",class="form-control",data-ng-model="pageViewScopeEmailSuffix")
+                        button(class="btn btn-default margin-left-small") Add Suffix
               div(data-ng-if="scope.type == 'upnsuffix'")
                 div NOT SUPPORTED YET
       div(class="row")
