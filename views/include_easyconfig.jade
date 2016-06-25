@@ -33,9 +33,9 @@ div.row
                         a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
                       td
                         div.text-right
-                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,-1)")
+                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$index,-1)")
                             span.glyphicon.glyphicon-arrow-up
-                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,1)")
+                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$index,1)")
                             span.glyphicon.glyphicon-arrow-down
                       td
                         a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplateConfigFile(conf.name,filename)") Delete
