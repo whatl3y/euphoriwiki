@@ -390,6 +390,17 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       location.reload();
     },
 
+    updateEasyConfigListAryOrder: function(confName,index,direction) {
+      direction = direction || 1;
+      $scope.template.config[confName] = $scope.template.config[confName] || [];
+
+      var newIndex = index + direction;
+
+      var itemToUpdate = $scope.template.config[confName].splice(index,1)[0];
+      console.log(itemToUpdate);
+      $scope.template.config[confName].splice(newIndex,0,itemToUpdate);
+    },
+
     formatDateTime: function(date) {        //assumes input date is UTC
       if (date instanceof Date || (typeof date==="string" && date.length)) {
         date = date.toString().replace("T"," ").replace("Z"," ");

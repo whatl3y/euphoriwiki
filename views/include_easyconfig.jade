@@ -25,11 +25,18 @@ div.row
                     tr
                       th #
                       th File
+                      th Reorder
                       th Delete
                     tr(data-ng-repeat="filename in template.config[conf.name]")
                       td {{ $index+1 }}
                       td
                         a(data-ng-href="/file/{{ filename }}",target="_blank")  {{ filename }}
+                      td
+                        div.text-right
+                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,-1)")
+                            span.glyphicon.glyphicon-arrow-up
+                          a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,1)")
+                            span.glyphicon.glyphicon-arrow-down
                       td
                         a(href="javascript:void(0)",data-ng-click="handlers.deleteTemplateConfigFile(conf.name,filename)") Delete
             div(data-ng-if="conf.type == 'select'")
@@ -48,6 +55,10 @@ div.row
                         div.col-xs-12.col-sm-6 {{ $parent.$index+1 + '. ' + column.colName }}
                         div.col-xs-12.col-sm-6
                           div.text-right(data-ng-if="$index == conf.listcols.length-1")
+                            a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,-1)")
+                              span.glyphicon.glyphicon-arrow-up
+                            a(href="javascript:void(0)",data-ng-click="functions.updateEasyConfigListAryOrder(conf.name,$parent.$parent.$index,1)")
+                              span.glyphicon.glyphicon-arrow-down
                             a(href="javascript:void(0)",data-ng-click="template.config[conf.name].splice($parent.$parent.$index,1)")
                               em Delete
                     div.panel-body
