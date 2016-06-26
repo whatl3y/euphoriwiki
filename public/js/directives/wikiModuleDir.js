@@ -56,6 +56,7 @@ function wikiModuleDir($compile,$http,$sce) {
           })
           .error(function(data,err) {
             console.log(data,err);
+            $element.replaceWith( "" );
             $scope.functions.loadComplete({template:"<h2>Module not loaded, please provide a valid module ID.</h2>"});
             loader.remove();
           });
