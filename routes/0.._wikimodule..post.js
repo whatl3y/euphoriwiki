@@ -56,7 +56,7 @@ module.exports = function(req,res) {
 
             try {
               //if the code in module.code does not call callback after 30 seconds, do it here.
-              setTimeout(function() {
+              var noDataTimer = setTimeout(function() {
                 try {
                   return callback(null,"No results were returned from the code.");
                 } catch(e) {}
@@ -69,7 +69,10 @@ module.exports = function(req,res) {
 
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
               //go ahead and assume we need to call the callback with that result here.
-              if (typeof codeResult !== "undefined" && codeResult != null) return callback(null,codeResult);
+              if (typeof codeResult !== "undefined" && codeResult != null) {
+                clearTimeout(noDataTimer);
+                return callback(null,codeResult);
+              }
 
             } catch(e) {
               return callback(e);
