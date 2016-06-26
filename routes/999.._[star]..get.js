@@ -7,15 +7,15 @@ var config = require("../libs/config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {
-  var wiki = new WikiHandler({path:req.originalUrl});
+  var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/"+req.params[0];
+
+  var wiki = new WikiHandler({path:path});
   var A = new Auth({session:req.session});
   var Access = new AccessManagement({db: config.mongodb.db});
   var audit = new Audit({user:A.username, ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});
 
   var username = A.username;
   var oView = {};
-
-  var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/"+req.params[0];
 
   // NOTE: need to move this to class at some point
   // increment the page visits for the page
