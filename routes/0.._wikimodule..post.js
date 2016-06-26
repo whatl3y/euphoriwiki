@@ -65,11 +65,11 @@ module.exports = function(req,res) {
               //execute module code
               var params = Object.merge(instance.config || {},{callback:callback});
               params = Object.merge(params,{path:path});
-              var codeResult = new CodeRunner({code:module.code, params:params}).eval();
+              var codeResult = new CodeRunner({code:module.code || "return ''", params:params}).eval();
 
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
               //go ahead and assume we need to call the callback with that result here.
-              if (codeResult) return callback(null,codeResult);
+              if (typeof codeResult !== "undefined" && codeResult != null) return callback(null,codeResult);
 
             } catch(e) {
               return callback(e);
