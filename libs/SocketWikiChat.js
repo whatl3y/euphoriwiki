@@ -1,7 +1,7 @@
 var Authentication = require("./Authentication.js");
 var ChatMessageHandler = require("./ChatMessageHandler.js");
 var WikiHandler = require("./WikiHandler.js");
-var config = require('./config.js');
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------

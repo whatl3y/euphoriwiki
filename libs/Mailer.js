@@ -1,6 +1,6 @@
 var nodemailer = require('nodemailer');
 var GetHTML = require("./GetHTML.js");
-var config = require("./config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
@@ -9,23 +9,23 @@ var log = require("bunyan").createLogger(config.logger.options());
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:  nodemailer, GetHTML library
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/19/2016 - created
 -----------------------------------------------------------------------------------------*/
 Mailer = function(options) {
   options = options || {};
-  
+
   this.mailoptions = {};
   this.mailoptions.from = options.from || "";
   this.mailoptions.to = options.to || "";
   this.mailoptions.cc = options.cc || [];
   this.mailoptions.bcc = options.bcc || [];
-  
+
   this.smtpconfig = (options.config) ? options.config : config.smtp.nodemailerconfig();
-  
+
   try {
     this.transporter = nodemailer.createTransport(this.smtpconfig);
-    
+
     //if we have template information, meaning this will be sent via a template
     //go ahead and define the templateSender and try to send the e-mail
     //      options.send: boolean indicating if we'll go ahead and send the e-mail

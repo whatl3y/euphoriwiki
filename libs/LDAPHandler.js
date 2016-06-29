@@ -1,5 +1,5 @@
 var ActiveDirectory = require("activedirectory");
-var config = require('./config.js');
+var config = require("../config.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    LDAPHandler.js

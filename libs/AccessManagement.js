@@ -1,4 +1,4 @@
-var config = require('./config.js');
+var config = require("../config.js");
 var _ = require("underscore");
 var async = require("async");
 

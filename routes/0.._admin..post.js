@@ -4,7 +4,7 @@ var async = require("async");
 var GetHTML = require("../libs/GetHTML.js");
 var Authentication = require("../libs/Authentication.js");
 var WikiHandler = require("../libs/WikiHandler.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {
