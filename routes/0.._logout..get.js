@@ -1,5 +1,5 @@
 var Audit = require("../libs/Audit.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {

@@ -1,4 +1,4 @@
-var config = require("./libs/config.js");
+var config = require("./config.js");
 
 'use strict'
 

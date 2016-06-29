@@ -1,6 +1,6 @@
 var LocalStrategy = require("passport-local").Strategy;
 var Authentication = require("../libs/Authentication.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 
 module.exports = {
   strategy: LocalStrategy,

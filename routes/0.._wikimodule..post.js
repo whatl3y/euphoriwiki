@@ -6,7 +6,7 @@ var Audit = require("../libs/Audit.js");
 var GetHTML = require("../libs/GetHTML.js");
 var FileHandler = require("../libs/FileHandler.js");
 var CodeRunner = require("../libs/CodeRunner.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {

@@ -1,6 +1,6 @@
 var fs = require("fs");
 var async = require("async");
-var config = require("./config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------

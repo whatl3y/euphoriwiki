@@ -2,7 +2,7 @@ var Auth = require("../libs/Authentication.js");
 var WikiHandler = require("../libs/WikiHandler.js");
 var AccessManagement = require("../libs/AccessManagement.js");
 var Audit = require("../libs/Audit.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 
 module.exports = function(req,res) {
   var query = req.params.query;

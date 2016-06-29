@@ -1,7 +1,7 @@
 var path = require("path");
 var async = require("async");
-var MDB = require('./MDB.js');
-var Object = require("../public/js/Object_prototypes.js");
+var MDB = require('./libs/MDB.js');
+var Object = require("./public/js/Object_prototypes.js");
 
 var self = module.exports = {
   app: {
@@ -17,8 +17,8 @@ var self = module.exports = {
   },
 
   newrelic: {
-    key: process.env.NEW_RELIC_LICENSE_KEY,
-    level: process.env.NEW_RELIC_LOGGING_LEVEL || 'info'
+    key: process.env.NEWRELIC_KEY,
+    level: process.env.NEWRELIC_LEVEL || 'info'
   },
 
   admin: {

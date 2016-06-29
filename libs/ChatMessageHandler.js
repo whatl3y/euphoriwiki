@@ -1,5 +1,5 @@
 var ObjectId = require('mongodb').ObjectID;
-var config = require('./config.js');
+var config = require("../config.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:		ChatMessageHandler.js

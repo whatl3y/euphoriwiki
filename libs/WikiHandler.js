@@ -5,7 +5,7 @@ var SQLHandler = require("./SQLHandler.js");
 var FileHandler = require("./FileHandler.js");
 var GetHTML = require("./GetHTML.js");
 var CodeRunner = require("./CodeRunner.js");
-var config = require('./config.js');
+var config = require("../config.js");
 var Object = require("../public/js/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------

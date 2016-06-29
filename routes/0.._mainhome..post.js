@@ -2,7 +2,7 @@ var _ = require("underscore");
 var async = require("async");
 var Auth = require("../libs/Authentication.js");
 var AccessManagement = require("../libs/AccessManagement.js");
-var config = require("../libs/config.js");
+var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {

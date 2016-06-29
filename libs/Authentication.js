@@ -2,7 +2,7 @@ var async = require("async");
 var Encryption = require("./Encryption.js");
 var Access = require("./AccessManagement.js");
 var LDAPHandler = require("./LDAPHandler.js");
-var config = require("./config.js");
+var config = require("../config.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Authentication.js
