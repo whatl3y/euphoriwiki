@@ -1,7 +1,7 @@
 {
   "name": "euphoriwiki",
   "version": "1.0.0",
-  "description": "Easy to use wiki.",
+  "description": "Easy to use web platform to build blogs, wikis, or any kind of website.",
   "main": "index.js",
   "engines": {
     "node": ">=0.12"
@@ -11,7 +11,7 @@
     "url" : "https://github.com/whatl3y/euphoriwiki.git"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "newrelic": "latest",

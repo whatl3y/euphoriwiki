@@ -71,8 +71,9 @@ module.exports = function(req,res) {
         oView.canSeeEditButton = (oView.loggedIn && canEditPage);
 
         if (!canViewPage) return res.redirect("/?auth=" + path);
-        else if (page.aliasfor) return res.redirect(page.aliasfor);
-        else if (!passwordValidated) pageHtml = "";
+        if (page.aliasfor) return res.redirect(page.aliasfor);
+        if (!canEditPage && !pageHtml) return res.redirect("/");
+        if (!passwordValidated) pageHtml = "";
 
         return res.render("wikipage",config.view.send(req,{obj:oView, iobj:{pageInfo:{content_html:pageHtml}}, title:path}));
       }
