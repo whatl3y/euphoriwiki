@@ -44,6 +44,7 @@ function wikiModuleDir($compile,$http,$sce) {
           var loader = new Core.Modals().asyncLoader({message:"Loading module..."});
           $http.post('/wikimodule',{type:"getModule", id:moduleId, path:decodeURI(location.pathname)})
           .success(function(ret) {
+            //console.log(ret);
             if (ret.success) {
               $scope.functions.bindInfo(ret);
             } else {

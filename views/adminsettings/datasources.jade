@@ -14,7 +14,7 @@ div.separate-vert-small
                   th Host
                   th Driver
                   th Database
-                  th Remove
+                  th Edit/Remove
                 tr
                   td
                     strong
@@ -23,30 +23,45 @@ div.separate-vert-small
                   td {{ ds.driver }}
                   td {{ ds.database }}
                   td
+                    a(href="javascript:void(0)",data-ng-click="setting.dsName=ds.name;setting.dsServer=ds.server;setting.dsSsl=ds.ssl;setting.dsPort=ds.port;setting.dsDriver=ds.driver;setting.dsDb=ds.database;setting.dsUn=ds.username;setting.dsPw=ds.password")
+                      em Edit
+                    span  /
                     a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
                       em x
   div(class="separate-vert-small")
     div.padding-small
       div.panel.panel-default
         div.panel-body
-          form(data-ng-submit="functions.pushArray(setting.value,{name:setting.dsName, server:setting.dsServer, driver:setting.dsDriver, database:setting.dsDb, username:setting.dsUn, password:setting.dsPw})")
-            div.form-group
-              label(for="dsName") Datasource Name
-              input.input-sm.form-control.margin-small(type="text",id="dsName",name="dsName",data-ng-model="setting.dsName")
-            div.form-group
-              label(for="dsServer") Server/Host
-              input.input-sm.form-control.margin-small(type="text",id="dsServer",name="dsServer",data-ng-model="setting.dsServer")
-            div.form-group
-              label(for="tmpDsDriver") Driver
-              select.input-sm.form-control.margin-small(id="tmpDsDriver",name="tmpDsDriver",data-ng-model="setting.dsDriver",data-ng-options="d.key as d.name for d in [{key:'mssql',name:'Microsoft SQL Server'},{key:'mysql',name:'MySQL'},{key:'postgresql',name:'PostgreSQL'}]")
-            div.form-group
-              label(for="dsDb") Database
-              input.input-sm.form-control.margin-small(type="text",id="dsDb",name="dsDb",data-ng-model="setting.dsDb")
-            div.form-group
-              label(for="dsUn") Username
-              input.input-sm.form-control.margin-small(type="text",id="dsUn",name="dsUn",data-ng-model="setting.dsUn")
-            div.form-group
-              label(for="dsPw") Password
-              input.input-sm.form-control.margin-small(type="text",id="dsPw",name="dsPw",data-ng-model="setting.dsPw")
-            div.form-group.text-center
-              button(type="submit",class="btn btn-default margin-left-small") Add Datasource
+          form(data-ng-submit="functions.pushArray(setting.value,setting.dsConString || {name:setting.dsName, server:setting.dsServer, ssl:setting.dsSsl, port:setting.dsPort, driver:setting.dsDriver, database:setting.dsDb, username:setting.dsUn, password:setting.dsPw})")
+            div
+              div.form-group
+                label(for="dsName") Datasource Name
+                input.input-sm.form-control.margin-small(type="text",id="dsName",name="dsName",data-ng-model="setting.dsName")
+              div.form-group
+                label(for="dsServer") Server/Host
+                input.input-sm.form-control.margin-small(type="text",id="dsServer",name="dsServer",data-ng-model="setting.dsServer")
+              div.form-group
+                label(for="dsUsesSsl") Connection Uses SSL? (Default: False)
+                select.input-sm.form-control.margin-small(id="dsUsesSsl",name="dsUsesSsl",data-ng-model="setting.dsSsl",data-ng-options="s.val as s.text for s in [{text:'True',val:''},{text:'False',val:'true'}]")
+              div.form-group
+                label(for="dsPort") Port
+                input.input-sm.form-control.margin-small(type="text",id="dsPort",name="dsPort",data-ng-model="setting.dsPort")
+              div.form-group
+                label(for="tmpDsDriver") Driver
+                select.input-sm.form-control.margin-small(id="tmpDsDriver",name="tmpDsDriver",data-ng-model="setting.dsDriver",data-ng-options="d.key as d.name for d in [{key:'mssql',name:'Microsoft SQL Server'},{key:'mysql',name:'MySQL'},{key:'postgresql',name:'PostgreSQL'}]")
+              div.form-group
+                label(for="dsDb") Database
+                input.input-sm.form-control.margin-small(type="text",id="dsDb",name="dsDb",data-ng-model="setting.dsDb")
+              div.form-group
+                label(for="dsUn") Username
+                input.input-sm.form-control.margin-small(type="text",id="dsUn",name="dsUn",data-ng-model="setting.dsUn")
+              div.form-group
+                label(for="dsPw") Password
+                input.input-sm.form-control.margin-small(type="text",id="dsPw",name="dsPw",data-ng-model="setting.dsPw")
+              div.form-group.text-center
+                button(type="submit",class="btn btn-default margin-left-small") Add Datasource
+            div.connection-string(style="margin-top:10px")
+              div or if you would like to only provide a connection string, use the field below:
+              div.form-group
+                label(for="dsConString") Connection String
+                input.input-sm.form-control.margin-small(type="text",id="dsConString",name="dsConString",data-ng-model="setting.dsConString")

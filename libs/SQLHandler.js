@@ -8,15 +8,15 @@ var pg = require("pg");
 |AUTHOR:    Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:    mysql, mssql
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |        *LJW 3/1/2016 - created
 -----------------------------------------------------------------------------------------*/
 SQLHandler = function(opts) {
   opts = opts || {};
-  
+
   this.config = opts.config || {};
   this.driver = opts.driver || "mssql";
-  
+
   try {
     if (this.driver) {
       this.connection = this.init().createConnection[this.driver](this.config);
@@ -29,16 +29,16 @@ SQLHandler = function(opts) {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      connect (PUBLIC)
-|DESCRIPTION:  
+|DESCRIPTION:
 |PARAMETERS:  1. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.init = function() {
   var self = this;
-  
+
   return this.map = {
     driver: {
       mysql: "mysql",
@@ -46,7 +46,10 @@ SQLHandler.prototype.init = function() {
       postgres: "postgresql",
       postgresql: "postgresql"
     },
-    
+
+    //TODO change all createConnection types to not just take the raw config
+    //object as it's input, but do some validation and ensure we're passing
+    //the correct key/value pairs or a complete connection string (pg)
     createConnection: {
       mysql: function(config) {
         return mysql.createConnection(config);
@@ -54,11 +57,11 @@ SQLHandler.prototype.init = function() {
       mssql: function(config) {
         return new mssql.Connection(config);
       },
-      postgresql: function(conString) {
-        return new pg.Client(conString);
+      postgresql: function(config) {
+        return new pg.Client(config);
       }
     },
-    
+
     connect: {
       mysql: function(cb)  {
         (self.connection) ? self.connection.connect(cb) : self.noop(cb);
@@ -70,7 +73,7 @@ SQLHandler.prototype.init = function() {
         (self.connection) ? self.connection.connect(cb) : self.noop(cb);
       }
     },
-    
+
     query: {
       mysql: function(q,cb) {
         (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
@@ -83,7 +86,7 @@ SQLHandler.prototype.init = function() {
         (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
       }
     },
-    
+
     close: {
       mysql: function() {
         (self.connection) ? self.connection.destroy() : self.noop();
@@ -100,9 +103,9 @@ SQLHandler.prototype.init = function() {
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      connect (PUBLIC)
-|DESCRIPTION:  
+|DESCRIPTION:
 |PARAMETERS:  1. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -118,7 +121,7 @@ SQLHandler.prototype.connect = function(cb) {
 |              options.query: the query to run
 |              options.close: true/false whether to close the connection
 |        2. cb(REQ): the function we would like to call with results from messages
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -126,9 +129,9 @@ SQLHandler.prototype.connect = function(cb) {
 SQLHandler.prototype.query = function(options,cb) {
   options = options || {};
   var q = (typeof options==="string") ? options : options.query;
-  
+
   var self = this;
-  
+
   self.map.query[self.driver](q,function(__e,data) {
     if (typeof options==="object" && options.close) self.map.close[self.driver]();
     cb(__e,data);
@@ -147,7 +150,7 @@ SQLHandler.prototype.query = function(options,cb) {
 |              options.object: object that we'll be returning the data from the multiple
 |                  queries will be returned in.
 |        2. cb(REQ): the function we would like to call with results from the queries
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
@@ -155,16 +158,16 @@ SQLHandler.prototype.query = function(options,cb) {
 SQLHandler.prototype.queriesRecursive = function(options,cb) {
   options.index = options.index || 0;
   options.object = options.object || {};
-  
+
   var self=this;
-  
+
   if (options.array[options.index]) {
     self.query({query:options.array[options.index].Query},function(_e,data) {
       if (_e) cb(_e,options.object);
       else {
         options.object[options.array[options.index].ObjectKey] = data;
         options.index++;
-        
+
         self.queriesRecursive(options,cb);
       }
     })
