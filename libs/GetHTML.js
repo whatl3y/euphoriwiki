@@ -10,17 +10,17 @@ var mammoth = require("mammoth");
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:  path, fs, html, jade, mammoth
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/19/2016 - created
 -----------------------------------------------------------------------------------------*/
 GetHTML = function(options) {
   options = options || {};
-  
+
   this.indent = options.indent || 2;        //how far the HTML indent spacing should be for enclosed tags on new lines.
   this.path = options.path || "";           //directory path where file resides
   this.filename = options.file || options.filename || "";
   this.fullpath = options.fullpath || "";   //full directory+file path where file resides
-  
+
   this.initialize();
 }
 
@@ -52,9 +52,9 @@ GetHTML.prototype.initialize = function() {
 -----------------------------------------------------------------------------------------*/
 GetHTML.prototype.html = function(string,cb) {
   cb = (typeof string==="function") ? string : cb;
-  
+
   var self = this;
-  
+
   if (typeof string==="function") {
     fs.readFile(this.fullpath,{encoding:"utf8"},function(e,retHtml) {
       if (e) cb(e);
@@ -89,9 +89,9 @@ GetHTML.prototype.jade = function(string,cb) {
   cb = (typeof string==="function") ? string : cb;
   method = (typeof string==="function") ? "renderFile" : "render";
   methodParam = (typeof string==="function") ? this.fullpath : (string || "");
-  
+
   try {
-    var retHtml = jade[method](methodParam);
+    var retHtml = jade[method](methodParam, {basedir:path.join('','views')});
     cb(null,this.prettify(retHtml));
   } catch(e) {
     cb(e);
@@ -108,7 +108,7 @@ GetHTML.prototype.jade = function(string,cb) {
 -----------------------------------------------------------------------------------------*/
 GetHTML.prototype.docx = function(cb) {
   var self = this;
-  
+
   mammoth.convertToHtml({path:this.fullpath}).then(function(result) {
     cb(null,self.prettify(result));
   }).catch(function(err) {
@@ -186,26 +186,26 @@ GetHTML.prototype.makePath=function(p,ary) {
     if (typeof ary[0]==="string") {
       p = path.join(p,ary[0]);
       ary.shift();
-      
+
       return this.makePath(p,ary);
     } else {
       return p;
     }
-    
+
   } else if (p && !ary) {
-    
+
     ary = (p instanceof Array) ? p : p.split(/[\\\/,\|\^]{1,2}/g);
     p = "";
-    
+
     if (ary.length <= 1) return path.join(ary[0] || "");
     else {
       p = path.join(ary[0]);
       ary.shift();
-      
+
       return this.makePath(p,ary);
     }
   }
-  
+
   return p;
 }
 
