@@ -410,10 +410,14 @@ module.exports = function(req,res) {
 
           //populate template info based on info provided
           var oTemplate = JSON.parse(info.template || "");
-          saveData["$set"].template = (oTemplate && oTemplate.isEasyConfig == "Yes") ? {
-            templateId: oTemplate.templateId,
-            config: oTemplate.config || {}
-          } : {};
+          if (oTemplate && oTemplate.isEasyConfig == "Yes") {
+            saveData["$set"].content_html = '';
+            saveData["$set"].content_markdown = '';
+            saveData["$set"].template = {
+              templateId: oTemplate.templateId,
+              config: oTemplate.config || {}
+            };
+          }
 
           aTemplateFiles.forEach(function(oTemp) {
             if (typeof saveData["$set"].template.config === "object") {
