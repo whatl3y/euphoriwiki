@@ -417,6 +417,7 @@ module.exports = function(req,res) {
               templateId: oTemplate.templateId,
               config: oTemplate.config || {}
             };
+            saveData["$set"].search_content = wiki.addAndPopulateSearchField(saveData["$set"]);
           }
 
           aTemplateFiles.forEach(function(oTemp) {

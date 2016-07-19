@@ -495,8 +495,8 @@ WikiHandler.prototype.searchPages=function(query,cb) {
   var returnedFields = {path:1,description:1,tags:1,pageViews:1,updated:1,_id:0};
 
   var filters = {path:/.*/};
-  if (query) filters = {$or: [{path:regEx},{tags:{$in:querySplit}},{path:{$in:regExQuerySplit}}]};
-  if (queryExact) filters = {$and:[{content_html:new RegExp(".*" + queryExact + ".*","gmi")},filters]};
+  if (query) filters = {$or: [{path:regEx}, {tags:{$in:querySplit}}, {path:{$in:regExQuerySplit}}]};
+  if (queryExact) filters = {$and: [{$or: [{content_html:new RegExp(".*" + queryExact + ".*","gmi")},{search_content:new RegExp(".*" + queryExact + ".*","gmi")}]}, filters]};
 
   this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},function(e,pages) {
     if (e) cb(e);
@@ -868,6 +868,33 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
       }
     }
   );
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      addAndPopulateSearchField (PUBLIC)
+|DESCRIPTION:  If the page is an Easy Config page, we will populate and return a concatenated
+|           string of information about the config keys and information in those keys.
+|PARAMETERS:  1. oContent(OPT): an object of the information about a page.
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    <string/null>: if is an Easy Config page, a long string, otherwise null
+-----------------------------------------------------------------------------------------*/
+WikiHandler.prototype.addAndPopulateSearchField=function(oContent) {
+  if (oContent.template.templateId && typeof oContent.template.config === "object") {
+    var searchString = '';
+    var config = oContent.template.config;
+    for (var _key in config) {
+      if (typeof config[_key] === "string") {
+        searchString += '|' + _key + ': ' + config[_key];
+      } else if (config[_key] instanceof Array && typeof config[_key] === "string") {
+        searchString += '|' + _key + ': ' + config[_key].join('; ');
+      }
+    }
+
+    return searchString;
+  }
+
+  return null;
 }
 
 /*-----------------------------------------------------------------------------------------
