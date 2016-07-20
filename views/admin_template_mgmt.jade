@@ -80,7 +80,7 @@ block main
                           div.panel-heading.text-large
                             div.row
                               div.col-xs-8
-                                strong {{ $index + 1 }}. Configuration
+                                strong {{ $index + 1 }}. {{ newTemplate.config[$index].name || 'Configuration' }}
                               div.col-xs-4.text-right
                                 a(href="javascript:void(0)",data-ng-click="functions.updateAryOrder('newTemplateConfig',$index,-1)")
                                   span.glyphicon.glyphicon-arrow-up
