@@ -42,7 +42,8 @@
     "async": "^1.5.2",
     "activedirectory": "^0.7.1",
     "mammoth": "^0.3.30",
-    "graceful-fs": "^4.1.3"
+    "graceful-fs": "^4.1.3",
+    "redis": "^2.6.2"
   },
   "author": "Lance Whatley",
   "license": "ISC"

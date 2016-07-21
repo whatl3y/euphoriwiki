@@ -10,6 +10,7 @@ var formidable = require('express-formidable');
 var bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
 var mongoStore = require("connect-mongo")(session);
+var redis = require("redis");
 var path = require("path");
 var http = require("http").Server(app);
 var io = require("socket.io")(http,{pingInterval:4000, pingTimeout:10000});
