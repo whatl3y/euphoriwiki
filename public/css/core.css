@@ -201,6 +201,7 @@ colgroup col.info {
   background: #F5F5F5;
   /*min-height: 300px;*/
   margin: 10px;
+  opacity: 0.8;
 }
 
 .dark {

@@ -1,17 +1,17 @@
 - //access to adminSettingsCtrl functions
 - //the information saved needs to go to setting.value as either an object or other piece of data
 
-div(class="separate-vert-small")
-  div(class="row")
+div.separate-vert-small
+  div.row
     form
-      div(class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-        div(class="form-group")
+      div.col-xs-12
+        div.form-group
           label(for="host") SMTP Host
           input(type="text",class="form-control",id="host",name="host",data-ng-model="setting.value.host")
-        div(class="form-group")
+        div.form-group
           label(for="port") SMTP Port
           input(type="text",class="form-control",id="port",name="port",data-ng-model="setting.value.port")
-        div(class="form-group")
+        div.form-group
           div
             label Is the SMTP connection secure?
           div
@@ -21,17 +21,17 @@ div(class="separate-vert-small")
             div(class="radio-inline")
               label No
                 input(type="radio",id="secure",name="secure",data-ng-model="setting.value.secure",data-ng-value="false")
-        div(class="form-group")
+        div.form-group
           label(for="user") Authentication User
           input(type="text",class="form-control",id="user",name="user",data-ng-model="setting.value.auth.user")
-        div(class="form-group")
+        div.form-group
           label(for="pw")
-            div Authentication User Password 
+            div Authentication User Password
               a(href="javascript:void(0)",data-ng-click="authPass=(!authPass || authPass=='password')?'text':'password'") ({{ (!authPass || authPass=='password') ? 'Show Password' : 'Hide Password' }})
           input(type="{{ authPass || 'password' }}",class="form-control",id="pw",name="pw",data-ng-model="setting.value.auth.pass")
-        div(class="form-group")
+        div.form-group
           label(for="defEmail") Wiki E-mail Address
           input(type="text",class="form-control",id="defEmail",name="defEmail",data-ng-model="setting.value.defaultEmail")
-        div(class="form-group")
+        div.form-group
           label(for="defName") Wiki E-mail Name
           input(type="text",class="form-control",id="defName",name="defName",data-ng-model="setting.value.defaultName")

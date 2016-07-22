@@ -6,7 +6,7 @@ function wikiModuleDir($compile,$http,$sce) {
       id: "=",
       hide: "="
     },
-    template: "<div><div class='module-placeholder text-center'><h3 class='padding-medium'><div><img style='width:30px;height:30px' src='/public/images/loader.gif' /></div><div>Loading Module...</div></h3></div></div>",
+    template: "<div><div class='module-placeholder text-center'><h3 class='padding-medium'><div><img style='width:30px;height:30px' src='/public/images/loader.gif' /></div><div>Loading</div></h3></div></div>",
     link: function($scope, $element, $attrs) {
       var moduleId = $scope.id;
       var hide = $scope.hide || false;
