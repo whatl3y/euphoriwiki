@@ -129,13 +129,18 @@ SQLHandler.prototype.connect = function(cb) {
 SQLHandler.prototype.query = function(options,cb) {
   options = options || {};
   var q = (typeof options==="string") ? options : options.query;
+  var dataArray = (typeof options==="string") ? null : options.dataArray;
 
   var self = this;
-
-  self.map.query[self.driver](q,function(__e,data) {
+  var responseFunction = function(__e,data) {
     if (typeof options==="object" && options.close) self.map.close[self.driver]();
     cb(__e,data);
-  });
+  };
+
+  if (dataArray) {
+    return self.map.query[self.driver](q,dataArray,responseFunction);
+  }
+  return self.map.query[self.driver](q,responseFunction);
 }
 
 /*-----------------------------------------------------------------------------------------

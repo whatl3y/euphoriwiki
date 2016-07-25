@@ -71,6 +71,9 @@ module.exports = function(req,res) {
               //go ahead and assume we need to call the callback with that result here.
               if (typeof codeResult !== "undefined" && codeResult != null) {
                 clearTimeout(noDataTimer);
+                if (codeResult instanceof Error) {
+                  return callback(codeResult);
+                }
                 return callback(null,codeResult);
               }
 

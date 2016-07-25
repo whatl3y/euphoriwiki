@@ -15,6 +15,7 @@ var config = require("../config.js");
 function ApiClient(opts) {
   opts=opts || {};
 
+  this.endpoint = opts.endpoint || null;
   this.verb = opts.verb || "GET";
   this.port = opts.port || ((opts.secure) ? 443 : 80);
   this.clientType = (opts.secure) ? "https" : "http";
@@ -36,12 +37,14 @@ function ApiClient(opts) {
 |        false: error getting token
 -----------------------------------------------------------------------------------------*/
 ApiClient.prototype.request = function(reqData,cb) {
-  reqData=reqData || {};
-  reqData=this.params(reqData,this.verb);
+  reqData = reqData || {};
+  reqData = this.params(reqData,this.verb);
 
-  var options={
+  var fullPath = (this.verb.toLowerCase() === 'get') ? this.path + '?' + reqData : this.path;
+
+  var options = {
     hostname: this.endpoint,
-    path: this.path,
+    path: fullPath,
     protocol: this.clientType+":",
     port: this.port,
     method: this.verb,
@@ -86,11 +89,11 @@ ApiClient.prototype.params = function(obj,type) {
 
   switch(type) {
     case 'get':
-      if (typeof obj==="string") return obj;
+      if (typeof obj === "string") return obj;
       return Object.serialize(obj);
 
     case 'post':
-      if (typeof obj==="string") return Object.unserialize(obj);
+      if (typeof obj === "string") return Object.unserialize(obj);
       return obj;
   }
 
