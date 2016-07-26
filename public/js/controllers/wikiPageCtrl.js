@@ -339,6 +339,10 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       return Object.size(obj);
     },
 
+    getAry: function(num) {
+      return new Array(num);
+    },
+
     pageStateToUploadType: function() {
       var ps = $scope.pageState;
 

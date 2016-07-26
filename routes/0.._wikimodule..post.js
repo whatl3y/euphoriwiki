@@ -7,6 +7,7 @@ var GetHTML = require("../libs/GetHTML.js");
 var FileHandler = require("../libs/FileHandler.js");
 var CodeRunner = require("../libs/CodeRunner.js");
 var config = require("../config.js");
+var Object = require('../public/js/Object_prototypes.js')
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {
@@ -63,8 +64,10 @@ module.exports = function(req,res) {
               },30000);
 
               //execute module code
-              var params = Object.merge(instance.config || {},{callback:callback});
-              params = Object.merge(params,{path:path});
+              var queryParams = req.headers.referer.split('?')[1];
+              oQueryParams = (typeof queryParams === 'string') ? Object.unserialize(queryParams) : {};
+              
+              var params = Object.merge(instance.config || {},{callback:callback, path:path, queryParams:oQueryParams});
               var codeResult = new CodeRunner({code:module.code || "return ''", params:params}).eval();
 
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
