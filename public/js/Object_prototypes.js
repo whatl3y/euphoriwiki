@@ -3,9 +3,9 @@
 |PURPOSE:  This will contain functions of the Object object that will be commonly used.
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|      
+|
 |ASSUMES:  Nothing
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 12/31/2014 - created
 -----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------
@@ -39,9 +39,16 @@ Object.size = function(obj) {
 Object.serialize = function(obj) {
   var a=[];
   for (var _key in obj) {
-    a.push( encodeURIComponent(_key)+'='+encodeURIComponent(obj[_key]) );
+    // a.push( encodeURIComponent(_key)+'='+encodeURIComponent(obj[_key]) );
+    if (obj[_key] instanceof Array) {
+      for (var _i=0;_i<obj[_key].length;_i++) {
+        a.push(encodeURIComponent(_key) + '=' + encodeURIComponent(obj[_key][_i]));
+      }
+    } else {
+      a.push(encodeURIComponent(_key) + '=' + encodeURIComponent(obj[_key]));
+    }
   }
-  
+
   return a.join("&");
 }
 
@@ -56,14 +63,14 @@ Object.serialize = function(obj) {
 -----------------------------------------------------------------------------------------*/
 Object.unserialize = function(string) {
   string=(/^\?/.test(string)) ? string.substring(1) : string;    //if first char is a question mark, remove it from the string
-  
+
   var a=string.split("&");
   var obj={};
   for (var _i=0;_i<a.length;_i++) {
     var _a = a[_i].split("=");
     obj[ decodeURIComponent(_a[0]) ] = decodeURIComponent(_a[1]);
   }
-  
+
   return obj;
 }
 
@@ -88,7 +95,7 @@ Object.merge = function(obj1,obj2,obj3) {
     var toClass = {}.toString;
     return typeof obj[attrname]==="object" && toClass.call(obj[attrname]) == "[object Object]";
   }
-  
+
   if (typeof obj1!=='object') {
     //do nothing
   } else if (typeof obj2!=='object') {
@@ -106,7 +113,7 @@ Object.merge = function(obj1,obj2,obj3) {
       else obj3[attrname] = obj2[attrname];
     }
   }
-  
+
   return obj3;
 }
 
@@ -127,7 +134,7 @@ Object.merge = function(obj1,obj2,obj3) {
 |        <ary>: a new Array created if oldToNew isn't provided
 -----------------------------------------------------------------------------------------*/
 Object.reKey = function(obj,oldToNew) {
-  var newObj;  
+  var newObj;
   switch (typeof oldToNew) {
     case 'object':
       newObj=Object.merge(obj);    //see function above
@@ -138,14 +145,14 @@ Object.reKey = function(obj,oldToNew) {
         }
       }
       break;
-      
+
     default:
       newObj=[];
       for (var _key in obj) {
         newObj.push(obj[ _key ]);
       }
   }
-  
+
   return newObj;
 }
 
@@ -166,7 +173,7 @@ Object.removeDollarKeys = function(obj) {
       else if (typeof obj[_k]==="object" && obj[_k]!=null) obj[_k]=Object.removeDollarKeys(obj[_k]);
     }
   }
-  
+
   return obj;
 }
 
