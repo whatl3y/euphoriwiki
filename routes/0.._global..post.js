@@ -36,18 +36,18 @@ module.exports = function(req,res) {
               oPages = Object.merge(oPages,wiki.aryToNestedObj(pagesSplit));
             }
 
-            return callback(null,oPages);
+            return callback(null,oPages,filteredPages);
           } catch(_e) {
-            return callback(_e,{});
+            return callback(_e,{},[]);
           }
         },
-        function(filteredPages,callback) {
+        function(filteredPages,filteredPagesAry,callback) {
           config.mongodb.db.collection("themes").find({type:"global"}).toArray(function(e,themeInfo) {
-            callback(e,filteredPages,themeInfo);
+            callback(e,filteredPages,filteredPagesAry,themeInfo);
           });
         }
       ],
-        function(err,filteredPages,themeInfo) {
+        function(err,filteredPages,filteredPagesAry,themeInfo) {
           if (err) {
             res.json({success:false, error:err});
             return log.error(err);
@@ -55,7 +55,13 @@ module.exports = function(req,res) {
 
           var theme = (themeInfo instanceof Array && themeInfo.length) ? themeInfo[0] : {};
 
-          return res.json({success:true, allpages:filteredPages, logo:theme.header_logo, logoLink:theme.header_logo_link});
+          return res.json({
+            success:true,
+            allpages:filteredPages,
+            allpages_ary:filteredPagesAry,
+            logo:theme.header_logo,
+            logoLink:theme.header_logo_link
+          });
         }
       );
 

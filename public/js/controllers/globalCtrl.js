@@ -43,6 +43,7 @@ function globalCtrl($scope,$http) {
           console.log(ret);
         } else {
           $scope.allPages = ret.allpages;
+          $scope.allPagesAry = ret.allpages_ary;
           $scope.navLogo = (ret.logo) ? "/file/" + ret.logo : "/public/images/euphoriwiki.png";
           $scope.navLogoLink = ret.logoLink || null;
 
