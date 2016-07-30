@@ -7,14 +7,14 @@ var Grid = require('gridfs-stream');
 |PURPOSE:  Handles all things to do with getting information about a wiki page.
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|      
+|
 |ASSUMES:  mongodb native driver in nodejs
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
 FileHandler=function(options) {
   options = options || {};
-  
+
   this.db = options.db;
   this.gfs = Grid(this.db, mongo);
 }
@@ -31,10 +31,10 @@ FileHandler=function(options) {
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.findFiles=function(options,cb) {
   var options = options || {};
-  
+
   var method = (options.one) ? "findOne" : "find";
   var fileName = options.filename;
-  
+
   this.gfs[method]({filename:fileName},function(err,file) {
     if (err) cb(err);
     else cb(null,file);
@@ -53,20 +53,20 @@ FileHandler.prototype.findFiles=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.uploadFile=function(options,cb) {
   options = options || {};
-  
+
   var filePath = options.path || options.filePath;
-  var fileName = options.filename;
+  var fileName = options.filename || filePath.substring((filePath.lastIndexOf('/') > -1) ? filePath.lastIndexOf('/')+1 : 0);
   var newFileName = (options.exactname) ? fileName : false;
-  
+
   newFileName = newFileName || this.getFileName(fileName);
-  
+
   var readStream = options.readStream || fs.createReadStream(filePath);
   var writeStream = this.writeStream(newFileName);
-  
+
   //setup event handlers for file stream
   writeStream.on("error",function(err) {cb(err);});
   writeStream.on("close",function(file) {cb(null,newFileName);});
-  
+
   readStream.pipe(writeStream);
 }
 
@@ -84,27 +84,27 @@ FileHandler.prototype.uploadFile=function(options,cb) {
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.getFile=function(options,cb) {
   options = options || {};
-  
+
   var filename = options.filename || options.file || "";
   var encoding = options.encoding || "";
-  
+
   try {
     var readStream = this.gfs.createReadStream({filename:filename});
     if (encoding) readStream.setEncoding(encoding);
-    
+
     var data = "";
     readStream.on("data",function(chunk) {
       data += chunk;
     });
-    
+
     readStream.on("end",function() {
       cb(null,data);
     });
-    
+
     readStream.on("error",function(e) {
       cb(e);
     });
-    
+
   } catch(err) {
     cb(err);
   }
@@ -124,7 +124,7 @@ FileHandler.prototype.deleteFile=function(options,cb) {
   try {
     var fileName = options.filename || "";
     this.gfs.remove({filename:fileName},cb);
-    
+
   } catch(err) {
     cb(err);
   }
@@ -153,7 +153,7 @@ FileHandler.prototype.writeStream=function(newFileName) {
 -----------------------------------------------------------------------------------------*/
 FileHandler.prototype.getFileName=function(fileName,extraText) {
   extraText = extraText || Date.now();
-  
+
   var lastPeriod = fileName.lastIndexOf(".");
   return fileName.substring(0,lastPeriod) + "_" + extraText + fileName.substring(lastPeriod);
 }

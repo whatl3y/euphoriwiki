@@ -14,7 +14,6 @@ switch (which) {
     console.log(new Encryption().decrypt(text));
     break;
 
-
   default:
     console.log("Please enter an argument, -e to encrypt, -d to decrypt.")
 }
