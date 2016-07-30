@@ -19,7 +19,7 @@ SQLHandler = function(opts) {
 
   try {
     if (this.driver) {
-      this.connection = this.init().createConnection[this.driver](this.config);
+      this.connection = this.init().createConnection[this.map.driver[this.driver]](this.config);
       this.init();
     }
   } catch(err) {
@@ -111,7 +111,8 @@ SQLHandler.prototype.init = function() {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.connect = function(cb) {
-  this.map.connect[this.driver](cb);
+  this.map.connect[this.map.driver[this.driver]](cb);
+  return this;
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -133,14 +134,15 @@ SQLHandler.prototype.query = function(options,cb) {
 
   var self = this;
   var responseFunction = function(__e,data) {
-    if (typeof options==="object" && options.close) self.map.close[self.driver]();
+    if (typeof options==="object" && options.close) self.close();
     cb(__e,data);
   };
 
   if (dataArray) {
-    return self.map.query[self.driver](q,dataArray,responseFunction);
+    self.map.query[self.map.driver[self.driver]](q,dataArray,responseFunction);
   }
-  return self.map.query[self.driver](q,responseFunction);
+  self.map.query[self.map.driver[self.driver]](q,responseFunction);
+  return this;
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -176,7 +178,23 @@ SQLHandler.prototype.queriesRecursive = function(options,cb) {
         self.queriesRecursive(options,cb);
       }
     })
-  } else cb(null,options.object);
+  } else {
+    cb(null,options.object);
+  }
+  return this;
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      close (PUBLIC)
+|DESCRIPTION: close the current connection
+|PARAMETERS:
+|SIDE EFFECTS:  None
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+SQLHandler.prototype.close=function() {
+  this.map.close[this.map.driver[this.driver]]();
+  return this;
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -190,6 +208,7 @@ SQLHandler.prototype.queriesRecursive = function(options,cb) {
 SQLHandler.prototype.noop=function(cb1,cb2) {
   if (typeof cb1==="function") cb1();
   else if (typeof cb2==="function") cb2();
+  return this;
 }
 
 //-------------------------------------------------------
