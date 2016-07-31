@@ -42,7 +42,7 @@ div.separate-vert-small
                 input.input-sm.form-control.margin-small(type="text",id="dsServer",name="dsServer",data-ng-model="setting.dsServer")
               div.form-group
                 label(for="dsUsesSsl") Connection Uses SSL? (Default: False)
-                select.input-sm.form-control.margin-small(id="dsUsesSsl",name="dsUsesSsl",data-ng-model="setting.dsSsl",data-ng-options="s.val as s.text for s in [{text:'True',val:''},{text:'False',val:'true'}]")
+                select.input-sm.form-control.margin-small(id="dsUsesSsl",name="dsUsesSsl",data-ng-model="setting.dsSsl",data-ng-options="s.val as s.text for s in [{text:'True',val:'true'},{text:'False',val:''}]")
               div.form-group
                 label(for="dsPort") Port
                 input.input-sm.form-control.margin-small(type="text",id="dsPort",name="dsPort",data-ng-model="setting.dsPort")

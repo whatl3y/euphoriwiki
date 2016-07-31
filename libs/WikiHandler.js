@@ -820,7 +820,9 @@ WikiHandler.prototype.getModules=function(options,cb) {
     }
   ],
     function(err,results) {
-      var modules = results[0];
+      var modules = results[0].sort(function(a,b) {
+        return (a.key < b.key) ? -1 : 1;
+      });
       cb(err,modules);
     }
   );
@@ -863,6 +865,7 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
           var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
           moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
         });
+        moduleInstances = moduleInstances.sort(function(a,b) { return (a.key < b.key) ? -1 : 1; });
 
         cb(null,moduleInstances);
       }
