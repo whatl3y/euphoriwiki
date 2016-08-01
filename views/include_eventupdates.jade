@@ -8,7 +8,7 @@ div(class="separate-vert-small text-center")
 div(class="padding-small text-center",data-ng-show="!" + aryEvents + ".length")
   alert There are no page events configured in the wiki.
 ul(class="list-unstyled",data-ng-show=aryEvents+".length")
-  li(class="switch-grey separate-vert-small",data-ng-repeat="event in "+aryEvents)
+  li(class="switch-grey separate-vert-small",data-ng-repeat="event in "+aryEvents+" | orderBy:'name'")
     div(class="row padding-medium")
       div(class="col-xs-12")
         div(class="row")

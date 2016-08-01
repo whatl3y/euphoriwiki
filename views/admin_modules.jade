@@ -19,7 +19,7 @@ block main
               - //th Configuration Options
               th Date Created
               th Edit/Delete Module
-            tr(data-ng-repeat="module in modules")
+            tr(data-ng-repeat="module in modules | orderBy:'key'")
               td {{ $index+1 }}
               td {{ module.key }}
               td {{ module.name }}
