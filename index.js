@@ -146,8 +146,9 @@ function main(notClustering) {
         if (queryInfo.extracode) {
           try {
             eval(queryInfo.extracode);
+            log.debug('Successfully ran extra code for initializequeries - collection: ' + queryInfo.collection + ' info: ' + JSON.stringify(queryInfo));
           } catch(err) {
-            log.error(err);
+            log.error(err,'Error running extra code for initializequeries - collection: ' + queryInfo.collection + ' info: ' + JSON.stringify(queryInfo));
           }
         }
       });
