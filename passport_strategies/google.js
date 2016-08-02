@@ -20,9 +20,9 @@ module.exports = {
   },
   handler: function(req, accessToken, refreshToken, profile, done) {
     log.debug(profile);
-    
+
     A.session = req.session;
-    
+
     if (typeof profile === "object") {
       var info = {
         username: "google_" + profile.id,
@@ -33,7 +33,7 @@ module.exports = {
         refreshToken: refreshToken
       };
     } else return done(null,false);
-    
+
     async.waterfall([
       function(callback) {
         A.findOrSaveUser({username:info.username},function(err,user) {
@@ -60,19 +60,30 @@ module.exports = {
             accessToken: info.accessToken,
             refreshToken: info.refreshToken
           };
-          
-          A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
-            if (e) return callback(e);
-            else {
-              A.login(doc,function(_e) {
-                callback(_e,doc);
-              });
+        } else {
+          var saveData = {
+            $set: {
+              lastlogin: new Date(),
+              username: info.username,
+              firstname: info.firstname,
+              lastname: info.lastname,
+              email: info.email || null,
+              accessToken: info.accessToken,
+              refreshToken: info.refreshToken
             }
-            
-            new WikiHandler().event({type:"login", params:{username:info.username}},function(e,result) {if (e) log.error(e);});
-            new Audit().log({type:"Login", user:info.username});
+          }
+        }
+
+        A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
+          if (e) return callback(e);
+
+          A.login(doc,function(_e) {
+            callback(_e,doc);
           });
-        } else callback(null,userRecord);
+
+          new WikiHandler().event({type:"login", params:{username:info.username}},function(e,result) {if (e) log.error(e);});
+          new Audit().log({type:"Login", user:info.username});
+        });
       }
     ],
       function(err,userRecord) {
