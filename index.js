@@ -38,13 +38,6 @@ var log = require("bunyan").createLogger(config.logger.options());
 var Object = require("./public/js/Object_prototypes.js");
 
 try {
-  // initialize routes object to be used to bind express routes
-  var aRoutes = fs.readdirSync("routes");
-  var oRoutes = {};
-  for (var _i=0; _i < aRoutes.length; _i++) {
-    oRoutes[aRoutes[_i]] = require("./routes/" + aRoutes[_i]);
-  }
-
   //handle clustering if applicable
   if (config.server.CLUSTERING) {
     if (!sticky.listen(http,config.server.PORT)) {    //if (cluster.isMaster) {}
@@ -152,6 +145,13 @@ function main(notClustering) {
           }
         }
       });
+
+      // initialize routes object to be used to bind express routes
+      var aRoutes = fs.readdirSync("routes");
+      var oRoutes = {};
+      for (var _i=0; _i < aRoutes.length; _i++) {
+        oRoutes[aRoutes[_i]] = require("./routes/" + aRoutes[_i]);
+      }
 
       //setup route handlers in the express app
       _.each(oData.routes,function(route) {
