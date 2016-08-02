@@ -75,15 +75,34 @@ SQLHandler.prototype.init = function() {
     },
 
     query: {
-      mysql: function(q,cb) {
-        (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
+      mysql: function(q,ary,cb) {
+        cb = (typeof ary === 'function') ? ary : cb;
+        ary = (typeof ary === 'function') ? null : ary;
+
+        if (self.connection) {
+          if (ary instanceof Array) {
+            return self.connection.query(q,ary,cb);
+          }
+          return self.connection.query(q,cb)
+        }
+        return self.noop(q,cb);
       },
       mssql: function(q,cb) {
         var conn = (self.connection) ? self.connection : {};
         new mssql.Request(conn).query(q,cb);
       },
-      postgresql: function(q,cb) {
-        (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
+      postgresql: function(q,ary,cb) {
+        // (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
+        cb = (typeof ary === 'function') ? ary : cb;
+        ary = (typeof ary === 'function') ? null : ary;
+
+        if (self.connection) {
+          if (ary instanceof Array) {
+            return self.connection.query(q,ary,cb);
+          }
+          return self.connection.query(q,cb)
+        }
+        return self.noop(q,cb);
       }
     },
 
@@ -140,8 +159,9 @@ SQLHandler.prototype.query = function(options,cb) {
 
   if (dataArray) {
     self.map.query[self.map.driver[self.driver]](q,dataArray,responseFunction);
+  } else {
+    self.map.query[self.map.driver[self.driver]](q,responseFunction);
   }
-  self.map.query[self.map.driver[self.driver]](q,responseFunction);
   return this;
 }
 
