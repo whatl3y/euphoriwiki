@@ -446,7 +446,6 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
 
           template.config = template.config.map(function(c) {
             if (queryResults[c.name]) return queryResults[c.name];
-
             return c;
           });
 
@@ -498,10 +497,7 @@ WikiHandler.prototype.searchPages=function(query,cb) {
   if (query) filters = {$or: [{path:regEx}, {tags:{$in:querySplit}}, {path:{$in:regExQuerySplit}}]};
   if (queryExact) filters = {$and: [{$or: [{content_html:new RegExp(".*" + queryExact + ".*","gmi")},{search_content:new RegExp(".*" + queryExact + ".*","gmi")}]}, filters]};
 
-  this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},function(e,pages) {
-    if (e) cb(e);
-    else cb(null,pages);
-  });
+  this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},cb);
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -545,12 +541,11 @@ WikiHandler.prototype.pageTree=function(path) {
 WikiHandler.prototype.requiresReview=function(path,cb) {
   path = path || this.path;
   this.getPage({filters:{path:path}, fields:{"settings.requiresReview":1}},function(e,pages) {
-    if (e) cb(e);
-    else if (!pages.length) cb(null,0);
-    else {
-      var numReviews = pages[0].settings.requiresReview || 0;
-      return cb(null,numReviews);
-    }
+    if (e) return cb(e);
+    if (!pages.length) return cb(null,0);
+
+    var numReviews = pages[0].settings.requiresReview || 0;
+    return cb(null,numReviews);
   });
 }
 
@@ -625,16 +620,14 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
   }
 
   if (pagePW) {
-    validate(pagePW);
-  } else {
-    this.isPasswordProtected(pageInfo,function(e,pw) {
-      if (e) cb(e);
-      else {
-        if (!pw) cb(null,true);
-        else validate(pw);
-      }
-    });
+    return validate(pagePW);
   }
+
+  this.isPasswordProtected(pageInfo,function(e,pw) {
+    if (e) return cb(e);
+    if (!pw) return cb(null,true);
+    return validate(pw);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -654,14 +647,15 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
   }
 
   if (typeof info==="object" && info!=null) {
-    check(info);
-  } else {
-    this.getPage({fields:{password:1}},function(_e,pageInfo) {
-      if (_e) cb(_e);
-      else if (!pageInfo.length) cb(null,false);
-      else check(pageInfo[0]);
-    });
+    return check(info);
   }
+
+  this.getPage({fields:{password:1}},function(_e,pageInfo) {
+    if (_e) return cb(_e);
+    if (!pageInfo.length) return cb(null,false);
+
+    return check(pageInfo[0]);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -823,7 +817,7 @@ WikiHandler.prototype.getModules=function(options,cb) {
       var modules = results[0].sort(function(a,b) {
         return (a.key < b.key) ? -1 : 1;
       });
-      cb(err,modules);
+      return cb(err,modules);
     }
   );
 }
@@ -856,19 +850,18 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
     }
   ],
     function(err,results) {
-      if (err) cb(err);
-      else {
-        var modules = results[0];
-        var moduleInstances = results[1];
+      if (err) return cb(err);
 
-        _.each(moduleInstances,function(instance,_index) {
-          var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
-          moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
-        });
-        moduleInstances = moduleInstances.sort(function(a,b) { return (a.key < b.key) ? -1 : 1; });
+      var modules = results[0];
+      var moduleInstances = results[1];
 
-        cb(null,moduleInstances);
-      }
+      _.each(moduleInstances,function(instance,_index) {
+        var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
+        moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
+      });
+      moduleInstances = moduleInstances.sort(function(a,b) { return (a.key < b.key) ? -1 : 1; });
+
+      return cb(null,moduleInstances);
     }
   );
 }

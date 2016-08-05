@@ -47,11 +47,10 @@ AccessManagement.prototype.isAdmin = function(options,cb) {
     }
   ],
     function(err,results) {
-      if (err) cb(err);
-      else {
-        var isAdmin = results[0] || results[1] || false;
-        cb(null,isAdmin);
-      }
+      if (err) return cb(err);
+
+      var isAdmin = results[0] || results[1] || false;
+      return cb(null,isAdmin);
     }
   );
 }
@@ -71,7 +70,7 @@ AccessManagement.prototype.isWikiAdmin = function(username,cb) {
 
   this.db.collection("adminsettings").find({domid:"wikiadmins","value.username":username},{_id:1}).toArray(function(e,admin) {
     if (e) return cb(e);
-    else if (admin.length) return cb(null,true);
+    if (admin.length) return cb(null,true);
 
     return cb(null,false);
   });
@@ -101,38 +100,37 @@ AccessManagement.prototype.isPageAdmin = function(options,cb) {
   var self = this;
 
   if (!username || !path) {
-    cb(null,false);
-  } else {
-    var pathFilter = this.createInheritanceFilter(path);
-    pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
-
-    var oFilters = {$and: [pathFilter, {"settings.admins":{$exists:1}}]};
-
-    this.db.collection("wikicontent").find(oFilters,{"settings.admins":1}).toArray(function(e,pages) {
-      if (e) cb(e);
-      else {
-        if (pages.length) {
-          pages = self.sortWikiResults(pages);
-
-          var isAdmin = null;
-          _.each(pages,function(p) {
-            if (!(p.settings.admins instanceof Array) || !p.settings.admins.length) return;
-            else {
-              _.each(p.settings.admins,function(adminUsername) {
-                if (isAdmin != null) return;
-                else if (adminUsername.toLowerCase() == username.toLowerCase()) isAdmin = true;
-              });
-
-              if (isAdmin == null) isAdmin = false;
-            }
-          });
-
-          cb(null,((isAdmin == null) ? editOnly : isAdmin));
-
-        } else cb(null,editOnly);
-      }
-    });
+    return cb(null,false);
   }
+
+  var pathFilter = this.createInheritanceFilter(path);
+  pathFilter = (typeof pathFilter==="object" && pathFilter["$or"]) ? pathFilter : {path:path};
+
+  var oFilters = {$and: [pathFilter, {"settings.admins":{$exists:1}}]};
+
+  this.db.collection("wikicontent").find(oFilters,{"settings.admins":1}).toArray(function(e,pages) {
+    if (e) return cb(e);
+
+    if (pages.length) {
+      pages = self.sortWikiResults(pages);
+
+      var isAdmin = null;
+      _.each(pages,function(p) {
+        if (!(p.settings.admins instanceof Array) || !p.settings.admins.length) return;
+
+        _.each(p.settings.admins,function(adminUsername) {
+          if (isAdmin != null) return;
+          if (adminUsername.toLowerCase() == username.toLowerCase()) isAdmin = true;
+        });
+
+        if (isAdmin == null) isAdmin = false;
+      });
+
+      return cb(null,((isAdmin == null) ? editOnly : isAdmin));
+    }
+
+    return cb(null,editOnly);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -191,24 +189,25 @@ AccessManagement.prototype.onlyViewablePaths = function(options,cb) {
 
     async.parallel(asyncParallel,
       function(err,results) {
-        if (err) cb(err);
-        else {
-          try {
-            var filteredPages = results.filter(function(_p) {
-              return _p.canView;
-            }).map(function(__p) {
-              return __p.path;
-            });
+        if (err) return cb(err);
 
-            cb(null,filteredPages);
-          } catch(_err) {
-            cb(_err);
-          }
+        try {
+          var filteredPages = results.filter(function(_p) {
+            return _p.canView;
+          }).map(function(__p) {
+            return __p.path;
+          });
+
+          return cb(null,filteredPages);
+        } catch(_err) {
+          return cb(_err);
         }
       }
     );
 
-  } else cb(null,[]);
+  } else {
+    return cb(null,[]);
+  }
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -246,31 +245,39 @@ AccessManagement.prototype.canViewPage = function(options,cb) {
       pages = self.sortWikiResults(pages);
 
       var canView = null;
-      async.each(pages,function(p,callback1) {
+      async.eachSeries(pages,function(p,callback1) {
+        // Only descend to find more scopes for a new page if we haven't found a
+        // scope already that evaluates to true/false (i.e. no scopes period
+        // for the 'lower' pages)
+        if (canView !== null) return callback1();
+
         var scopes = p.settings.viewscope;
 
         async.each(scopes,function(scope,callback2) {
+          // Only look within additional scopes for a page if we haven't
+          // found a scope yet that evaluates to true. This effectively
+          // gives us OR logic between the scopes.
+          if (canView === true) return callback2();
+
           var evalFunction = self.getMemberScopeEvalFunction(scope.type);
 
           evalFunction(username,path,scope.data || session,function(__err,result) {
-            if (!__err) {
-              if (canView == null && !result) canView = false;
-              else if (result) canView = true;
-            }
+            if (__err) return callback2(__err);
+            if (canView == null && !result) canView = false;
+            if (result) canView = true;
 
-            callback2(__err);
+            return callback2();
           });
         },
         function(_err) {
-          if (_err) callback1(_err);
-          else {
-            canView = (canView == null) ? true : canView;
-            callback1();
-          }
+          if (_err) return callback1(_err);
+
+          canView = (canView === null) ? true : canView;
+          return callback1();
         });
       },
       function(err) {
-        cb(err,canView);
+        return cb(err,canView);
       });
 
     } else {
