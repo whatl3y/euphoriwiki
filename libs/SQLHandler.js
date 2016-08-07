@@ -148,13 +148,13 @@ SQLHandler.prototype.connect = function(cb) {
 -----------------------------------------------------------------------------------------*/
 SQLHandler.prototype.query = function(options,cb) {
   options = options || {};
-  var q = (typeof options==="string") ? options : options.query;
-  var dataArray = (typeof options==="string") ? null : options.dataArray;
+  var q = (typeof options==="string") ? options : (options.query || options.q);
+  var dataArray = (typeof options==="string") ? null : (options.dataArray || options.data);
 
   var self = this;
   var responseFunction = function(__e,data) {
     if (typeof options==="object" && options.close) self.close();
-    cb(__e,data);
+    return cb(__e,data);
   };
 
   if (dataArray) {
