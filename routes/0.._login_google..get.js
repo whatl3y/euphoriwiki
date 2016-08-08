@@ -8,4 +8,7 @@ if (config.oauth_scopes instanceof Array) {
   log.debug('Additional oauth_scopes found for google login: ' + additionalScopes.join(','));
 }
 
-module.exports = passport.authenticate("google",{scope: [].concat(["profile", "email"],additionalScopes)});
+module.exports = passport.authenticate("google",{
+  scope: [].concat(["profile", "email"],additionalScopes),
+  accessType: 'offline'   //returns the refresh token
+});
