@@ -25,6 +25,19 @@ var RedisHelper = function(urlOrClient) {
     this.client.type(key,cb);
   };
 
+  this.scan = function(cursor,cb) {
+    this.client.scan(cursor,function(err,cursorAndKeys) {
+      return cb(err,cursorAndKeys);
+    }
+  };
+
+  // Gets the keys that match a pattern
+  // http://redis.io/commands/KEYS
+  // wildcard is *
+  this.keys = function(pattern,cb) {
+    this.client.keys(pattern,cb);
+  };
+
   this.info = function(key,cb) {
     this.client.debug('object',key,cb);
   };
@@ -79,6 +92,14 @@ var RedisHelper = function(urlOrClient) {
       return cb(null,oSetValues);
     })
   };
+
+  this.end = function() {
+    this.client.end(false);
+  };
+
+  this.close = function() {
+    this.end();
+  }
 }
 
 //-------------------------------------------------------
