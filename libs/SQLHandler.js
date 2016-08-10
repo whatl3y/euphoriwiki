@@ -146,10 +146,20 @@ SQLHandler.prototype.connect = function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.query = function(options,cb) {
+SQLHandler.prototype.query = function(options,dataArray,cb) {
   options = options || {};
+
+  cb = (typeof dataArray === "function") ? dataArray : cb;
+
+  if (typeof dataArray === "function") {
+    if (typeof options === "string") {
+      dataArray = null;
+    } else {
+      dataArray = options.dataArray || options.data;
+    }
+  }
+
   var q = (typeof options==="string") ? options : (options.query || options.q);
-  var dataArray = (typeof options==="string") ? null : (options.dataArray || options.data);
 
   var self = this;
   var responseFunction = function(__e,data) {
