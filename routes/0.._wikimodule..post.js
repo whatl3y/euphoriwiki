@@ -61,7 +61,7 @@ module.exports = function(req,res) {
                 try {
                   return callback(null,"No results were returned from the code.");
                 } catch(e) {}
-              },(instance.timeout || 30)*1000);
+              },(module.timeout || 30)*1000);
 
               //execute module code
               var queryParams = req.headers.referer.split('?')[1];
