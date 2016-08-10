@@ -28,7 +28,7 @@ var RedisHelper = function(urlOrClient) {
   this.scan = function(cursor,cb) {
     this.client.scan(cursor,function(err,cursorAndKeys) {
       return cb(err,cursorAndKeys);
-    }
+    });
   };
 
   // Gets the keys that match a pattern
