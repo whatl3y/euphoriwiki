@@ -87,15 +87,17 @@ ApiClient.prototype.params = function(obj,type) {
   obj=obj || {};
   type= (typeof type==='string') ? type.toLowerCase() : 'get';
 
-  switch(type) {
-    case 'get':
-      if (typeof obj === "string") return obj;
-      return Object.serialize(obj);
-
-    case 'post':
-      if (typeof obj === "string") return Object.unserialize(obj);
-      return obj;
-  }
+  // 20160805 LW just serialize if object
+  return (typeof obj === "string") ? obj : Object.serialize(obj);
+  // switch(type) {
+  //   case 'get':
+  //     if (typeof obj === "string") return obj;
+  //     return Object.serialize(obj);
+  //
+  //   case 'post':
+  //     if (typeof obj === "string") return obj;    //return Object.unserialize(obj);
+  //     return Object.serialize(obj);
+  // }
 
   return '';
 }

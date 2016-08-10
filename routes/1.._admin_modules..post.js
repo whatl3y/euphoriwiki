@@ -91,6 +91,7 @@ module.exports = function(req,res) {
               var moduleConfig = Object.removeDollarKeys(info.module.config || {}) || {};
               var moduleCode = info.module.code || "";
               var clientCode = info.module.clientCode || "";
+              var timeout = info.module.timeout;
 
               var createOrModify = function(newFileName) {
                 var data = {$set: {updated: new Date()}};
@@ -101,6 +102,7 @@ module.exports = function(req,res) {
                 if (moduleConfig) data["$set"].config = moduleConfig;
                 if (moduleCode) data["$set"].code = moduleCode;
                 if (newFileName) data["$set"].template = newFileName;
+                if (timeout) data["$set"].timeout = timeout;
 
                 data["$set"].clientCode = clientCode;
 

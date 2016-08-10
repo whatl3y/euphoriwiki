@@ -50,21 +50,29 @@ block main
                       div(class="text-xlarge") Create/Edit Modules
                     div(class="panel-body")
                       form
-                        div(class="form-group")
+                        div.form-group
                           label(for="key") Module Key
                           input(type="text",class="form-control",id="key",name="key",data-ng-model="newModule.key")
-                        div(class="form-group")
+                        div.form-group
                           label(for="name") Module Name
                           input(type="text",class="form-control",id="name",name="name",data-ng-model="newModule.name")
-                        div(class="form-group")
+                        div.form-group
                           label(for="description") Module Description
                           textarea(class="form-control",id="description",name="description",data-ng-model="newModule.description")
-                        div(class="form-group")
+                        div.form-group
                           label(for="template",popover="This is an HTML or Jade template file we will use to replace the module with after retrieving and processing it.",popover-trigger="mouseenter")
                             span Module View Template File
                             span(class="glyphicon glyphicon-info-sign")
                           input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
-                        div(class="form-group")
+                        div.form-group
+                          label(for="timeout",popover="Determines how long in seconds we will wait for the module to return results before silently failing. If left blank, the default is 30 seconds.",popover-trigger="mouseenter")
+                            span Module Timeout (seconds)
+                            span(class="glyphicon glyphicon-info-sign")
+                            span
+                              small
+                                small  default: 30 seconds
+                          input.form-control(type="number",id="timeout",name="timeout",data-ng-model="newModule.timeout")
+                        div.form-group
                           div(class="panel")
                             div(class="panel-heading")
                               label(popover="A list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
@@ -94,10 +102,10 @@ block main
                                     div.col-xs-12.col-sm-4
                                       label(for="cv{{ $index }}") Value(s)
                                       input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
-                        div(class="form-group")
+                        div.form-group
                           label Data Generation Code (Server)
                           textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code",placeholder="The config options are exposed in this code in the PARAMS object (i.e. var {{ newModule.config[0].name || 'option1' }} = PARAMS.{{ newModule.config[0].name || 'option1' }}).\r\n\r\nThis code either needs to return the value/object you want to use with the module, or if async code is used you need to pass your returned information to the PARMAS.callback function (first param is error/null, second parameter is data returned).\r\n\r\nEXAMPLE:\r\nasyncFunction('foo',function(err,data) {\r\n\tPARAMS.callback(err,data);\r\n});")
-                        div(class="form-group")
+                        div.form-group
                           label (OPTIONAL) Post Processing Code (Client)
                           textarea(class="form-control",id="clientCode",name="clientCode",data-ng-model="newModule.clientCode",placeholder="The results from the Data Generation Code are exposed in this code using the DATA object (i.e. var result1 = DATA.myFirstPieceOfData).")
                         div(class="form-group text-center")

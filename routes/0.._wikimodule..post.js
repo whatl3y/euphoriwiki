@@ -61,12 +61,12 @@ module.exports = function(req,res) {
                 try {
                   return callback(null,"No results were returned from the code.");
                 } catch(e) {}
-              },30000);
+              },(instance.timeout || 30)*1000);
 
               //execute module code
               var queryParams = req.headers.referer.split('?')[1];
               oQueryParams = (typeof queryParams === 'string') ? Object.unserialize(queryParams) : {};
-              
+
               var params = Object.merge(instance.config || {},{callback:callback, path:path, queryParams:oQueryParams});
               var codeResult = new CodeRunner({code:module.code || "return ''", params:params}).eval();
 
