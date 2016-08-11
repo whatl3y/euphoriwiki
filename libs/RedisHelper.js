@@ -56,7 +56,7 @@ var RedisHelper = function(urlOrClient) {
     this.client.keys(pattern,cb);
   };
 
-  this.info = function(key,cb) {
+  this.debug_object = function(key,cb) {
     this.client.debug('object',key,cb);
   };
 
