@@ -21,6 +21,24 @@ var RedisHelper = function(urlOrClient) {
     this.client = null;
   }
 
+  //http://redis.io/commands/INFO
+  //memory information about redis instance
+  this.info = function(param,cb) {
+    this.client.info(param,cb);
+  };
+
+  this.dbsize = function(cb) {
+    this.client.dbsize(cb);
+  };
+
+  this.key_size = function(cb) {
+    this.dbsize(cb);
+  };
+
+  this.number_of_keys = function(cb) {
+    this.dbsize(cb);
+  };
+
   this.type = function(key,cb) {
     this.client.type(key,cb);
   };
