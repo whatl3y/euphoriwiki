@@ -1,13 +1,17 @@
 - //access to adminSettingsCtrl functions
 - //the information saved needs to go to setting.value as either an object or other piece of data
 
-div(class="separate-vert-small")
-  div
-    span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="path in setting.value")
-      span {{ path }}
-      small(class="margin-left-small")
-        a(href="javascript:void(0)",data-ng-click="setting.value.splice($index,1)")
-          em x
+div.separate-vert-small
+  div.padding-small.table-responsive
+    table.table
+      tr
+        th Path
+        th Delete
+      tr(data-ng-repeat="path in setting.value | orderBy")
+        td {{ path }}
+        td
+          a(href="javascript:void(0)",data-ng-click="setting.value.splice(setting.value.indexOf(path),1)")
+            div Delete
   div(class="separate-vert-small")
     div(class="text-center")
       form(class="form-inline",data-ng-submit="functions.pushArray(setting.value,setting.temp)")
