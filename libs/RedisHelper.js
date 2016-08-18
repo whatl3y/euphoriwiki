@@ -72,10 +72,11 @@ var RedisHelper = function(urlOrClient) {
   };
 
   this.hash = function(key,cb) {
+    var self = this;
     var cursor= 0;
     var object = {};
     async.doUntil(function(callback) {
-      this.client.hscan(key,cursor,function(err,cursorAndKeys) {
+      self.client.hscan(key,cursor,function(err,cursorAndKeys) {
         if (err) return callback(err);
 
         cursor = cursorAndKeys[0];
