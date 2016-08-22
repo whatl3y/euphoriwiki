@@ -4,7 +4,7 @@
 div.separate-vert-small
   div.padding-small
     ul.list-unstyled
-      li(class="padding-small",data-ng-repeat="ds in setting.value")
+      li(class="padding-small",data-ng-repeat="ds in setting.value | orderBy:'name'")
         small
           small
             div.table-responsive
