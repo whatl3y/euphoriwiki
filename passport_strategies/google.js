@@ -28,10 +28,11 @@ module.exports = {
         username: "google_" + profile.id,
         firstname: profile.name.givenName,
         lastname: profile.name.familyName,
-        email: profile.emails[0].value,
-        accessToken: accessToken,
-        refreshToken: refreshToken
+        email: profile.emails[0].value
       };
+
+      if (accessToken) info.accessToken = accessToken;
+      if (refreshToken) info.refreshToken = refreshToken;
     } else return done(null,false);
 
     async.waterfall([
