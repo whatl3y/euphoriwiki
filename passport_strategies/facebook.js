@@ -29,11 +29,10 @@ module.exports = {
         username: "fb_" + profile.id,
         firstname: profile.name.givenName,
         lastname: profile.name.familyName,
-        email: profile.emails[0].value
+        email: profile.emails[0].value,
+        accessToken: accessToken,
+        refreshToken: refreshToken
       };
-
-      if (accessToken) info.accessToken = accessToken;
-      if (refreshToken) info.refreshToken = refreshToken;
     } else return done(null,false);
 
     async.waterfall([
@@ -58,10 +57,11 @@ module.exports = {
             username: info.username,
             firstname: info.firstname,
             lastname: info.lastname,
-            email: info.email || null,
-            accessToken: info.accessToken,
-            refreshToken: info.refreshToken
+            email: info.email || null
           };
+
+          if (info.accessToken) saveData.accessToken = info.accessToken;
+          if (info.refreshToken) saveData.refreshToken = info.refreshToken;
         } else {
           var saveData = {
             $set: {
@@ -69,11 +69,12 @@ module.exports = {
               username: info.username,
               firstname: info.firstname,
               lastname: info.lastname,
-              email: info.email || null,
-              accessToken: info.accessToken,
-              refreshToken: info.refreshToken
+              email: info.email || null
             }
           }
+
+          if (info.accessToken) saveData['$set'].accessToken = info.accessToken;
+          if (info.refreshToken) saveData['$set'].refreshToken = info.refreshToken;
         }
 
         A.findOrSaveUser(Object.merge(saveData,{upsert:true}),function(e,doc) {
