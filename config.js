@@ -137,7 +137,7 @@ var self = module.exports = {
           });
         },
         function(opts,callback) {
-          if (process.env.MONGODB_FILE_HOST) {
+          if (process.env.MONGODB_FILE_URI || process.env.MONGODB_FILE_HOST) {
             new MDB({config:self, connectionString:oSelf.connectionString({
               full: process.env.MONGODB_FILE_URI,
               host: process.env.MONGODB_FILE_HOST,
