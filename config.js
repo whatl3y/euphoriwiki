@@ -118,7 +118,7 @@ var self = module.exports = {
 
       var auth = (user && password) ? user+":"+password+"@" : "";
 
-      return options.full || dbInfo.full  || protocol+'://'+auth+host+':'+port+'/'+db;
+      return options.full || dbInfo.full || (protocol+'://'+auth+host+':'+port+'/'+db);
     },
 
     initialize:  function(cb) {
