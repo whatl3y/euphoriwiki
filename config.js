@@ -76,7 +76,7 @@ var self = module.exports = {
 
   mongodb: {
     access: {
-      FULL_URI:  process.env.MONGODB_FULLURI || null,
+      FULL_URI:  process.env.MONGODB_URI || null,
       PROTOCOL:  'mongodb',
       HOST:    process.env.MONGODB_HOST || "localhost",
       PORT:    Number(process.env.MONGODB_PORT || 27017),
@@ -118,7 +118,7 @@ var self = module.exports = {
 
       var auth = (user && password) ? user+":"+password+"@" : "";
 
-      return ((options.host) ? options.full : dbInfo.full) || protocol+'://'+auth+host+':'+port+'/'+db;
+      return ((options.full) ? options.full : dbInfo.full) || protocol+'://'+auth+host+':'+port+'/'+db;
     },
 
     initialize:  function(cb) {
@@ -139,6 +139,7 @@ var self = module.exports = {
         function(opts,callback) {
           if (process.env.MONGODB_FILE_HOST) {
             new MDB({config:self, connectionString:oSelf.connectionString({
+              full: process.env.MONGODB_FILE_URI,
               host: process.env.MONGODB_FILE_HOST,
               user: process.env.MONGODB_FILE_USER,
               password: process.env.MONGODB_FILE_PW,
