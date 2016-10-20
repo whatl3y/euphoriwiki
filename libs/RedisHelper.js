@@ -80,7 +80,9 @@ var RedisHelper = function(urlOrClient) {
         if (err) return callback(err);
 
         cursor = cursorAndKeys[0];
-        object[cursorAndKeys[1][0]] = cursorAndKeys[1][1];
+        for (var _i=0; _i<cursorAndKeys[1].length; _i=_i+2) {
+          object[cursorAndKeys[1][_i]] = cursorAndKeys[1][_i+1];
+        }
         return callback(null,cursor);
       });
     },
