@@ -72,29 +72,30 @@ var RedisHelper = function(urlOrClient) {
   };
 
   this.hash = function(key,cb) {
-    var self = this;
-    var cursor= 0;
-    var object = {};
-    async.doUntil(function(callback) {
-      self.client.hscan(key,cursor,function(err,cursorAndKeys) {
-        if (err) return callback(err);
-
-        cursor = cursorAndKeys[0];
-        for (var _i=0; _i<cursorAndKeys[1].length; _i=_i+2) {
-          object[cursorAndKeys[1][_i]] = cursorAndKeys[1][_i+1];
-        }
-        return callback(null,cursor);
-      });
-    },
-      // test function
-      function(scanCursor) {
-        return 0 === Number(scanCursor);
-      },
-      // after getting all keys this is the final callback
-      function(err) {
-        cb(err,object);
-      }
-    );
+    this.client.hgetall(key,cb)
+    // var self = this;
+    // var cursor= 0;
+    // var object = {};
+    // async.doUntil(function(callback) {
+    //   self.client.hscan(key,cursor,function(err,cursorAndKeys) {
+    //     if (err) return callback(err);
+    //
+    //     cursor = cursorAndKeys[0];
+    //     for (var _i=0; _i<cursorAndKeys[1].length; _i=_i+2) {
+    //       object[cursorAndKeys[1][_i]] = cursorAndKeys[1][_i+1];
+    //     }
+    //     return callback(null,cursor);
+    //   });
+    // },
+    //   // test function
+    //   function(scanCursor) {
+    //     return 0 === Number(scanCursor);
+    //   },
+    //   // after getting all keys this is the final callback
+    //   function(err) {
+    //     cb(err,object);
+    //   }
+    // );
   };
 
   this.set = function(key,cb) {
