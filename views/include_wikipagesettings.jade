@@ -1,207 +1,208 @@
 - //20160204: included in include_editpage.jade
 - //has access to properties in wikiPageCtrl controller
-div(class="row")
-  div(class="col-xs-12 col-md-10 col-md-offset-1")
-    h1 Inherited Settings
-    small The following settings will be inherited at lower child page levels to this one unless overridden at that page.
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Page Administrators
-      div
-        div(class="separate-vert-small text-theme-color")
-          em.
-            This will determine a subset of people who have access to edit
-            this AND any subpages to this page. If no one here is specified,
-            then this setting will ascend up the page tree to see if there are administrators
-            specified there. If there are none at any level above this page, anyone can edit this page.
+div.container
+  div.row
+    div.col-xs-12
+      h1 Inherited Settings
+      small The following settings will be inherited at lower child page levels to this one unless overridden at that page.
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Page Administrators
         div
-          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
-            span {{ admin }}
-            small(class="margin-left-small")
-              a(href="javascript:void(0)",data-ng-click="pageadmins.splice($index,1)")
-                em x
-        div(class="row separate-vert-small")
-          div(class="text-center")
-            form(class="form-inline",data-ng-submit="pageadmins.push(tempAd);tempAd=''")
-              div(class="form-group")
-                label(for="tempAdmins") New Page Administrator
-                input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
-                button(type="submit",class="btn btn-default margin-left-small") Add Username
+          div(class="separate-vert-small text-theme-color")
+            em.
+              This will determine a subset of people who have access to edit
+              this AND any subpages to this page. If no one here is specified,
+              then this setting will ascend up the page tree to see if there are administrators
+              specified there. If there are none at any level above this page, anyone can edit this page.
+          div
+            span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="admin in pageadmins")
+              span {{ admin }}
+              small(class="margin-left-small")
+                a(href="javascript:void(0)",data-ng-click="pageadmins.splice($index,1)")
+                  em x
+          div(class="row separate-vert-small")
+            div(class="text-center")
+              form(class="form-inline",data-ng-submit="pageadmins.push(tempAd);tempAd=''")
+                div(class="form-group")
+                  label(for="tempAdmins") New Page Administrator
+                  input(type="text",id="tempAdmins",name="tempAdmins",class="form-control margin-left-small",data-ng-model="tempAd")
+                  button(type="submit",class="btn btn-default margin-left-small") Add Username
+            div(class="separate-vert-small form-group text-center")
+              button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Who Can View This and Child Pages?
+        div(class="padding-small")
+          - var scopeAry = "viewscopes"
+          include include_viewscopeConfigModule.jade
+    div.divider.largegap.col-xs-12
+    div.col-xs-12
+      h1 Non-inherited Settings
+      small The following settings will only be applied to the current page, {{ pathname }}, and will not affect lower child pages.
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Page Path
+        div
+          small
+            alert IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
+        div
+          div(class="row")
+            div(class="col-xs-12 col-md-6 col-md-offset-3")
+              input(type="text",class="form-control input-lg",data-ng-model="newPathname")
           div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('settings.admins',pageadmins||[])") Save Page Admins
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Who Can View This and Child Pages?
-      div(class="padding-small")
-        - var scopeAry = "viewscopes"
-        include include_viewscopeConfigModule.jade
-  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
-  div(class="col-xs-12 col-md-10 col-md-offset-1")
-    h1 Non-inherited Settings
-    small The following settings will only be applied to the current page, {{ pathname }}, and will not affect lower child pages.
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Page Path
-      div
-        small
-          alert IMPORTANT: If you change the page path this will be a permanent change, so the current path we are in now will be freed up for someone else to add content to it.
-      div
-        div(class="row")
-          div(class="col-xs-12 col-md-6 col-md-offset-3")
-            input(type="text",class="form-control input-lg",data-ng-model="newPathname")
-        div(class="separate-vert-small form-group text-center")
-          button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
-        alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Page Aliases
-      div Page aliases are additional wiki paths that, if users try to navigate to them, it will redirect them to this page. Aliases can only be configured if those paths are available and not already used as other pages or aliases.
-      div(class="separate-vert-small")
+            button(class="btn btn-success",data-ng-click="handlers.updatePath(newPathname)") Save Path
+          alert(class="separate-vert-small text-center",type="danger",data-ng-show="newPathError") {{ newPathError }}
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Page Aliases
+        div Page aliases are additional wiki paths that, if users try to navigate to them, it will redirect them to this page. Aliases can only be configured if those paths are available and not already used as other pages or aliases.
+        div(class="separate-vert-small")
+          div
+            span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="alias in aliases")
+              span {{ alias }}
+              small(class="margin-left-small")
+                a(href="javascript:void(0)",data-ng-click="aliases.splice($index,1)")
+                  em x
+          div(class="row separate-vert-small")
+            div(class="text-center")
+              form(class="form-inline",data-ng-submit="aliases.push(tempAlias);tempAlias=''")
+                div(class="form-group")
+                  label(for="tempAliases") New Page Alias
+                  input(type="text",id="tempAliases",name="tempAliases",class="form-control margin-left-small",data-ng-model="tempAlias")
+                  button(type="submit",class="btn btn-default margin-left-small") Add Alias
+            div(class="separate-vert-small form-group text-center")
+              button(class="btn btn-success",data-ng-click="handlers.updateAliases(aliases)") Update Page Aliases
+            div(class="padding-medium",data-ng-show="aliasError")
+              alert(type="danger") {{ aliasError }}
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Short Page Description
         div
-          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="alias in aliases")
-            span {{ alias }}
-            small(class="margin-left-small")
-              a(href="javascript:void(0)",data-ng-click="aliases.splice($index,1)")
-                em x
-        div(class="row separate-vert-small")
-          div(class="text-center")
-            form(class="form-inline",data-ng-submit="aliases.push(tempAlias);tempAlias=''")
-              div(class="form-group")
-                label(for="tempAliases") New Page Alias
-                input(type="text",id="tempAliases",name="tempAliases",class="form-control margin-left-small",data-ng-model="tempAlias")
-                button(type="submit",class="btn btn-default margin-left-small") Add Alias
+          small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.
+        div
+          div
+            textarea(class="form-control",data-ng-model="content.description")
           div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updateAliases(aliases)") Update Page Aliases
-          div(class="padding-medium",data-ng-show="aliasError")
-            alert(type="danger") {{ aliasError }}
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Short Page Description
-      div
-        small This will be used to help users find your page when searching and will show up in various places throughout the wiki when your page is showing.
-      div
+            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Page Tags
         div
-          textarea(class="form-control",data-ng-model="content.description")
-        div(class="separate-vert-small form-group text-center")
-          button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('description',content.description)") Save Description
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Page Tags
-      div
-        div(class="separate-vert-small text-theme-color")
-          em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
+          div(class="separate-vert-small text-theme-color")
+            em Page tags are important because they help when users are searching for information in the wiki. Always tag your pages with relevant tags!
+          div
+            span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
+              span {{ tag }}
+              small(class="margin-left-small")
+                a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
+                  em x
+          div(class="row separate-vert-small")
+            div(class="text-center")
+              form(class="form-inline",data-ng-submit="content.tags.push(tempT);tempT=''")
+                div(class="form-group")
+                  label(for="tempTag") New Tag
+                  input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="tempT")
+                  button(type="submit",class="btn btn-default margin-left-small") Add Tag
+            div(class="separate-vert-small form-group text-center")
+              button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div.text-large.header.padding-small
+          div Widgets
+        div.row
+          div.col-xs-12.col-sm-10.col-sm-offset-1.col-md-6.col-md-offset-3
+            form
+              div.form-group
+                div.panel.panel-primary
+                  div.panel-heading
+                    div.text-large Widget Orientation
+                  div.panel-body
+                    div.text-center
+                      input(type="radio",id="widgetLeft",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'left'")
+                      label(for="widgetLeft") Aligned Left (Default)
+                      input(type="radio",id="widgetRight",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'right'")
+                      label(for="widgetRight") Aligned Right
+              div.divider
+              div.form-group
+                div.panel.panel-success
+                  div.panel-heading
+                    div.text-large Page Navigation Tree
+                  div.panel-body
+                    div.text-center
+                      input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
+                      label(for="subpagesWidgetEnabled") Enabled
+                      input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
+                      label(for="subpagesWidgetDisabled") Disabled
+              div.form-group
+                div.panel.panel-success
+                  div.panel-heading
+                    div.text-large Page Chat Room
+                  div.panel-body
+                    div.text-center
+                      input(type="radio",id="chatWidgetEnabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="true")
+                      label(for="chatWidgetEnabled") Enabled
+                      input(type="radio",id="chatWidgetDisabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="false")
+                      label(for="chatWidgetDisabled") Disabled
+              div.form-group
+                div.panel.panel-success
+                  div.panel-heading
+                    div.text-large Page Comments
+                  div.panel-body
+                    div.text-center
+                      input(type="radio",id="commentsWidgetEnabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="true")
+                      label(for="commentsWidgetEnabled") Enabled
+                      input(type="radio",id="commentsWidgetDisabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="false")
+                      label(for="commentsWidgetDisabled") Disabled
+              div(class="separate-vert-small form-group text-center")
+                button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Hide All Header Information on Page
         div
-          span(class="wrapper dark radius-sm margin-small padding-small",data-ng-repeat="tag in content.tags")
-            span {{ tag }}
-            small(class="margin-left-small")
-              a(href="javascript:void(0)",data-ng-click="content.tags.splice($index,1)")
-                em x
-        div(class="row separate-vert-small")
-          div(class="text-center")
-            form(class="form-inline",data-ng-submit="content.tags.push(tempT);tempT=''")
-              div(class="form-group")
-                label(for="tempTag") New Tag
-                input(type="text",id="tempTag",name="tempTag",class="form-control margin-left-small",data-ng-model="tempT")
-                button(type="submit",class="btn btn-default margin-left-small") Add Tag
-          div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('tags',content.tags)") Save Tags
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div.text-large.header.padding-small
-        div Widgets
-      div.row
-        div.col-xs-12.col-sm-10.col-sm-offset-1.col-md-6.col-md-offset-3
           form
             div.form-group
-              div.panel.panel-primary
-                div.panel-heading
-                  div.text-large Widget Orientation
-                div.panel-body
-                  div.text-center
-                    input(type="radio",id="widgetLeft",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'left'")
-                    label(for="widgetLeft") Aligned Left (Default)
-                    input(type="radio",id="widgetRight",name="widgetOrientation",data-ng-model="widgets.orientation",data-ng-value="'right'")
-                    label(for="widgetRight") Aligned Right
-            div.divider
-            div.form-group
-              div.panel.panel-success
-                div.panel-heading
-                  div.text-large Page Navigation Tree
-                div.panel-body
-                  div.text-center
-                    input(type="radio",id="subpagesWidgetEnabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="true")
-                    label(for="subpagesWidgetEnabled") Enabled
-                    input(type="radio",id="subpagesWidgetDisabled",name="subpagesWidget",data-ng-model="widgets.subpages.enabled",data-ng-value="false")
-                    label(for="subpagesWidgetDisabled") Disabled
-            div.form-group
-              div.panel.panel-success
-                div.panel-heading
-                  div.text-large Page Chat Room
-                div.panel-body
-                  div.text-center
-                    input(type="radio",id="chatWidgetEnabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="true")
-                    label(for="chatWidgetEnabled") Enabled
-                    input(type="radio",id="chatWidgetDisabled",name="chatWidget",data-ng-model="widgets.chat.enabled",data-ng-value="false")
-                    label(for="chatWidgetDisabled") Disabled
-            div.form-group
-              div.panel.panel-success
-                div.panel-heading
-                  div.text-large Page Comments
-                div.panel-body
-                  div.text-center
-                    input(type="radio",id="commentsWidgetEnabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="true")
-                    label(for="commentsWidgetEnabled") Enabled
-                    input(type="radio",id="commentsWidgetDisabled",name="commentsWidget",data-ng-model="widgets.comments.enabled",data-ng-value="false")
-                    label(for="commentsWidgetDisabled") Disabled
+              div.separate-vert-small This will hide the header navigation and all of the associated wiki links that don't pertain to this page's content.
+              div.margin-left-large
+                input(type="radio",id="hideHeaderNo",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="0",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
+                label(for="hideHeaderNo") No (Default)
+                input(type="radio",id="hideHeaderYes",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="1",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
+                label(for="hideHeaderYes") Yes
             div(class="separate-vert-small form-group text-center")
-              button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('widgets',widgets)") Save Widgets
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Hide All Header Information on Page
-      div
-        form
-          div.form-group
-            div.separate-vert-small This will hide the header navigation and all of the associated wiki links that don't pertain to this page's content.
-            div.margin-left-large
-              input(type="radio",id="hideHeaderNo",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="0",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
-              label(for="hideHeaderNo") No (Default)
-              input(type="radio",id="hideHeaderYes",name="hideHeader",data-ng-model="hideAllOfHeader",data-ng-value="1",data-ng-change="functions.hideAllOfHeader(hideAllOfHeader)")
-              label(for="hideHeaderYes") Yes
-          div(class="separate-vert-small form-group text-center")
-            button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('hideAllOfHeader',hideAllOfHeader)") Save Hiding Header Info
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Password Protect Page
-      div
-        form
-          div(class="form-group")
-            div Password protect your page so users will be required to enter a password to enter the page and see its content.
-            div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
-              div(class="col-xs-11")
-                input(type="{{ (pagepw.show) ? 'text' : 'password' }}",class="form-control",data-ng-model="password")
-              div(class="col-xs-1 text-center")
-                a(href="javascript:void(0)",data-ng-click="pagepw.show=!pagepw.show") {{ (pagepw.show) ? "Hide" : "Show" }} Password
-            div(class="text-center col-xs-12")
-              button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
-              button(class="btn btn-warning margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
-  div(class="divider largegap col-xs-12 col-md-10 col-md-offset-1")
-  div(class="col-xs-12 col-md-10 col-md-offset-1")
-    h1 Delete Page
-  div(class="separate-vert-small col-xs-12 col-md-8 col-md-offset-2")
-    div(class="shadowsmall-subtle wrapper light gray padding-small")
-      div(class="text-large header padding-small")
-        div Delete {{ pathname }}
-      div(class="separate-vert-small text-theme-color")
-          em
-            strong This will delete this page from the wiki. We will archive its content so it can be retrieved later.
-      div
-        div(class="separate-vert-medium form-group text-center")
-          button(class="btn btn-danger btn-lg",data-ng-click="handlers.deletePage()") Delete Page
+              button(class="btn btn-success",data-ng-click="handlers.updatePageSetting('hideAllOfHeader',hideAllOfHeader)") Save Hiding Header Info
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Password Protect Page
+        div
+          form
+            div(class="form-group")
+              div Password protect your page so users will be required to enter a password to enter the page and see its content.
+              div(class="separate-vert-medium col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2")
+                div(class="col-xs-11")
+                  input(type="{{ (pagepw.show) ? 'text' : 'password' }}",class="form-control",data-ng-model="password")
+                div(class="col-xs-1 text-center")
+                  a(href="javascript:void(0)",data-ng-click="pagepw.show=!pagepw.show") {{ (pagepw.show) ? "Hide" : "Show" }} Password
+              div(class="text-center col-xs-12")
+                button(class="btn btn-success",data-ng-click="handlers.updatePagePassword(password)") Save Page Password
+                button(class="btn btn-warning margin-left-small",data-ng-click="handlers.updatePagePassword('EXAMPLE',true)") Remove Page Password
+    div.divider.largegap.col-xs-12
+    div.col-xs-12
+      h1 Delete Page
+    div.separate-vert-small.col-xs-12
+      div(class="shadowsmall-subtle wrapper light gray padding-small")
+        div(class="text-large header padding-small")
+          div Delete {{ pathname }}
+        div(class="separate-vert-small text-theme-color")
+            em
+              strong This will delete this page from the wiki. We will archive its content so it can be retrieved later.
+        div
+          div(class="separate-vert-medium form-group text-center")
+            button(class="btn btn-danger btn-lg",data-ng-click="handlers.deletePage()") Delete Page
