@@ -1,25 +1,26 @@
 extends layout
 
 block main  
-  div(class="row",data-ng-controller="adminEventsCtrl")
-    div(class="col-xs-12")
+  div.row(data-ng-controller="adminEventsCtrl")
+    div.col-xs-12
       include include_adminnav.jade
-    div(class="col-xs-12 col-md-10 col-md-offset-1")
-      div(class="padding-medium")
-        h1 Default Events
-        div.
-          Events are fired in the platform at particular times in the standard end user and/or administrator "workflows". 
-          For example, you can fire an event at the time someone visits a page, updates a page, etc. 
-          Use the form below to add and remove global default events below.
-        br
-        div
-          strong.
-            Keep in mind these will be default events that will fire
-            at any time the event fires for any wiki page. You can also create custom events at the page level
-            that will only fire for that particular page.
-        div(class="separate-vert-large")
-          div(class="padding-small text-center")
-            form
-              div(class="separate-vert-small")
-                button(class="btn btn-success",data-ng-click="handlers.saveEvents(defaultEvents)") Save Events
-          include include_eventupdates.jade
+    div.col-xs-12
+      div.container
+        div.padding-medium
+          h1 Default Events
+          div.
+            Events are fired in the platform at particular times in the standard end user and/or administrator "workflows". 
+            For example, you can fire an event at the time someone visits a page, updates a page, etc. 
+            Use the form below to add and remove global default events below.
+          br
+          div
+            strong.
+              Keep in mind these will be default events that will fire
+              at any time the event fires for any wiki page. You can also create custom events at the page level
+              that will only fire for that particular page.
+          div(class="separate-vert-large")
+            div(class="padding-small text-center")
+              form
+                div(class="separate-vert-small")
+                  button(class="btn btn-success",data-ng-click="handlers.saveEvents(defaultEvents)") Save Events
+            include include_eventupdates.jade

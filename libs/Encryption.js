@@ -1,3 +1,4 @@
+var fs = require('fs')
 var crypto = require("crypto");
 var config = require("../config.js");
 

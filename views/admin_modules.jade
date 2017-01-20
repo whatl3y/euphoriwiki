@@ -1,122 +1,126 @@
 extends layout
 
 block main
-  div(class="row",data-ng-controller="adminModulesCtrl")
-    div(class="col-xs-12")
-      include include_adminnav.jade
-    div.col-xs-12.col-md-10.col-md-offset-1
-      div
-        h1 Module Management
-      div.separate-vert-small
-        div.table-responsive(data-ng-if="modules.length")
-          table(class="table table-striped table-bordered")
-            tr
-              th #
-              th Module Key
-              th Name
-              th Description
-              th View Template
-              - //th Configuration Options
-              th Date Created
-              th Edit/Delete Module
-            tr(data-ng-repeat="module in modules | orderBy:'key'")
-              td {{ $index+1 }}
-              td {{ module.key }}
-              td {{ module.name }}
-              td {{ module.description }}
-              td
-                a(data-ng-href="/file/{{ module.template }}",target="_blank") {{ module.template }}
-              - //td {{ module.config.join(", ") }}
-              td {{ functions.formatDateTime(module.updated) }}
-              td
-                a(href="javascript:void(0)",data-ng-click="handlers.editModule(module)") Edit
-                span  /
-                a(href="javascript:void(0)",data-ng-click="handlers.deleteModule(module.key,module.template,$index)") Delete
-        h2(class="text-center",data-ng-if="!modules.length")
-          alert There are no modules available to review.
-    div.col-xs-12.col-md-10.col-md-offset-1
-      div.row
-        div.col-xs-12
-          div.panel.panel-default
-            div.panel-heading.click(data-ng-click="editPaneOpen = !editPaneOpen")
-              div.text-large
-                span.glyphicon(data-ng-class="(editPaneOpen) ? 'glyphicon-minus' : 'glyphicon-plus'")
-                span.margin-left-small {{ (editPaneOpen) ? 'Close' : 'Open' }}  Module Create/Edit Pane
-            div.panel-body(data-ng-show="editPaneOpen")
-              div.row
-                div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-                  div(class="panel panel-primary")
-                    div(class="panel-heading")
-                      div(class="text-xlarge") Create/Edit Modules
-                    div(class="panel-body")
-                      form
-                        div.form-group
-                          label(for="key") Module Key
-                          input(type="text",class="form-control",id="key",name="key",data-ng-model="newModule.key")
-                        div.form-group
-                          label(for="name") Module Name
-                          input(type="text",class="form-control",id="name",name="name",data-ng-model="newModule.name")
-                        div.form-group
-                          label(for="description") Module Description
-                          textarea(class="form-control",id="description",name="description",data-ng-model="newModule.description")
-                        div.form-group
-                          label(for="template",popover="This is an HTML or Jade template file we will use to replace the module with after retrieving and processing it.",popover-trigger="mouseenter")
-                            span Module View Template File
-                            span(class="glyphicon glyphicon-info-sign")
-                          input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
-                        div.form-group
-                          label(for="timeout",popover="Determines how long in seconds we will wait for the module to return results before silently failing. If left blank, the default is 30 seconds.",popover-trigger="mouseenter")
-                            span Module Timeout (seconds)
-                            span(class="glyphicon glyphicon-info-sign")
-                            span
-                              small
-                                small  default: 30 seconds
-                          input.form-control(type="number",id="timeout",name="timeout",data-ng-model="newModule.timeout")
-                        div.form-group
-                          div(class="panel")
-                            div(class="panel-heading")
-                              label(popover="A list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
-                                span Module Configuration Options
-                                span(class="glyphicon glyphicon-info-sign")
-                            div(class="panel-body")
-                              div(class="separate-vert-small text-center")
-                                button(class="btn btn-default",data-ng-click="functions.updateNewModuleConfigLength('inc')",popover-trigger="mouseenter",popover="Add new event.")
-                                  span(class="glyphicon glyphicon-plus")
-                                button(class="btn btn-default margin-left-small",data-ng-click="functions.updateNewModuleConfigLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
-                                  span(class="glyphicon glyphicon-minus")
-                              div(class="padding-small text-center",data-ng-show="!newModule.config.length")
-                                alert There are no configuration options required for this module.
-                              ul(class="list-unstyled")
-                                li(class="switch-grey separate-vert-small padding-medium",data-ng-show="newModule.config.length",data-ng-repeat="conf in newModule.config")
-                                  div.row
-                                    div.col-xs-12.col-sm-4
-                                      label(for="cn{{ $index }}") Config Option Name
-                                      input(type="text",class="form-control",id="cn{{ $index }}",name="cn{{ $index }}",data-ng-model="conf.name")
-                                    div.col-xs-12.col-sm-4
-                                      label(for="ct{{ $index }}") Control Type
-                                      select(class="form-control",id="ct{{ $index }}",name="ct{{ $index }}",data-ng-model="conf.type")
-                                        option(value="datasource") External Datasource
-                                        option(value="select") Select List
-                                        option(value="textbox") Text Box
-                                        option(value="textarea") Text Area
-                                    div.col-xs-12.col-sm-4
-                                      label(for="cv{{ $index }}") Value(s)
-                                      input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
-                        div.form-group
-                          label Data Generation Code (Server)
-                          textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code",placeholder="The config options are exposed in this code in the PARAMS object (i.e. var {{ newModule.config[0].name || 'option1' }} = PARAMS.{{ newModule.config[0].name || 'option1' }}).\r\n\r\nThis code either needs to return the value/object you want to use with the module, or if async code is used you need to pass your returned information to the PARMAS.callback function (first param is error/null, second parameter is data returned).\r\n\r\nEXAMPLE:\r\nasyncFunction('foo',function(err,data) {\r\n\tPARAMS.callback(err,data);\r\n});")
-                        div.form-group
-                          label (OPTIONAL) Post Processing Code (Client)
-                          textarea(class="form-control",id="clientCode",name="clientCode",data-ng-model="newModule.clientCode",placeholder="The results from the Data Generation Code are exposed in this code using the DATA object (i.e. var result1 = DATA.myFirstPieceOfData).")
-                        div(class="form-group text-center")
-                          button(class="btn btn-primary",data-ng-click="handlers.createModule('templateFile')") Create Module
+  div.row(data-ng-controller="adminModulesCtrl")
     div.col-xs-12
-      div.divider.thick.separate-vert-medium
-    div.col-xs-12.col-md-10.col-md-offset-1
-      div
-        h1 Global Module Instances
-      div.panel.panel-primary
-        div.panel-body
+      include include_adminnav.jade
+    div.col-xs-12
+      div.row
+        div.container
           div.row
             div.col-xs-12
-              include include_createmoduleinstances.jade
+              div
+                h1 Module Management
+              div.separate-vert-small
+                div.table-responsive(data-ng-if="modules.length")
+                  table(class="table table-striped table-bordered")
+                    tr
+                      th #
+                      th Module Key
+                      th Name
+                      th Description
+                      th View Template
+                      - //th Configuration Options
+                      th Date Created
+                      th Edit/Delete Module
+                    tr(data-ng-repeat="module in modules | orderBy:'key'")
+                      td {{ $index+1 }}
+                      td {{ module.key }}
+                      td {{ module.name }}
+                      td {{ module.description }}
+                      td
+                        a(data-ng-href="/file/{{ module.template }}",target="_blank") {{ module.template }}
+                      - //td {{ module.config.join(", ") }}
+                      td {{ functions.formatDateTime(module.updated) }}
+                      td
+                        a(href="javascript:void(0)",data-ng-click="handlers.editModule(module)") Edit
+                        span  /
+                        a(href="javascript:void(0)",data-ng-click="handlers.deleteModule(module.key,module.template,$index)") Delete
+                h2(class="text-center",data-ng-if="!modules.length")
+                  alert There are no modules available to review.
+            div.col-xs-12
+              div.row
+                div.col-xs-12
+                  div.panel.panel-default
+                    div.panel-heading.click(data-ng-click="editPaneOpen = !editPaneOpen")
+                      div.text-large
+                        span.glyphicon(data-ng-class="(editPaneOpen) ? 'glyphicon-minus' : 'glyphicon-plus'")
+                        span.margin-left-small {{ (editPaneOpen) ? 'Close' : 'Open' }}  Module Create/Edit Pane
+                    div.panel-body(data-ng-show="editPaneOpen")
+                      div.row
+                        div.col-xs-12
+                          div(class="panel panel-primary")
+                            div(class="panel-heading")
+                              div(class="text-xlarge") Create/Edit Modules
+                            div(class="panel-body")
+                              form
+                                div.form-group
+                                  label(for="key") Module Key
+                                  input(type="text",class="form-control",id="key",name="key",data-ng-model="newModule.key")
+                                div.form-group
+                                  label(for="name") Module Name
+                                  input(type="text",class="form-control",id="name",name="name",data-ng-model="newModule.name")
+                                div.form-group
+                                  label(for="description") Module Description
+                                  textarea(class="form-control",id="description",name="description",data-ng-model="newModule.description")
+                                div.form-group
+                                  label(for="template",popover="This is an HTML or Jade template file we will use to replace the module with after retrieving and processing it.",popover-trigger="mouseenter")
+                                    span Module View Template File
+                                    span(class="glyphicon glyphicon-info-sign")
+                                  input(type="file",class="form-control",id="template",name="template",fileread="templateFile")
+                                div.form-group
+                                  label(for="timeout",popover="Determines how long in seconds we will wait for the module to return results before silently failing. If left blank, the default is 30 seconds.",popover-trigger="mouseenter")
+                                    span Module Timeout (seconds)
+                                    span(class="glyphicon glyphicon-info-sign")
+                                    span
+                                      small
+                                        small  default: 30 seconds
+                                  input.form-control(type="number",id="timeout",name="timeout",data-ng-model="newModule.timeout")
+                                div.form-group
+                                  div(class="panel")
+                                    div(class="panel-heading")
+                                      label(popover="A list of options a user must enter when configuring this module. These options will be keys in the PARAMS object in your processing code.",popover-trigger="mouseenter")
+                                        span Module Configuration Options
+                                        span(class="glyphicon glyphicon-info-sign")
+                                    div(class="panel-body")
+                                      div(class="separate-vert-small text-center")
+                                        button(class="btn btn-default",data-ng-click="functions.updateNewModuleConfigLength('inc')",popover-trigger="mouseenter",popover="Add new event.")
+                                          span(class="glyphicon glyphicon-plus")
+                                        button(class="btn btn-default margin-left-small",data-ng-click="functions.updateNewModuleConfigLength('dec')",popover-trigger="mouseenter",popover="Delete last event.")
+                                          span(class="glyphicon glyphicon-minus")
+                                      div(class="padding-small text-center",data-ng-show="!newModule.config.length")
+                                        alert There are no configuration options required for this module.
+                                      ul(class="list-unstyled")
+                                        li(class="switch-grey separate-vert-small padding-medium",data-ng-show="newModule.config.length",data-ng-repeat="conf in newModule.config")
+                                          div.row
+                                            div.col-xs-12.col-sm-4
+                                              label(for="cn{{ $index }}") Config Option Name
+                                              input(type="text",class="form-control",id="cn{{ $index }}",name="cn{{ $index }}",data-ng-model="conf.name")
+                                            div.col-xs-12.col-sm-4
+                                              label(for="ct{{ $index }}") Control Type
+                                              select(class="form-control",id="ct{{ $index }}",name="ct{{ $index }}",data-ng-model="conf.type")
+                                                option(value="datasource") External Datasource
+                                                option(value="select") Select List
+                                                option(value="textbox") Text Box
+                                                option(value="textarea") Text Area
+                                            div.col-xs-12.col-sm-4
+                                              label(for="cv{{ $index }}") Value(s)
+                                              input(type="text",class="form-control",id="cv{{ $index }}",name="cv{{ $index }}",data-ng-model="conf.values",popover="Either a default value, or list of values for the select list data type.",popover-trigger="mouseenter")
+                                div.form-group
+                                  label Data Generation Code (Server)
+                                  textarea(class="form-control",id="code",name="code",data-ng-model="newModule.code",placeholder="The config options are exposed in this code in the PARAMS object (i.e. var {{ newModule.config[0].name || 'option1' }} = PARAMS.{{ newModule.config[0].name || 'option1' }}).\r\n\r\nThis code either needs to return the value/object you want to use with the module, or if async code is used you need to pass your returned information to the PARMAS.callback function (first param is error/null, second parameter is data returned).\r\n\r\nEXAMPLE:\r\nasyncFunction('foo',function(err,data) {\r\n\tPARAMS.callback(err,data);\r\n});")
+                                div.form-group
+                                  label (OPTIONAL) Post Processing Code (Client)
+                                  textarea(class="form-control",id="clientCode",name="clientCode",data-ng-model="newModule.clientCode",placeholder="The results from the Data Generation Code are exposed in this code using the DATA object (i.e. var result1 = DATA.myFirstPieceOfData).")
+                                div(class="form-group text-center")
+                                  button(class="btn btn-primary",data-ng-click="handlers.createModule('templateFile')") Create Module
+            div.col-xs-12
+              div.divider.thick.separate-vert-medium
+            div.col-xs-12
+              div
+                h1 Global Module Instances
+              div.panel.panel-primary
+                div.panel-body
+                  div.row
+                    div.col-xs-12
+                      include include_createmoduleinstances.jade

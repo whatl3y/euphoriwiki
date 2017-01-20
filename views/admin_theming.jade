@@ -4,89 +4,89 @@ block main
   div(class="row",data-ng-controller="adminThemingCtrl")
     div(class="col-xs-12")
       include include_adminnav.jade
-    div.col-xs-12.col-md-10.col-md-offset-1
-      div
+    div.col-xs-12
+      div.container
         h1 Theme Management
-    div.col-xs-12.col-md-10.col-md-offset-1
-      div.row
-        div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-          div.panel.panel-default
-            div.panel-heading.text-large Home Page Template
-            div.panel-body
-              div.text-center
-                div.text-large
-                  div(data-ng-show="homeBodyFile")
-                    a(data-ng-href="{{ homeBodyFile }}",target="_blank") {{ homeBodyFile }}
-                  div(data-ng-show="!homeBodyFile")
-                    em No home file currently...
+        div.col-xs-12
+          div.row
+            div.col-xs-12
+              div.panel.panel-default
+                div.panel-heading.text-large Home Page Template
+                div.panel-body
+                  div.text-center
+                    div.text-large
+                      div(data-ng-show="homeBodyFile")
+                        a(data-ng-href="{{ homeBodyFile }}",target="_blank") {{ homeBodyFile }}
+                      div(data-ng-show="!homeBodyFile")
+                        em No home file currently...
+                      div.divider
+                  div
+                    h3 Update home page main section
+                    form(data-ng-submit="handlers.updateMainPage('homeFile')")
+                      input.form-control(type="file",fileread="homeFile")
+                      div.text-center.separate-vert-small
+                        button.btn.btn-success Update Home Page File
+            div.col-xs-12
+              div.panel.panel-default
+                div.panel-heading.text-large Home Page Add-Ons
+                div.panel-body
+                  div.separate-vert-small.form-group
+                    div Categories Column Alignment
+                    small Default: Align left
+                    div.radio
+                      label Disabled
+                        input(type="radio",name="categories",value="disabled",data-ng-model="columns.categories.alignment")
+                    div.radio
+                      label Align Left
+                        input(type="radio",name="categories",value="left",data-ng-model="columns.categories.alignment")
+                    div.radio
+                      label Align Right
+                        input(type="radio",name="categories",value="right",data-ng-model="columns.categories.alignment")
+                  div.separate-vert-small.form-group
+                    div Quick Link Widgets Column Alignment
+                    small Default: Align Right
+                    div.radio
+                      label Disabled
+                        input(type="radio",name="widgets",value="disabled",data-ng-model="columns.widgets.alignment")
+                    div.radio
+                      label Align Left
+                        input(type="radio",name="widgets",value="left",data-ng-model="columns.widgets.alignment")
+                    div.radio
+                      label Align Right
+                        input(type="radio",name="widgets",value="right",data-ng-model="columns.widgets.alignment")
+                  div.separate-vert-small.form-group
+                    div Create or Go To Existing Page center widget
+                    small Default: Disabled
+                    div.radio
+                      label Disabled
+                        input(type="radio",name="pagesearch",value="disabled",data-ng-model="columns.pagesearch.enabled")
+                    div.radio
+                      label Enabled
+                        input(type="radio",name="pagesearch",value="enabled",data-ng-model="columns.pagesearch.enabled")
+                  div.text-center
+                    button.btn.btn-success(data-ng-click="handlers.updateMainBodyColumns(columns)") Update Add Ons
+            div.col-xs-12
+              div.panel.panel-default
+                div.panel-heading.text-large Platform Header Logo
+                div.panel-body
+                  div The image below will show the full image, but it will be resized to fit in the navbar once the page is reloaded.
                   div.divider
-              div
-                h3 Update home page main section
-                form(data-ng-submit="handlers.updateMainPage('homeFile')")
-                  input.form-control(type="file",fileread="homeFile")
-                  div.text-center.separate-vert-small
-                    button.btn.btn-success Update Home Page File
-        div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-          div.panel.panel-default
-            div.panel-heading.text-large Home Page Add-Ons
-            div.panel-body
-              div.separate-vert-small.form-group
-                div Categories Column Alignment
-                small Default: Align left
-                div.radio
-                  label Disabled
-                    input(type="radio",name="categories",value="disabled",data-ng-model="columns.categories.alignment")
-                div.radio
-                  label Align Left
-                    input(type="radio",name="categories",value="left",data-ng-model="columns.categories.alignment")
-                div.radio
-                  label Align Right
-                    input(type="radio",name="categories",value="right",data-ng-model="columns.categories.alignment")
-              div.separate-vert-small.form-group
-                div Quick Link Widgets Column Alignment
-                small Default: Align Right
-                div.radio
-                  label Disabled
-                    input(type="radio",name="widgets",value="disabled",data-ng-model="columns.widgets.alignment")
-                div.radio
-                  label Align Left
-                    input(type="radio",name="widgets",value="left",data-ng-model="columns.widgets.alignment")
-                div.radio
-                  label Align Right
-                    input(type="radio",name="widgets",value="right",data-ng-model="columns.widgets.alignment")
-              div.separate-vert-small.form-group
-                div Create or Go To Existing Page center widget
-                small Default: Disabled
-                div.radio
-                  label Disabled
-                    input(type="radio",name="pagesearch",value="disabled",data-ng-model="columns.pagesearch.enabled")
-                div.radio
-                  label Enabled
-                    input(type="radio",name="pagesearch",value="enabled",data-ng-model="columns.pagesearch.enabled")
-              div.text-center
-                button.btn.btn-success(data-ng-click="handlers.updateMainBodyColumns(columns)") Update Add Ons
-        div.col-xs-12.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-          div.panel.panel-default
-            div.panel-heading.text-large Platform Header Logo
-            div.panel-body
-              div The image below will show the full image, but it will be resized to fit in the navbar once the page is reloaded.
-              div.divider
-              div.text-center
-                div.text-large
-                  a(data-ng-href="{{ curLogoPath }}",target="_blank") {{ curLogoPath }}
-                div.row
-                  div.col-xs-12.col-sm-10.col-sm-offset-1
-                    div.dark.separate-vert-small.padding-medium
-                      img.img-responsive.block-center(data-ng-src="{{ curLogoPath }}")
-                div.divider
-              div
-                h3 Update Logo
-                form(data-ng-submit="handlers.updateLogo('navLogoFile')")
-                  div.form-group
-                    input.form-control(type="file",fileread="navLogoFile")
-                  div.form-group
-                    label Header Logo Link
-                    div
-                      input.form-control(data-ng-model="navLogoLink")
-                  div.text-center.separate-vert-small
-                    button.btn.btn-success Update Logo
+                  div.text-center
+                    div.text-large
+                      a(data-ng-href="{{ curLogoPath }}",target="_blank") {{ curLogoPath }}
+                    div.row
+                      div.col-xs-12.col-sm-10.col-sm-offset-1
+                        div.dark.separate-vert-small.padding-medium
+                          img.img-responsive.block-center(data-ng-src="{{ curLogoPath }}")
+                    div.divider
+                  div
+                    h3 Update Logo
+                    form(data-ng-submit="handlers.updateLogo('navLogoFile')")
+                      div.form-group
+                        input.form-control(type="file",fileread="navLogoFile")
+                      div.form-group
+                        label Header Logo Link
+                        div
+                          input.form-control(data-ng-model="navLogoLink")
+                      div.text-center.separate-vert-small
+                        button.btn.btn-success Update Logo

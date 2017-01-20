@@ -1,34 +1,35 @@
 extends layout
 
 block main
-  div(class="row",data-ng-controller="adminVisitorsCtrl")
-    div(class="col-xs-12")
+  div.row(data-ng-controller="adminVisitorsCtrl")
+    div.col-xs-12
       include include_adminnav.jade
-    div(class="col-xs-12 col-md-10 col-md-offset-1")
-      div.row
-        h1.col-xs-12 Current Visitors
-      div.row
-        div.col-xs-12.col-md-10-col-md-offset-1
-          div.table-responsive
-            table.table.table-striped.table-bordered
-              tr
-                th #
-                th Date
-                th User
-                th City
-                th State
-                th Country
-                th Current Page
-                th Instant Message
-              tr(data-ng-repeat="(socketId,info) in visitors")
-                td {{ $index+1 }}
+    div.col-xs-12
+      div.container
+        div.row
+          h1.col-xs-12 Current Visitors
+        div.row
+          div.col-xs-12
+            div.table-responsive
+              table.table.table-striped.table-bordered
+                tr
+                  th #
+                  th Date
+                  th User
+                  th City
+                  th State
+                  th Country
+                  th Current Page
+                  th Instant Message
+                tr(data-ng-repeat="(socketId,info) in visitors")
+                  td {{ $index+1 }}
 
-                - //the date function is located in the globalCtrl
-                td {{ $parent.$parent.functions.date.formatDateTime(info.date) }}
-                td {{ info.user || "Guest" }} {{ (info.firstname) ? "(" + info.firstname + " " + info.lastname + ")" : "" }}
-                td {{ info.location.city || "N/A" }}
-                td {{ info.location.state || "N/A" }}
-                td {{ info.location.country || "N/A" }}
-                td
-                  a(data-ng-href="{{ info.room || '' }}",target="_blank") {{ info.room || "N/A" }}
-                td N/A
+                  - //the date function is located in the globalCtrl
+                  td {{ $parent.$parent.functions.date.formatDateTime(info.date) }}
+                  td {{ info.user || "Guest" }} {{ (info.firstname) ? "(" + info.firstname + " " + info.lastname + ")" : "" }}
+                  td {{ info.location.city || "N/A" }}
+                  td {{ info.location.state || "N/A" }}
+                  td {{ info.location.country || "N/A" }}
+                  td
+                    a(data-ng-href="{{ info.room || '' }}",target="_blank") {{ info.room || "N/A" }}
+                  td N/A
