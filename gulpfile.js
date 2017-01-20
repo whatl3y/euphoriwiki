@@ -38,9 +38,12 @@ gulp.task('app', function () {
 })
 
 gulp.task('styles', function() {
-  return gulp.src('./src/public/sass/**/*.scss')
+  return gulp.src([
+    './src/public/sass/**/*.scss',
+    './src/public/sass/**/*.css'
+  ])
     .pipe(sass().on('error', sass.logError))
-    .pipe(concat('mosaicjs-master.css'))
+    .pipe(concat('master.css'))
     .pipe(minify_css({ keepBreaks: true }))
     .pipe(gulp.dest('./public/css/'))
 })

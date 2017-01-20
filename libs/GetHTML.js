@@ -86,9 +86,9 @@ GetHTML.prototype.htm = function (string, cb) {
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
 GetHTML.prototype.jade = function (string, cb) {
-  cb = typeof string === "function" ? string : cb;
-  method = typeof string === "function" ? "renderFile" : "render";
-  methodParam = typeof string === "function" ? this.fullpath : string || "";
+  cb = typeof string === " function" ? string : cb;
+  var method = typeof string === "function" ? "renderFile" : "render";
+  var methodParam = typeof string === "function" ? this.fullpath : string || "";
 
   try {
     var retHtml = jade[method](methodParam, { basedir: path.join('', 'views') });
