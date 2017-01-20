@@ -432,7 +432,7 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           if (!user.email) return cb(null,false);
 
           const usersEmailSuffix = user.email.substring(user.email.lastIndexOf("@") + 1);
-          isValid = _.indexOf(emailSuffixes,usersEmailSuffix) > -1;
+          const isValid = _.indexOf(emailSuffixes,usersEmailSuffix) > -1;
 
           return cb(null,isValid);
         });
