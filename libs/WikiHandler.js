@@ -1,3 +1,7 @@
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _ = require("underscore");
 var async = require("async");
 var ObjectId = require('mongodb').ObjectID;
@@ -6,7 +10,7 @@ var FileHandler = require("./FileHandler.js");
 var GetHTML = require("./GetHTML.js");
 var CodeRunner = require("./CodeRunner.js");
 var config = require("../config.js");
-var Object = require("../public/js/Object_prototypes.js");
+var Object = require("../public/js/extras/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    WikiHandler.js
@@ -18,11 +22,11 @@ var Object = require("../public/js/Object_prototypes.js");
 |REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
-WikiHandler=function(options) {
+var WikiHandler = function WikiHandler(options) {
   options = options || {};
 
   this.sanitizePath(options.path);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      initQueries (PUBLIC)
@@ -34,33 +38,28 @@ WikiHandler=function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.initQueries=function(cb) {
-  async.waterfall([
-    function(_callback) {
-      config.mongodb.db.collection("initializequeries").find().toArray(function(err,queries) {
-        _callback(err,queries);
-      });
-    },
-    function(queries,_callback) {
-      config.mongodb.MDB.findRecursive({
-        db: config.mongodb.db,
-        array: queries
-      },function(err,oData) {
-        _callback(err,queries,oData);
-      });
-    }
-  ],
-    function(err,queries,oData) {
-      if (err) return cb(err);
+WikiHandler.prototype.initQueries = function (cb) {
+  async.waterfall([function (_callback) {
+    config.mongodb.db.collection("initializequeries").find().toArray(function (err, queries) {
+      _callback(err, queries);
+    });
+  }, function (queries, _callback) {
+    config.mongodb.MDB.findRecursive({
+      db: config.mongodb.db,
+      array: queries
+    }, function (err, oData) {
+      _callback(err, queries, oData);
+    });
+  }], function (err, queries, oData) {
+    if (err) return cb(err);
 
-      try {
-        cb(null,{queries:queries, oData:oData});
-      } catch(err) {
-        cb(err);
-      }
+    try {
+      cb(null, { queries: queries, oData: oData });
+    } catch (err) {
+      cb(err);
     }
-  );
-}
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getSubPages (PUBLIC)
@@ -73,29 +72,29 @@ WikiHandler.prototype.initQueries=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getSubPages=function(cb,returnAry) {
-  var self=this;
+WikiHandler.prototype.getSubPages = function (cb, returnAry) {
+  var self = this;
 
-  var children = new RegExp("^"+(this.escapePath() || ".*")+"/.+$");      //all nested children
+  var children = new RegExp("^" + (this.escapePath() || ".*") + "/.+$"); //all nested children
   //var children = new RegExp("^"+this.escapePath()+"/[^/]+$");     //only direct children
 
-  this.getPage({filters:{path:children},fields:{path:1,description:1,pageViews:1}},function(_e,pages) {
+  this.getPage({ filters: { path: children }, fields: { path: 1, description: 1, pageViews: 1 } }, function (_e, pages) {
     if (_e) return cb(_e);
-    if (returnAry) return cb(null,pages);
+    if (returnAry) return cb(null, pages);
 
     var oPages = {};
     var pagesSplit = [];
     var thisPathPagesSplit = self.path.split("/").slice(1);
-    for (var _i=0;_i<pages.length;_i++) {
+    for (var _i = 0; _i < pages.length; _i++) {
       pagesSplit = pages[_i].path.split("/").slice(1);
       //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
 
-      oPages = Object.merge(oPages,self.aryToNestedObj(pagesSplit));
+      oPages = Object.merge(oPages, self.aryToNestedObj(pagesSplit));
     }
 
-    return cb(null,oPages);
-  })
-}
+    return cb(null, oPages);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getPage (PUBLIC)
@@ -111,21 +110,20 @@ WikiHandler.prototype.getSubPages=function(cb,returnAry) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getPage=function(options,cb) {
-  cb = (typeof options==="function") ? options : cb;
-  options = (typeof options==="function") ? {} : (options || {});
+WikiHandler.prototype.getPage = function (options, cb) {
+  cb = typeof options === "function" ? options : cb;
+  options = typeof options === "function" ? {} : options || {};
 
-  var coll = (typeof options==="string") ? "wikicontent" : ((options.archive) ? "wikicontent_archive" : "wikicontent");
-  var path = (typeof options==="string") ? options : (options.path || this.path);
-  var filters = (typeof options==="string") ? {path:path} : (options.filters || {path:path});
-  var fields = (typeof options==="string") ? {} : (options.fields || {});
-  var sort = (typeof options==="string") ? {} : (options.sort || {});
+  var coll = typeof options === "string" ? "wikicontent" : options.archive ? "wikicontent_archive" : "wikicontent";
+  var path = typeof options === "string" ? options : options.path || this.path;
+  var filters = typeof options === "string" ? { path: path } : options.filters || { path: path };
+  var fields = typeof options === "string" ? {} : options.fields || {};
+  var sort = typeof options === "string" ? {} : options.sort || {};
 
-  config.mongodb.db.collection(coll).find(filters,fields).sort(sort).toArray(function(_e,pageInfo) {
-    if (_e) cb(_e);
-    else cb(null,pageInfo);
+  config.mongodb.db.collection(coll).find(filters, fields).sort(sort).toArray(function (_e, pageInfo) {
+    if (_e) cb(_e);else cb(null, pageInfo);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getPageContent (PUBLIC)
@@ -136,70 +134,56 @@ WikiHandler.prototype.getPage=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getPageContent=function(cb) {
+WikiHandler.prototype.getPageContent = function (cb) {
   var self = this;
 
-  async.waterfall([
-    function(callback) {
-      self.getPage({fields:{content_html:1, template:1}}, function(e,page) {
-        callback(e,page);
-      });
-    },
-    function(page,callback) {
-      if (page && page.length) {
-        if (typeof page[0].template === "object" && page[0].template.templateId) {
-          return callback(null,page[0].template.templateId,null);
-        }
-
-        return callback(null,null,page[0].content_html);
+  async.waterfall([function (callback) {
+    self.getPage({ fields: { content_html: 1, template: 1 } }, function (e, page) {
+      callback(e, page);
+    });
+  }, function (page, callback) {
+    if (page && page.length) {
+      if (_typeof(page[0].template) === "object" && page[0].template.templateId) {
+        return callback(null, page[0].template.templateId, null);
       }
 
-      return callback(null,null,null);
-    },
-    function(templateId,html,callback) {
-      if (!templateId) return callback(null,html);
-
-      async.waterfall([
-        function(_callback) {
-          config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) },{file:1,config:1}).toArray(function(e,result) {
-            _callback(e,result);
-          });
-        },
-        function(template,_callback) {
-          var fh = new FileHandler({db:config.mongodb.filedb});
-
-          fh.getFile({filename:template[0].file, encoding:"utf8"},function(e,result) {
-            _callback(e,result,template[0],templateId);
-          });
-        },
-        function(fileContents,oTemplate,templateId,_callback) {
-          if (fileContents) {
-            try {
-              var gH = new GetHTML();
-
-              var method = gH.extension(oTemplate.file).substring(1);
-              gH[method](fileContents,function(e,html) {
-                return _callback(e,html,oTemplate.config,templateId);
-              });
-
-            } catch (e) {
-              return _callback(e,"",oTemplate.config,templateId);
-            }
-
-          } else return _callback(null,"",oTemplate.config,templateId);
-        }
-      ],
-        function(err,html,config,templateId) {
-          return callback(err,html,config,templateId);
-        }
-      );
+      return callback(null, null, page[0].content_html);
     }
-  ],
-    function(err,html,templateConfig,templateId) {
-      return cb(err,html,templateConfig,templateId);
-    }
-  );
-}
+
+    return callback(null, null, null);
+  }, function (templateId, html, callback) {
+    if (!templateId) return callback(null, html);
+
+    async.waterfall([function (_callback) {
+      config.mongodb.db.collection("wikitemplates").find({ _id: ObjectId(templateId) }, { file: 1, config: 1 }).toArray(function (e, result) {
+        _callback(e, result);
+      });
+    }, function (template, _callback) {
+      var fh = new FileHandler({ db: config.mongodb.filedb });
+
+      fh.getFile({ filename: template[0].file, encoding: "utf8" }, function (e, result) {
+        _callback(e, result, template[0], templateId);
+      });
+    }, function (fileContents, oTemplate, templateId, _callback) {
+      if (fileContents) {
+        try {
+          var gH = new GetHTML();
+
+          var method = gH.extension(oTemplate.file).substring(1);
+          gH[method](fileContents, function (e, html) {
+            return _callback(e, html, oTemplate.config, templateId);
+          });
+        } catch (e) {
+          return _callback(e, "", oTemplate.config, templateId);
+        }
+      } else return _callback(null, "", oTemplate.config, templateId);
+    }], function (err, html, config, templateId) {
+      return callback(err, html, config, templateId);
+    });
+  }], function (err, html, templateConfig, templateId) {
+    return cb(err, html, templateConfig, templateId);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      updatePagesWithCallback (PUBLIC)
@@ -219,17 +203,16 @@ WikiHandler.prototype.getPageContent=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB,finalCB) {
+WikiHandler.prototype.updatePagesWithCallback = function (options, singleDocUpdateCB, finalCB) {
   var filters = options.filters || {};
   var fields = options.fields || {};
 
   var indErrors = null;
 
-  config.mongodb.db.collection("wikicontent").find(filters,fields).each(function(err,doc) {
-    if (err) singleDocUpdateCB(err);
-    else {
-      var updateFields = singleDocUpdateCB(null,doc);
-      config.mongodb.db.collection("wikicontent").update({_id:doc._id},updateFields,function(err,result) {
+  config.mongodb.db.collection("wikicontent").find(filters, fields).each(function (err, doc) {
+    if (err) singleDocUpdateCB(err);else {
+      var updateFields = singleDocUpdateCB(null, doc);
+      config.mongodb.db.collection("wikicontent").update({ _id: doc._id }, updateFields, function (err, result) {
         if (err) {
           indErrors = indErrors || [];
           indErrors.push(err);
@@ -239,7 +222,7 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
   });
 
   finalCB(indErrors);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      updateAliases (PUBLIC)
@@ -254,7 +237,7 @@ WikiHandler.prototype.updatePagesWithCallback=function(options,singleDocUpdateCB
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.updateAliases=function(options,cb) {
+WikiHandler.prototype.updateAliases = function (options, cb) {
   options = options || {};
 
   var aliases = options.aliases || [];
@@ -262,111 +245,114 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
   var username = options.username;
   var self = this;
 
-  var aliasesOrig = aliases.map(function(a){return (a[0]=="/") ? a : "/"+a});;
-  aliases = aliasesOrig.map(function(a){return {path:a}});
+  var aliasesOrig = aliases.map(function (a) {
+    return a[0] == "/" ? a : "/" + a;
+  });;
+  aliases = aliasesOrig.map(function (a) {
+    return { path: a };
+  });
 
-  var check = {$or:aliases};
+  var check = { $or: aliases };
 
   if (aliases.length) {
-    async.parallel([
-      function(callback) {
-        Access.isAdmin({username:username, path:self.path},function(e,isAdmin) {
-          callback(e,isAdmin);
-        });
-      },
-      function(callback) {
-        self.getPage({filters:check,fields:{path:1,aliasfor:1,_id:0}},function(_e,pages) {
-          callback(_e,pages);
-        });
-      },
-      function(callback) {
-        self.getPage({filters:{aliasfor:self.path},fields:{path:1,aliasfor:1,_id:0}},function(_e,pages) {
-          callback(_e,pages);
-        });
-      },
-      function(callback) {
-        try {
-          var notAllowed = false;
-          async.each(aliasesOrig,function(a,_callback) {
-            self.allowedPath(a,function(e,isAllowed) {
-              if (e) return _callback(e);
-              if (!isAllowed) notAllowed = a;
-              _callback(null);
-            });
-          },
-          function(err) {
-            callback(err,notAllowed);
+    async.parallel([function (callback) {
+      Access.isAdmin({ username: username, path: self.path }, function (e, isAdmin) {
+        callback(e, isAdmin);
+      });
+    }, function (callback) {
+      self.getPage({ filters: check, fields: { path: 1, aliasfor: 1, _id: 0 } }, function (_e, pages) {
+        callback(_e, pages);
+      });
+    }, function (callback) {
+      self.getPage({ filters: { aliasfor: self.path }, fields: { path: 1, aliasfor: 1, _id: 0 } }, function (_e, pages) {
+        callback(_e, pages);
+      });
+    }, function (callback) {
+      try {
+        var notAllowed = false;
+        async.each(aliasesOrig, function (a, _callback) {
+          self.allowedPath(a, function (e, isAllowed) {
+            if (e) return _callback(e);
+            if (!isAllowed) notAllowed = a;
+            _callback(null);
           });
+        }, function (err) {
+          callback(err, notAllowed);
+        });
+      } catch (e) {
+        callback(e);
+      }
+    }], function (err, results) {
+      if (err) cb(err);else {
+        var isAdmin = results[0];
+        var alreadyUsed = results[1];
+        var currentAliases = results[2];
+        var notAllowedPath = results[3];
 
-        } catch(e) {
-          callback(e)
+        var currentAliasesOnlyPaths = currentAliases.map(function (c) {
+          return c.path;
+        });
+        var aliasesToDelete = _.difference(currentAliasesOnlyPaths, aliasesOrig).map(function (a) {
+          return { path: a };
+        });
+
+        if (alreadyUsed.length) {
+          aliases = aliases.filter(function (a) {
+            return _.findIndex(alreadyUsed, function (used) {
+              return a.path == used.path;
+            }) == -1;
+          });
+          alreadyUsed = alreadyUsed.filter(function (a) {
+            return typeof a.aliasfor === "undefined" || a.aliasfor != self.path;
+          });
         }
 
-      }
-    ],
-      function(err,results) {
-        if (err) cb(err)
-        else {
-          var isAdmin = results[0];
-          var alreadyUsed = results[1];
-          var currentAliases = results[2];
-          var notAllowedPath = results[3];
-
-          var currentAliasesOnlyPaths = currentAliases.map(function(c){return c.path});
-          var aliasesToDelete = _.difference(currentAliasesOnlyPaths,aliasesOrig).map(function(a){return {path:a}});
-
-          if (alreadyUsed.length) {
-            aliases = aliases.filter(function(a){return _.findIndex(alreadyUsed,function(used){return a.path == used.path}) == -1});
-            alreadyUsed = alreadyUsed.filter(function(a){return typeof a.aliasfor==="undefined" || a.aliasfor != self.path});
-          }
-
-          if (!isAdmin) cb("You must be a page admin to update the page aliases.");
-          else {
-            if (notAllowedPath) {
-              cb("Your aliases were not saved because the following path is not allowed: " + notAllowedPath);
-            } else if (aliases.length || alreadyUsed.length) {
-              if (alreadyUsed.length) {
-                var inUseString = alreadyUsed.map(function(p){return p.path}).join(", ");
-                cb("Your aliases were not saved because the following are already in use: " + inUseString);
-              } else {
-                var docs = aliases.map(function(a) {
-                  a.aliasfor = self.path;
-                  a.description = "Page alias for " + self.path;
-                  a.updated = new Date();
-                  a.updatedBy = {username: username};
-                  return a;
-                });
-
-                config.mongodb.db.collection("wikicontent").insert(docs,function(err,result) {
-                  if (err) cb(err);
-                  else {
-                    //delete aliases we no longer want
-                    if (aliasesToDelete.length) {
-                      config.mongodb.db.collection("wikicontent").remove({$or:aliasesToDelete},function(e) {
-                        cb(e);
-                      });
-                    } else cb(null)
-                  }
-                });
-              }
+        if (!isAdmin) cb("You must be a page admin to update the page aliases.");else {
+          if (notAllowedPath) {
+            cb("Your aliases were not saved because the following path is not allowed: " + notAllowedPath);
+          } else if (aliases.length || alreadyUsed.length) {
+            if (alreadyUsed.length) {
+              var inUseString = alreadyUsed.map(function (p) {
+                return p.path;
+              }).join(", ");
+              cb("Your aliases were not saved because the following are already in use: " + inUseString);
             } else {
-              if (aliasesToDelete.length) {
-                config.mongodb.db.collection("wikicontent").remove({$or:aliasesToDelete},function(e) {
-                  cb(e);
-                });
-              } else cb(null);
+              var docs = aliases.map(function (a) {
+                a.aliasfor = self.path;
+                a.description = "Page alias for " + self.path;
+                a.updated = new Date();
+                a.updatedBy = { username: username };
+                return a;
+              });
+
+              config.mongodb.db.collection("wikicontent").insert(docs, function (err, result) {
+                if (err) cb(err);else {
+                  //delete aliases we no longer want
+                  if (aliasesToDelete.length) {
+                    config.mongodb.db.collection("wikicontent").remove({ $or: aliasesToDelete }, function (e) {
+                      cb(e);
+                    });
+                  } else cb(null);
+                }
+              });
             }
+          } else {
+            if (aliasesToDelete.length) {
+              config.mongodb.db.collection("wikicontent").remove({ $or: aliasesToDelete }, function (e) {
+                cb(e);
+              });
+            } else cb(null);
           }
         }
       }
-    );
+    });
   } else {
     //delete all aliases since there are none now
-    config.mongodb.db.collection("wikicontent").remove({aliasfor:self.path},function(e) {
+    config.mongodb.db.collection("wikicontent").remove({ aliasfor: self.path }, function (e) {
       cb(e);
     });
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getTemplates (PUBLIC)
@@ -376,11 +362,11 @@ WikiHandler.prototype.updateAliases=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getTemplates=function(cb) {
-  config.mongodb.db.collection("wikitemplates").find({ active:{$ne:false} }).sort({name:1}).toArray(function(_e,templates) {
-    cb(_e,templates);
+WikiHandler.prototype.getTemplates = function (cb) {
+  config.mongodb.db.collection("wikitemplates").find({ active: { $ne: false } }).sort({ name: 1 }).toArray(function (_e, templates) {
+    cb(_e, templates);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getTemplateInfo (PUBLIC)
@@ -391,74 +377,66 @@ WikiHandler.prototype.getTemplates=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
+WikiHandler.prototype.getTemplateInfo = function (templateId, cb) {
   var self = this;
 
-  async.waterfall([
-    function(callback) {
-      config.mongodb.db.collection("wikitemplates").find({ _id:ObjectId(templateId) }).toArray(function(_e,template) {
-        callback(_e,template);
-      });
-    },
-    function(template,callback) {
-      if (!template.length) return callback();
-      if (!template[0].config || !template[0].config.length) return callback(null,template[0]);
+  async.waterfall([function (callback) {
+    config.mongodb.db.collection("wikitemplates").find({ _id: ObjectId(templateId) }).toArray(function (_e, template) {
+      callback(_e, template);
+    });
+  }, function (template, callback) {
+    if (!template.length) return callback();
+    if (!template[0].config || !template[0].config.length) return callback(null, template[0]);
 
-      template = template[0]
-      var queryResults = {};
+    template = template[0];
+    var queryResults = {};
 
-      async.each(template.config,function(conf,__callback) {
-        if (conf.valueIsQuery == "Yes") {
-          self.getExternalDatasources({name:conf.datasource},function(err,PARAMS) {
-            if (err) return __callback(err);
+    async.each(template.config, function (conf, __callback) {
+      if (conf.valueIsQuery == "Yes") {
+        self.getExternalDatasources({ name: conf.datasource }, function (err, PARAMS) {
+          if (err) return __callback(err);
 
-            var queryConfig = {
-              database: PARAMS.database,
-              user: PARAMS.username,
-              password: PARAMS.password
-            };
-            if (PARAMS.driver == "mysql" || PARAMS.driver == "postgresql" || PARAMS.driver == "postgres") queryConfig.host = PARAMS.server;
-            if (PARAMS.driver == "mssql") queryConfig.server = PARAMS.server;
+          var queryConfig = {
+            database: PARAMS.database,
+            user: PARAMS.username,
+            password: PARAMS.password
+          };
+          if (PARAMS.driver == "mysql" || PARAMS.driver == "postgresql" || PARAMS.driver == "postgres") queryConfig.host = PARAMS.server;
+          if (PARAMS.driver == "mssql") queryConfig.server = PARAMS.server;
 
-            var sql = new SQLHandler({driver:PARAMS.driver,config:queryConfig});
+          var sql = new SQLHandler({ driver: PARAMS.driver, config: queryConfig });
 
-            sql.connect(function(e) {
-              if (e) return __callback(e);
+          sql.connect(function (e) {
+            if (e) return __callback(e);
 
-              sql.query({query:conf.values, close:true},function(e,results) {
-                results = (results instanceof Array && results[0] instanceof Array) ? results[0] : results;
-                results = results.map(function(r) {
-                  return _.values(r)[0];
-                });
-
-                queryResults[conf.name] = Object.merge(conf,{datasourceValues:results});
-                __callback(e);
+            sql.query({ query: conf.values, close: true }, function (e, results) {
+              results = results instanceof Array && results[0] instanceof Array ? results[0] : results;
+              results = results.map(function (r) {
+                return _.values(r)[0];
               });
+
+              queryResults[conf.name] = Object.merge(conf, { datasourceValues: results });
+              __callback(e);
             });
           });
+        });
+      } else {
+        return __callback();
+      }
+    }, function (err) {
+      if (err) return callback(err, template);
 
-        } else {
-          return __callback();
-        }
-      },
-        function(err) {
-          if (err) return callback(err,template);
+      template.config = template.config.map(function (c) {
+        if (queryResults[c.name]) return queryResults[c.name];
+        return c;
+      });
 
-          template.config = template.config.map(function(c) {
-            if (queryResults[c.name]) return queryResults[c.name];
-            return c;
-          });
-
-          callback(null,template);
-        }
-      );
-    }
-  ],
-    function(err,template) {
-      return cb(err,template);
-    }
-  );
-}
+      callback(null, template);
+    });
+  }], function (err, template) {
+    return cb(err, template);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      searchPages (PUBLIC)
@@ -469,13 +447,13 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.searchPages=function(query,cb) {
+WikiHandler.prototype.searchPages = function (query, cb) {
   query = query.toLowerCase();
 
   var queryExact = "";
   if (query.indexOf('"') > -1) {
-    queryExact = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$3");
-    query = query.replace(/^(.*)(")([^"]+)(")(.*)$/,"$1$5");
+    queryExact = query.replace(/^(.*)(")([^"]+)(")(.*)$/, "$3");
+    query = query.replace(/^(.*)(")([^"]+)(")(.*)$/, "$1$5");
   }
 
   var regEx = new RegExp(".*" + query + ".*");
@@ -487,18 +465,18 @@ WikiHandler.prototype.searchPages=function(query,cb) {
   //i.e. "customer axiom" would match the path "/something/axiom"
   var regExQuerySplit = [];
 
-  _.each(querySplit,function(word) {
-    regExQuerySplit.push(new RegExp(".*" + word + "$"/* + ".*"*/));
+  _.each(querySplit, function (word) {
+    regExQuerySplit.push(new RegExp(".*" + word + "$" /* + ".*"*/));
   });
 
-  var returnedFields = {path:1,description:1,tags:1,pageViews:1,updated:1,_id:0};
+  var returnedFields = { path: 1, description: 1, tags: 1, pageViews: 1, updated: 1, _id: 0 };
 
-  var filters = {path:/.*/};
-  if (query) filters = {$or: [{path:regEx}, {tags:{$in:querySplit}}, {path:{$in:regExQuerySplit}}]};
-  if (queryExact) filters = {$and: [{$or: [{content_html:new RegExp(".*" + queryExact + ".*","gmi")},{search_content:new RegExp(".*" + queryExact + ".*","gmi")}]}, filters]};
+  var filters = { path: /.*/ };
+  if (query) filters = { $or: [{ path: regEx }, { tags: { $in: querySplit } }, { path: { $in: regExQuerySplit } }] };
+  if (queryExact) filters = { $and: [{ $or: [{ content_html: new RegExp(".*" + queryExact + ".*", "gmi") }, { search_content: new RegExp(".*" + queryExact + ".*", "gmi") }] }, filters] };
 
-  this.getPage({filters:filters, fields:returnedFields, sort:{pageViews:-1}},cb);
-}
+  this.getPage({ filters: filters, fields: returnedFields, sort: { pageViews: -1 } }, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      pageTree (PUBLIC)
@@ -508,17 +486,17 @@ WikiHandler.prototype.searchPages=function(query,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.pageTree=function(path) {
+WikiHandler.prototype.pageTree = function (path) {
   path = path || this.path || "";
 
-  var pages=[];
+  var pages = [];
 
   //pages.push({text:'home',link:"/"});
-  var splitPages=path.split('/');
-  var tempLink="";
+  var splitPages = path.split('/');
+  var tempLink = "";
 
-  for (var _i=0;_i<splitPages.length;_i++) {
-    tempLink+="/"+splitPages[_i];
+  for (var _i = 0; _i < splitPages.length; _i++) {
+    tempLink += "/" + splitPages[_i];
     pages.push({
       text: splitPages[_i],
       link: tempLink
@@ -526,7 +504,7 @@ WikiHandler.prototype.pageTree=function(path) {
   }
 
   return pages;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      requiresReview (PUBLIC)
@@ -538,16 +516,16 @@ WikiHandler.prototype.pageTree=function(path) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.requiresReview=function(path,cb) {
+WikiHandler.prototype.requiresReview = function (path, cb) {
   path = path || this.path;
-  this.getPage({filters:{path:path}, fields:{"settings.requiresReview":1}},function(e,pages) {
+  this.getPage({ filters: { path: path }, fields: { "settings.requiresReview": 1 } }, function (e, pages) {
     if (e) return cb(e);
-    if (!pages.length) return cb(null,0);
+    if (!pages.length) return cb(null, 0);
 
     var numReviews = pages[0].settings.requiresReview || 0;
-    return cb(null,numReviews);
+    return cb(null, numReviews);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      allowedPath (PUBLIC)
@@ -559,32 +537,29 @@ WikiHandler.prototype.requiresReview=function(path,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.allowedPath=function(path,cb) {
-  if (typeof path!=="string") return cb(null,false);
+WikiHandler.prototype.allowedPath = function (path, cb) {
+  if (typeof path !== "string") return cb(null, false);
 
-  async.waterfall([
-    function(callback) {
-      config.mongodb.db.collection("adminsettings").find({domid:"forbidden_paths"},{value:1}).toArray(function(_e,paths) {
-        if (_e) return callback(_e);
-        if (!paths || !paths.length || typeof paths[0] !== "object" || !paths[0].value) return callback(null,true);
+  async.waterfall([function (callback) {
+    config.mongodb.db.collection("adminsettings").find({ domid: "forbidden_paths" }, { value: 1 }).toArray(function (_e, paths) {
+      if (_e) return callback(_e);
+      if (!paths || !paths.length || _typeof(paths[0]) !== "object" || !paths[0].value) return callback(null, true);
 
-        var invalid = [];
-        paths[0].value.forEach(function(p) {
-          invalid.push(new RegExp("^\/" + p + "[\/]*.*$"));
-        });
-
-        callback(null,invalid);
+      var invalid = [];
+      paths[0].value.forEach(function (p) {
+        invalid.push(new RegExp("^\/" + p + "[\/]*.*$"));
       });
-    },
-    function(invalid,callback) {
-      callback(null,(_.findIndex(invalid,function(re){return re.test(path)}) > -1) ? false : true);
-    }
-  ],
-    function(err,result) {
-      cb(err,result);
-    }
-  );
-}
+
+      callback(null, invalid);
+    });
+  }, function (invalid, callback) {
+    callback(null, _.findIndex(invalid, function (re) {
+      return re.test(path);
+    }) > -1 ? false : true);
+  }], function (err, result) {
+    cb(err, result);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      validatePassword (PUBLIC)
@@ -599,7 +574,7 @@ WikiHandler.prototype.allowedPath=function(path,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.validatePassword=function(options,cb) {
+WikiHandler.prototype.validatePassword = function (options, cb) {
   var pw = options.password;
   var pagePW = options.pagePW;
   var session = options.session;
@@ -607,28 +582,28 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
 
   var self = this;
 
-  var validate = function(actualPW) {
-    if (typeof session[self.path]==="object" && session[self.path].auth) {
-      cb(null,true);
+  var validate = function validate(actualPW) {
+    if (_typeof(session[self.path]) === "object" && session[self.path].auth) {
+      cb(null, true);
     } else if (pw == actualPW) {
-      session[self.path] = (typeof session[self.path]==="object") ? Object.merge(session[self.path],{auth:true}) : {auth:true};
+      session[self.path] = _typeof(session[self.path]) === "object" ? Object.merge(session[self.path], { auth: true }) : { auth: true };
       session.save();
-      cb(null,true);
+      cb(null, true);
     } else {
-      cb(null,false);
+      cb(null, false);
     }
-  }
+  };
 
   if (pagePW) {
     return validate(pagePW);
   }
 
-  this.isPasswordProtected(pageInfo,function(e,pw) {
+  this.isPasswordProtected(pageInfo, function (e, pw) {
     if (e) return cb(e);
-    if (!pw) return cb(null,true);
+    if (!pw) return cb(null, true);
     return validate(pw);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isPasswordProtected (PUBLIC)
@@ -640,23 +615,22 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.isPasswordProtected=function(info,cb) {
-  var check = function(pageInfo) {
-    if (typeof pageInfo.password === "string") cb(null,pageInfo.password);
-    else cb(null,false);
-  }
+WikiHandler.prototype.isPasswordProtected = function (info, cb) {
+  var check = function check(pageInfo) {
+    if (typeof pageInfo.password === "string") cb(null, pageInfo.password);else cb(null, false);
+  };
 
-  if (typeof info==="object" && info!=null) {
+  if ((typeof info === "undefined" ? "undefined" : _typeof(info)) === "object" && info != null) {
     return check(info);
   }
 
-  this.getPage({fields:{password:1}},function(_e,pageInfo) {
+  this.getPage({ fields: { password: 1 } }, function (_e, pageInfo) {
     if (_e) return cb(_e);
-    if (!pageInfo.length) return cb(null,false);
+    if (!pageInfo.length) return cb(null, false);
 
     return check(pageInfo[0]);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      event (PUBLIC)
@@ -670,11 +644,11 @@ WikiHandler.prototype.isPasswordProtected=function(info,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.event=function(options,cb) {
+WikiHandler.prototype.event = function (options, cb) {
   options = options || {};
 
-  var type = (typeof options==="string") ? options : (options.type || "");
-  var params = (typeof options==="string") ? {} : (options.params || {});
+  var type = typeof options === "string" ? options : options.type || "";
+  var params = typeof options === "string" ? {} : options.params || {};
 
   var self = this;
 
@@ -683,77 +657,72 @@ WikiHandler.prototype.event=function(options,cb) {
     return;
   }
 
-  async.parallel([
-    function(callback) {
-      config.mongodb.db.collection("wikicontent").find({path:self.path}).toArray(function(e,doc) {
-        if (e) return callback(e);
-        if (!doc || !doc.length || !(typeof doc[0] === "object") || !(doc[0].events instanceof Array)) return callback(null,[]);
+  async.parallel([function (callback) {
+    config.mongodb.db.collection("wikicontent").find({ path: self.path }).toArray(function (e, doc) {
+      if (e) return callback(e);
+      if (!doc || !doc.length || !(_typeof(doc[0]) === "object") || !(doc[0].events instanceof Array)) return callback(null, []);
 
-        doc[0].events = doc[0].events.filter(function(ev) {return ev.type == type});
-
-        return callback(e,doc);
+      doc[0].events = doc[0].events.filter(function (ev) {
+        return ev.type == type;
       });
 
-      /* $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
-      config.mongodb.db.collection("wikicontent").aggregate([
-        {
-          $match: {path:self.path}
-        },
-        {
-          $project: {
-            _id: 0,
-            events: {
-              $filter: {
-                input: "$events",
-                as: "event",
-                cond: {
-                  $eq: ["$$event.type",type]
-                }
+      return callback(e, doc);
+    });
+
+    /* $FILTER IS ONLY SUPPORTED BY MONGODB 3.2+
+    config.mongodb.db.collection("wikicontent").aggregate([
+      {
+        $match: {path:self.path}
+      },
+      {
+        $project: {
+          _id: 0,
+          events: {
+            $filter: {
+              input: "$events",
+              as: "event",
+              cond: {
+                $eq: ["$$event.type",type]
               }
             }
           }
         }
-      ],function(e,doc) {
-        callback(e,doc);
-      });*/
-    },
-    function(callback) {
-      config.mongodb.db.collection("defaultevents").find({type:type}).toArray(function(e,events) {
-        callback(e,events);
-      });
-    },
-  ],
-    function(err,results) {
-      if (err) return cb(err);
-
-      var pageEvents = (results[0].length && typeof results[0][0]==="object") ? results[0][0].events : [];
-      var defaultEvents = results[1] || [];
-
-      var aggregatedEvents = [].concat(pageEvents,defaultEvents);
-
-      if (aggregatedEvents.length) {
-        var asyncParallel = aggregatedEvents.map(function(event) {
-          event = event || {};
-          var parameters = Object.merge(params,event.params || {});
-
-          return function(callback) {
-            var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
-
-            if (!(result instanceof Error)) callback(null,true);
-            else callback(result);
-          }
-        });
-
-        async.parallel(asyncParallel,function(err,results) {
-          if (err) cb(err);
-          else cb(null,true);
-        });
-      } else {
-        cb(null,true);
       }
+    ],function(e,doc) {
+      callback(e,doc);
+    });*/
+  }, function (callback) {
+    config.mongodb.db.collection("defaultevents").find({ type: type }).toArray(function (e, events) {
+      callback(e, events);
+    });
+  }], function (err, results) {
+    if (err) return cb(err);
+
+    var pageEvents = results[0].length && _typeof(results[0][0]) === "object" ? results[0][0].events : [];
+    var defaultEvents = results[1] || [];
+
+    var aggregatedEvents = [].concat(pageEvents, defaultEvents);
+
+    if (aggregatedEvents.length) {
+      var asyncParallel = aggregatedEvents.map(function (event) {
+        event = event || {};
+        var parameters = Object.merge(params, event.params || {});
+
+        return function (callback) {
+          var result = new CodeRunner({ code: event.code, params: Object.merge({ pagepath: self.path }, parameters) }).eval();
+
+          if (!(result instanceof Error)) callback(null, true);else callback(result);
+        };
+      });
+
+      async.parallel(asyncParallel, function (err, results) {
+        if (err) cb(err);else cb(null, true);
+      });
+    } else {
+      cb(null, true);
     }
-  );
-}
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getExternalDatasources (PUBLIC)
@@ -766,29 +735,29 @@ WikiHandler.prototype.event=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getExternalDatasources=function(options,cb) {
-  cb = (typeof options === "function") ? options : cb;
-  options = (typeof options === "function") ? {} : (options || {});
+WikiHandler.prototype.getExternalDatasources = function (options, cb) {
+  cb = typeof options === "function" ? options : cb;
+  options = typeof options === "function" ? {} : options || {};
 
-  var dsName = (typeof options === "string") ? options : (options.name || null);
+  var dsName = typeof options === "string" ? options : options.name || null;
 
-  config.mongodb.db.collection("adminsettings").find({domid:"datasources"}).toArray(function(e,datasources) {
+  config.mongodb.db.collection("adminsettings").find({ domid: "datasources" }).toArray(function (e, datasources) {
     if (e) return cb(e);
-    if (!datasources.length) return cb(null,[]);
+    if (!datasources.length) return cb(null, []);
 
     datasources = datasources[0].value;
 
     if (dsName) {
-      datasources = datasources.filter(function(ds) {
+      datasources = datasources.filter(function (ds) {
         return ds.name == dsName;
       })[0];
 
-      return cb(null,datasources);
+      return cb(null, datasources);
     }
 
-    return cb(null,datasources);
+    return cb(null, datasources);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getModules (PUBLIC)
@@ -800,27 +769,23 @@ WikiHandler.prototype.getExternalDatasources=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getModules=function(options,cb) {
+WikiHandler.prototype.getModules = function (options, cb) {
   options = options || {};
 
-  var filters = options.filters || { active:{$ne:false} };
+  var filters = options.filters || { active: { $ne: false } };
   var fields = options.fields || {};
 
-  async.parallel([
-    function(callback) {
-      config.mongodb.db.collection("wiki_modules").find(filters,fields).toArray(function(e,modules) {
-        callback(e,modules);
-      });
-    }
-  ],
-    function(err,results) {
-      var modules = results[0].sort(function(a,b) {
-        return (a.key < b.key) ? -1 : 1;
-      });
-      return cb(err,modules);
-    }
-  );
-}
+  async.parallel([function (callback) {
+    config.mongodb.db.collection("wiki_modules").find(filters, fields).toArray(function (e, modules) {
+      callback(e, modules);
+    });
+  }], function (err, results) {
+    var modules = results[0].sort(function (a, b) {
+      return a.key < b.key ? -1 : 1;
+    });
+    return cb(err, modules);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getModuleInstances (PUBLIC)
@@ -832,39 +797,38 @@ WikiHandler.prototype.getModules=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.getModuleInstances=function(path,cb) {
+WikiHandler.prototype.getModuleInstances = function (path, cb) {
   path = path || this.path;
 
   var self = this;
 
-  async.parallel([
-    function(callback) {
-      self.getModules({fields:{_id:0, key:1, name:1, description:1, config:1}},function(e,modules) {
-        callback(e,modules);
-      });
-    },
-    function(callback) {
-      config.mongodb.db.collection("wiki_modules_instances").find({path:path}).toArray(function(e,modulesInstances) {
-        callback(e,modulesInstances);
-      });
-    }
-  ],
-    function(err,results) {
-      if (err) return cb(err);
+  async.parallel([function (callback) {
+    self.getModules({ fields: { _id: 0, key: 1, name: 1, description: 1, config: 1 } }, function (e, modules) {
+      callback(e, modules);
+    });
+  }, function (callback) {
+    config.mongodb.db.collection("wiki_modules_instances").find({ path: path }).toArray(function (e, modulesInstances) {
+      callback(e, modulesInstances);
+    });
+  }], function (err, results) {
+    if (err) return cb(err);
 
-      var modules = results[0];
-      var moduleInstances = results[1];
+    var modules = results[0];
+    var moduleInstances = results[1];
 
-      _.each(moduleInstances,function(instance,_index) {
-        var m = modules.filter(function(m) {return m.key == instance.modulekey;}) || [];
-        moduleInstances[_index].moduleConfig = (typeof m[0]==="object") ? m[0].config : [];
-      });
-      moduleInstances = moduleInstances.sort(function(a,b) { return (a.key < b.key) ? -1 : 1; });
+    _.each(moduleInstances, function (instance, _index) {
+      var m = modules.filter(function (m) {
+        return m.key == instance.modulekey;
+      }) || [];
+      moduleInstances[_index].moduleConfig = _typeof(m[0]) === "object" ? m[0].config : [];
+    });
+    moduleInstances = moduleInstances.sort(function (a, b) {
+      return a.key < b.key ? -1 : 1;
+    });
 
-      return cb(null,moduleInstances);
-    }
-  );
-}
+    return cb(null, moduleInstances);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      addAndPopulateSearchField (PUBLIC)
@@ -875,8 +839,8 @@ WikiHandler.prototype.getModuleInstances=function(path,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <string/null>: if is an Easy Config page, a long string, otherwise null
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.addAndPopulateSearchField=function(oContent) {
-  if (oContent.template.templateId && typeof oContent.template.config === "object") {
+WikiHandler.prototype.addAndPopulateSearchField = function (oContent) {
+  if (oContent.template.templateId && _typeof(oContent.template.config) === "object") {
     var searchString = '';
     var config = oContent.template.config;
     for (var _key in config) {
@@ -891,7 +855,7 @@ WikiHandler.prototype.addAndPopulateSearchField=function(oContent) {
   }
 
   return null;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      deletePage (PUBLIC)
@@ -901,39 +865,32 @@ WikiHandler.prototype.addAndPopulateSearchField=function(oContent) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.deletePage=function(cb) {
+WikiHandler.prototype.deletePage = function (cb) {
   var self = this;
 
-  async.series([
-    function(callback) {
-      self.getPage(function(e,page) {
-        if (e) callback(e);
-        else {
-          var oArchive = page[0];
-          delete(oArchive["_id"]);
+  async.series([function (callback) {
+    self.getPage(function (e, page) {
+      if (e) callback(e);else {
+        var oArchive = page[0];
+        delete oArchive["_id"];
 
-          config.mongodb.db.collection("wikicontent_archive").insert(oArchive,function(err,result) {
-            callback(err,result);
-          });
-        }
-      });
-    },
-    function(callback) {
-      config.mongodb.db.collection("wikicontent").remove({ $or:[{path:self.path},{aliasfor:self.path}] },function(e,result) {
-        callback(e,result);
-      });
-    },
-    function(callback) {
-      config.mongodb.db.collection("wiki_modules_instances").remove({ path:self.path },function(e,result) {
-        callback(e,result);
-      });
-    }
-  ],
-    function(err,results) {
-      cb(err);
-    }
-  );
-}
+        config.mongodb.db.collection("wikicontent_archive").insert(oArchive, function (err, result) {
+          callback(err, result);
+        });
+      }
+    });
+  }, function (callback) {
+    config.mongodb.db.collection("wikicontent").remove({ $or: [{ path: self.path }, { aliasfor: self.path }] }, function (e, result) {
+      callback(e, result);
+    });
+  }, function (callback) {
+    config.mongodb.db.collection("wiki_modules_instances").remove({ path: self.path }, function (e, result) {
+      callback(e, result);
+    });
+  }], function (err, results) {
+    cb(err);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      aryToNestedObj (PUBLIC)
@@ -943,18 +900,17 @@ WikiHandler.prototype.deletePage=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <object>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.aryToNestedObj=function(ary) {
+WikiHandler.prototype.aryToNestedObj = function (ary) {
   var obj = {};
 
   var key = ary[0];
   var newAry = ary.slice(1);
   obj[key] = {};
 
-  if (newAry.length > 1) obj[key] = this.aryToNestedObj(newAry);
-  else if (newAry[0]) obj[key][newAry[0]] = {};
+  if (newAry.length > 1) obj[key] = this.aryToNestedObj(newAry);else if (newAry[0]) obj[key][newAry[0]] = {};
 
   return obj;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      sanitizePath (PUBLIC)
@@ -964,10 +920,10 @@ WikiHandler.prototype.aryToNestedObj=function(ary) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.sanitizePath=function(path) {
-  path = (path || this.path || "");
-  return this.path = ((path[path.length-1]=="/") ? path.substring(0,path.length-1) : path).toLowerCase();
-}
+WikiHandler.prototype.sanitizePath = function (path) {
+  path = path || this.path || "";
+  return this.path = (path[path.length - 1] == "/" ? path.substring(0, path.length - 1) : path).toLowerCase();
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      escapePath (PUBLIC)
@@ -977,13 +933,8 @@ WikiHandler.prototype.sanitizePath=function(path) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-WikiHandler.prototype.escapePath=function(path) {
-  return (path || this.path).replace(/\.\/\+\[\]/g,"\$0");
-}
+WikiHandler.prototype.escapePath = function (path) {
+  return (path || this.path).replace(/\.\/\+\[\]/g, "\$0");
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=WikiHandler;
-}
-//-------------------------------------------------------
+module.exports = WikiHandler;

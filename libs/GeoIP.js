@@ -1,3 +1,5 @@
+"use strict";
+
 var httpClient = require("./ApiClient.js");
 
 /*-----------------------------------------------------------------------------------------
@@ -7,11 +9,11 @@ var httpClient = require("./ApiClient.js");
 |AUTHOR:  Lance Whatley
 |CALLABLE METHODS:
 |      go: makes a request to the endpoint
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 1/7/2016 - created
 -----------------------------------------------------------------------------------------*/
 function GeoIP(dataType) {
-  this.dataType = dataType || "json";    //json, csv, xml, jsonp
+  this.dataType = dataType || "json"; //json, csv, xml, jsonp
   this.client = new httpClient();
   this.client.endpoint = "freegeoip.net";
 }
@@ -25,9 +27,9 @@ function GeoIP(dataType) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: the new path
 -----------------------------------------------------------------------------------------*/
-GeoIP.prototype.setPath = function(ip) {
+GeoIP.prototype.setPath = function (ip) {
   return this.client.path = "/" + this.dataType + "/" + ip;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      go (PUBLIC)
@@ -38,21 +40,16 @@ GeoIP.prototype.setPath = function(ip) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GeoIP.prototype.go = function(ip,cb) {
+GeoIP.prototype.go = function (ip, cb) {
   var self = this;
-  
-  this.setPath(ip);
-  this.client.request(null,function(err,data) {
-    if (err) return cb(err);
-    if (!data) return cb("No location information for IP address: " + ip)
-    
-    return cb(null,(self.dataType=="json") ? JSON.parse(data) : data);
-  });
-}
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=GeoIP;
-}
-//-------------------------------------------------------
+  this.setPath(ip);
+  this.client.request(null, function (err, data) {
+    if (err) return cb(err);
+    if (!data) return cb("No location information for IP address: " + ip);
+
+    return cb(null, self.dataType == "json" ? JSON.parse(data) : data);
+  });
+};
+
+module.exports = GeoIP;

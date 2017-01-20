@@ -1,74 +1,75 @@
-var newrelic = require("newrelic");
-var os = require("os");
-var fs = require("fs");
-var express = require("express");
-var app = express();
-var cluster = require("cluster");
-var sticky = require("sticky-session");
-var session = require("express-session");
-var formidable = require('express-formidable');
-var bodyParser = require("body-parser");
-var cookieParser = require("cookie-parser");
-var mongoStore = require("connect-mongo")(session);
-var redis = require("redis");
-var path = require("path");
-var http = require("http").Server(app);
-var io = require("socket.io")(http,{pingInterval:4000, pingTimeout:10000});
-var passport = require("passport");
-var uuid = require('node-uuid');
-var _ = require("underscore");
-var async = require("async");
-var jade = require("jade");
-var html = require("html");
-var mammoth = require("mammoth");
-var Encryption = require("./libs/Encryption.js");
-var SocketHandler = require("./libs/SocketHandler.js");
-var Auth = require("./libs/Authentication.js");
-var GetHTML = require("./libs/GetHTML.js");
-var Audit = require("./libs/Audit.js");
-var AccessManagement = require("./libs/AccessManagement.js");
-var ChildProcesses = require("./libs/ChildProcesses.js");
-var RouteHandler = require("./libs/RouteHandler.js");
-var WikiHandler = require("./libs/WikiHandler.js");
-var FileHandler = require("./libs/FileHandler.js");
-var SQLHandler = require("./libs/SQLHandler.js");
-var DirectoryProcessor = require("./libs/DirectoryProcessor.js");
-var config = require("./config.js");
-var log = require("bunyan").createLogger(config.logger.options());
-var Object = require("./public/js/Object_prototypes.js");
+var newrelic = require("newrelic")
+var mongodb = require('mongodb')
+var os = require("os")
+var fs = require("fs")
+var express = require("express")
+var app = express()
+var cluster = require("cluster")
+var sticky = require("sticky-session")
+var session = require("express-session")
+var formidable = require('express-formidable')
+var bodyParser = require("body-parser")
+var cookieParser = require("cookie-parser")
+var mongoStore = require("connect-mongo")(session)
+var redis = require("redis")
+var path = require("path")
+var http = require("http").Server(app)
+var io = require("socket.io")(http,{pingInterval:4000, pingTimeout:10000})
+var passport = require("passport")
+var uuid = require('node-uuid')
+var _ = require("underscore")
+var async = require("async")
+var jade = require("jade")
+var html = require("html")
+var mammoth = require("mammoth")
+var Encryption = require("./libs/Encryption.js")
+var SocketHandler = require("./libs/SocketHandler.js")
+var Auth = require("./libs/Authentication.js")
+var GetHTML = require("./libs/GetHTML.js")
+var Audit = require("./libs/Audit.js")
+var AccessManagement = require("./libs/AccessManagement.js")
+var ChildProcesses = require("./libs/ChildProcesses.js")
+var RouteHandler = require("./libs/RouteHandler.js")
+var WikiHandler = require("./libs/WikiHandler.js")
+var FileHandler = require("./libs/FileHandler.js")
+var SQLHandler = require("./libs/SQLHandler.js")
+var DirectoryProcessor = require("./libs/DirectoryProcessor.js")
+var config = require("./config.js")
+var log = require("bunyan").createLogger(config.logger.options())
+var Object = require("./public/js/extras/Object_prototypes.js")
 
 try {
   //handle clustering if applicable
   if (config.server.CLUSTERING) {
     if (!sticky.listen(http,config.server.PORT)) {    //if (cluster.isMaster) {}
-      http.once("listening",function() {log.info("listening on *:"+config.server.PORT);});
+      http.once("listening",function() {log.info("listening on *:"+config.server.PORT)})
 
       // Count CPUs, max CLUSTER_MAX_CPUS forks
       var cpuCount = os.cpus().length;
-      log.debug("Number of CPUs on machine: " + cpuCount);
+      log.debug("Number of CPUs on machine: " + cpuCount)
       cpuCount = (cpuCount > config.server.CLUSTER_MAX_CPUS) ? config.server.CLUSTER_MAX_CPUS : cpuCount;
-      log.debug("Number of CPUs we're using: " + cpuCount);
+      log.debug("Number of CPUs we're using: " + cpuCount)
 
       // Create a worker for each CPU
       for (var _i=0;_i<cpuCount;_i++) {
-        cluster.fork();
+        cluster.fork()
       }
 
       // Listen for dying workers
       cluster.on("exit", function (worker) {
         // Replace the dead worker
-        log.info("Worker " + worker.id + " died. Creating another worker...");
-        cluster.fork();
-      });
+        log.info("Worker " + worker.id + " died. Creating another worker...")
+        cluster.fork()
+      })
     } else {
-      main();
+      main()
     }
   } else {
-    main(true);
+    main(true)
   }
 
 } catch (_err) {
-  log.error(_err);
+  log.error(_err)
 }
 
 

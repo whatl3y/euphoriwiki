@@ -1,3 +1,5 @@
+"use strict";
+
 var Authentication = require("./Authentication.js");
 var ChatMessageHandler = require("./ChatMessageHandler.js");
 var WikiHandler = require("./WikiHandler.js");
@@ -6,17 +8,17 @@ var log = require("bunyan").createLogger(config.logger.options());
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketWikiChat.js
-|PURPOSE:  
+|PURPOSE:
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
-|ASSUMES:  
-|REVISION HISTORY:  
+|ASSUMES:
+|REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
-SocketWikiChat = function(app,socket) {
+var SocketWikiChat = function SocketWikiChat(app, socket) {
   this.app = app;
   this.socket = socket;
-  
+
   this.handler = {
     subscribe: getMessages.bind(this),
     getmoremessages: getMessages.bind(this),
@@ -24,8 +26,8 @@ SocketWikiChat = function(app,socket) {
     chatmessage: chatMessage.bind(this),
     subchatmessage: subChatMessage.bind(this),
     disconnect: disconnect.bind(this)
-  }
-}
+  };
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      userTyping (PUBLIC)
@@ -40,16 +42,16 @@ SocketWikiChat = function(app,socket) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function userTyping(io,socket,data) {
-  var auth = new Authentication({session: socket.request.session});
+function userTyping(io, socket, data) {
+  var auth = new Authentication({ session: socket.request.session });
   if (!auth.isLoggedIn()) return;
-  
+
   var userInfo = this.app.CACHE.sockets[socket.id] || {};
-  
-  if (data.val.length>0) {
-    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{info:{id:socket.id, user:userInfo.user, name:userInfo.firsname}, typing:true});
+
+  if (data.val.length > 0) {
+    socket.broadcast.to(data.room).emit('chatCtrl_usertyping', { info: { id: socket.id, user: userInfo.user, name: userInfo.firsname }, typing: true });
   } else {
-    socket.broadcast.to(data.room).emit('chatCtrl_usertyping',{info:{id:socket.id, user:userInfo.user, name:userInfo.firsname}, typing:false});
+    socket.broadcast.to(data.room).emit('chatCtrl_usertyping', { info: { id: socket.id, user: userInfo.user, name: userInfo.firsname }, typing: false });
   }
 }
 
@@ -66,31 +68,31 @@ function userTyping(io,socket,data) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function chatMessage(io,socket,data,SocketHandler) {
-  var wiki = new WikiHandler({path:data.room});
-  var auth = new Authentication({session: socket.request.session});
-  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
-  
-  var messageData={
+function chatMessage(io, socket, data, SocketHandler) {
+  var wiki = new WikiHandler({ path: data.room });
+  var auth = new Authentication({ session: socket.request.session });
+  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error", "Sorry, you must be logged in to chat on the page.");
+
+  var messageData = {
     user: auth.username,
     name: socket.request.session.firstname + " " + socket.request.session.lastname,
     content: data.msg
   };
-  
-  new ChatMessageHandler({ namespace: io.name, room: data.room })
-    .insert(messageData,function(_err,message) {
-      if (_err) return log.error(_err);
-      
-      var mesID = message[0]._id;
-      var name = message[0].name || message[0].guestname;
-      var cont = message[0].content;
-      var d = message[0].creationdate;
-      
-      var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
-      io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
-      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, room:data.room, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
-    }
-  );
+
+  new ChatMessageHandler({ namespace: io.name, room: data.room }).insert(messageData, function (_err, message) {
+    if (_err) return log.error(_err);
+
+    var mesID = message[0]._id;
+    var name = message[0].name || message[0].guestname;
+    var cont = message[0].content;
+    var d = message[0].creationdate;
+
+    var messageToSend = messageInformation({ id: mesID, name: name, content: cont, date: d });
+    io.to(data.room).emit('chatCtrl_chatmessage', messageToSend);
+    wiki.event({ type: "addchatmessage", params: { messageId: mesID, date: d, room: data.room, user: auth.username, content: data.msg } }, function (e, result) {
+      if (e) log.error(e);
+    });
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -106,23 +108,21 @@ function chatMessage(io,socket,data,SocketHandler) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function subChatMessage(io,socket,data,SocketHandler) {
-  var auth = new Authentication({session: socket.request.session});
-  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
-  
-  var submessageData= {
+function subChatMessage(io, socket, data, SocketHandler) {
+  var auth = new Authentication({ session: socket.request.session });
+  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error", "Sorry, you must be logged in to chat on the page.");
+
+  var submessageData = {
     guestname: socket.request.session.firstname,
     primaryMessage: data.messageID,
     content: data.content
   };
-  
-  new ChatMessageHandler({ namespace: io.name, room: data.room })
-    .insertSubmessage(submessageData,function(_err,submessage) {
-      if (_err) return log.error(_err);
-      
-      io.to(data.room).emit('chatCtrl_addsubmessage',submessageData);
-    }
-  );
+
+  new ChatMessageHandler({ namespace: io.name, room: data.room }).insertSubmessage(submessageData, function (_err, submessage) {
+    if (_err) return log.error(_err);
+
+    io.to(data.room).emit('chatCtrl_addsubmessage', submessageData);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -138,24 +138,23 @@ function subChatMessage(io,socket,data,SocketHandler) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function getMessages(io,socket,data,SocketHandler) {
-  new ChatMessageHandler({ namespace: io.name, room: data.room })
-    .findAll(data.page || 0,function(_err,messages) {
-      if (_err) return log.error(_err);
-      
-      var messagesToSend=[];
-      for (var _i=0;_i<messages.length;_i++) {
-        messagesToSend.push(messageInformation({
-          id: messages[_i]._id,
-          name: messages[_i].name || messages[_i].guestname,
-          content: messages[_i].content,
-          date: messages[_i].creationdate,
-          links: messages[_i].links
-        }))
-      }
-      
-      socket.emit('chatCtrl_messages',messagesToSend);
-    });
+function getMessages(io, socket, data, SocketHandler) {
+  new ChatMessageHandler({ namespace: io.name, room: data.room }).findAll(data.page || 0, function (_err, messages) {
+    if (_err) return log.error(_err);
+
+    var messagesToSend = [];
+    for (var _i = 0; _i < messages.length; _i++) {
+      messagesToSend.push(messageInformation({
+        id: messages[_i]._id,
+        name: messages[_i].name || messages[_i].guestname,
+        content: messages[_i].content,
+        date: messages[_i].creationdate,
+        links: messages[_i].links
+      }));
+    }
+
+    socket.emit('chatCtrl_messages', messagesToSend);
+  });
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -171,10 +170,10 @@ function getMessages(io,socket,data,SocketHandler) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function disconnect(io,socket,data,SocketHandler) {
+function disconnect(io, socket, data, SocketHandler) {
   if (this.app.CACHE.sockets[socket.id]) {
     var room = this.app.CACHE.sockets[socket.id].room;
-    socket.broadcast.to(room).emit('chatCtrl_usertyping',{info:{id:socket.id}, typing:false});
+    socket.broadcast.to(room).emit('chatCtrl_usertyping', { info: { id: socket.id }, typing: false });
   }
 }
 
@@ -198,9 +197,4 @@ function messageInformation(opts) {
   };
 }
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=SocketWikiChat;
-}
-//-------------------------------------------------------
+module.exports = SocketWikiChat;

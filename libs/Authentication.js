@@ -1,3 +1,7 @@
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var async = require("async");
 var Encryption = require("./Encryption.js");
 var Access = require("./AccessManagement.js");
@@ -13,10 +17,10 @@ var config = require("../config.js");
 |REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
-Authentication = function(options) {
+var Authentication = function Authentication(options) {
   options = options || {};
 
-  this.session = options.session;        //the session object we will be able to save for future requests
+  this.session = options.session; //the session object we will be able to save for future requests
   this.username = this.getUsername();
 
   this.accountsTable = "accounts";
@@ -25,7 +29,7 @@ Authentication = function(options) {
   this.ldap = new LDAPHandler();
   this.GLOBAL_ADMIN = process.env.GLOBAL_USERNAME;
   this.GLOBAL_PASSWORD = process.env.GLOBAL_PASSWORD;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      findOrSaveUser (PUBLIC)
@@ -37,47 +41,37 @@ Authentication = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.findOrSaveUser = function(data,cb) {
+Authentication.prototype.findOrSaveUser = function (data, cb) {
   var data = data || {};
-  var username = (data.$set) ? data.$set.username : data.username;
+  var username = data.$set ? data.$set.username : data.username;
   var upsert = data.upsert || false;
   var update = data.update || false;
   var fields = data.fields || {};
 
-  delete(data.upsert);
-  delete(data.update);
+  delete data.upsert;
+  delete data.update;
 
-  async.series([
-    function(callback) {
-      config.mongodb.db.collection("accounts").find({username:username},fields).toArray(function(e,record) {
-          if (e) callback(e);
-          else callback(null,(record instanceof Array) ? record[0]: record);
-        }
-      );
-    },
-    function(callback) {
-      if (update || upsert) {
-        config.mongodb.db.collection("accounts").update({username:username},data,{ upsert:upsert },
-          function(e,result) {
-            return callback(e,(data.$set) ? data.$set : data);
-          }
-        );
-      } else callback(null,false);
-    }
-  ],
-    function(err,results) {
-      if (err) return cb(err);
+  async.series([function (callback) {
+    config.mongodb.db.collection("accounts").find({ username: username }, fields).toArray(function (e, record) {
+      if (e) callback(e);else callback(null, record instanceof Array ? record[0] : record);
+    });
+  }, function (callback) {
+    if (update || upsert) {
+      config.mongodb.db.collection("accounts").update({ username: username }, data, { upsert: upsert }, function (e, result) {
+        return callback(e, data.$set ? data.$set : data);
+      });
+    } else callback(null, false);
+  }], function (err, results) {
+    if (err) return cb(err);
 
-      var origRecord = results[0];
-      var updatedOrNewRecord = results[1];
+    var origRecord = results[0];
+    var updatedOrNewRecord = results[1];
 
-      if (upsert || update) return cb(null,updatedOrNewRecord);
-      else if (origRecord) return cb(null,origRecord);
+    if (upsert || update) return cb(null, updatedOrNewRecord);else if (origRecord) return cb(null, origRecord);
 
-      return cb(null,false);
-    }
-  );
-}
+    return cb(null, false);
+  });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      auth (PUBLIC)
@@ -90,20 +84,20 @@ Authentication.prototype.findOrSaveUser = function(data,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.auth = function(options,cb) {
+Authentication.prototype.auth = function (options, cb) {
   options = options || {};
 
   switch (options.type) {
     case "activedirectory":
-      options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
-      this.ldap.auth(options,cb);
+      options.username = options.username + (options.username.indexOf("@") > -1 ? "" : "@" + config.ldap.suffix);
+      this.ldap.auth(options, cb);
       break;
 
     default:
-      options.username = options.username + ((options.username.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix);
-      this.ldap.auth(options,cb);
+      options.username = options.username + (options.username.indexOf("@") > -1 ? "" : "@" + config.ldap.suffix);
+      this.ldap.auth(options, cb);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      validatePassword (PUBLIC)
@@ -114,9 +108,9 @@ Authentication.prototype.auth = function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <boolean>: determines if password is valid
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.validatePassword = function(enteredPassword,encryptedPassword) {
+Authentication.prototype.validatePassword = function (enteredPassword, encryptedPassword) {
   return enteredPassword == this.encryption.decrypt(encryptedPassword);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      find (PUBLIC)
@@ -130,9 +124,9 @@ Authentication.prototype.validatePassword = function(enteredPassword,encryptedPa
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.find = function(options,cb) {
-  this.ldap.find(options,cb);
-}
+Authentication.prototype.find = function (options, cb) {
+  this.ldap.find(options, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getGroupMembershipForUser (PUBLIC)
@@ -143,9 +137,9 @@ Authentication.prototype.find = function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
-  this.ldap.getGroupMembershipForUser(options,cb);
-}
+Authentication.prototype.getGroupMembershipForUser = function (options, cb) {
+  this.ldap.getGroupMembershipForUser(options, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isUserMemberOf (PUBLIC)
@@ -157,9 +151,9 @@ Authentication.prototype.getGroupMembershipForUser = function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.isUserMemberOf = function(options,cb) {
-  this.ldap.isUserMemberOf(options,cb);
-}
+Authentication.prototype.isUserMemberOf = function (options, cb) {
+  this.ldap.isUserMemberOf(options, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isAuthTypeEnabled (PUBLIC)
@@ -175,17 +169,17 @@ Authentication.prototype.isUserMemberOf = function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.isAuthTypeEnabled = function(type,cb) {
+Authentication.prototype.isAuthTypeEnabled = function (type, cb) {
   var oFilter = {};
   oFilter["domid"] = "authtypes";
   oFilter["value." + type] = "true";
 
-  config.mongodb.db.collection("adminsettings").find(oFilter,{_id:1}).toArray(function(e,isEnabled) {
+  config.mongodb.db.collection("adminsettings").find(oFilter, { _id: 1 }).toArray(function (e, isEnabled) {
     if (e) return cb(e);
 
-    return cb(null,!!isEnabled.length);
+    return cb(null, !!isEnabled.length);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      login (PUBLIC)
@@ -196,18 +190,14 @@ Authentication.prototype.isAuthTypeEnabled = function(type,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.login = function(objOrUpn,cb) {
-  objOrUpn = (typeof objOrUpn==="object")
-    ? objOrUpn
-    : ((typeof objOrUpn === "string")
-      ? objOrUpn + ((objOrUpn.indexOf("@") > -1) ? "" : "@" + config.ldap.suffix)
-      : objOrUpn);
+Authentication.prototype.login = function (objOrUpn, cb) {
+  objOrUpn = (typeof objOrUpn === "undefined" ? "undefined" : _typeof(objOrUpn)) === "object" ? objOrUpn : typeof objOrUpn === "string" ? objOrUpn + (objOrUpn.indexOf("@") > -1 ? "" : "@" + config.ldap.suffix) : objOrUpn;
 
   var self = this;
 
   //does the actual saving to the session
   //and calls the callback function
-  var saveInfo = function(userInfo) {
+  var saveInfo = function saveInfo(userInfo) {
     var userKeys = Object.keys(userInfo);
     for (var _k = 0; _k < userKeys.length; _k++) {
       self.session[userKeys[_k]] = userInfo[userKeys[_k]];
@@ -220,28 +210,27 @@ Authentication.prototype.login = function(objOrUpn,cb) {
 
     self.session.loggedIn = true;
 
-    new Access({db:config.mongodb.db}).isWikiAdmin(self.session.username,function(err,isAdmin) {
+    new Access({ db: config.mongodb.db }).isWikiAdmin(self.session.username, function (err, isAdmin) {
       self.session.isFullAdmin = isAdmin || false;
 
       self.session.save();
       return cb(err);
     });
-  }
+  };
 
-  if (objOrUpn == this.GLOBAL_ADMIN) return saveInfo({ADMIN:true, username:this.GLOBAL_ADMIN});
-  else if (typeof objOrUpn === "object") return saveInfo(objOrUpn);
+  if (objOrUpn == this.GLOBAL_ADMIN) return saveInfo({ ADMIN: true, username: this.GLOBAL_ADMIN });else if ((typeof objOrUpn === "undefined" ? "undefined" : _typeof(objOrUpn)) === "object") return saveInfo(objOrUpn);
 
-  this.isAuthTypeEnabled("ldap",function(err,isEnabled) {
+  this.isAuthTypeEnabled("ldap", function (err, isEnabled) {
     if (err) return cb(err);
     if (!isEnabled) return cb();
 
-    self.find({attribute:"userPrincipalName", value:objOrUpn},function(err,info) {
+    self.find({ attribute: "userPrincipalName", value: objOrUpn }, function (err, info) {
       if (err) return cb(err);
 
       return saveInfo(info.users[0]);
     });
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getUsername (PUBLIC)
@@ -251,9 +240,9 @@ Authentication.prototype.login = function(objOrUpn,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <string or false>: string if logged in with username, else false
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.getUsername = function() {
-  return (this.isLoggedIn()) ? this.session.username : false;
-}
+Authentication.prototype.getUsername = function () {
+  return this.isLoggedIn() ? this.session.username : false;
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getFirstname (PUBLIC)
@@ -263,9 +252,9 @@ Authentication.prototype.getUsername = function() {
 |ASSUMES:    Nothing
 |RETURNS:    <string or false>: string if logged in with first name, else false
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.getFirstname = function() {
-  return (this.isLoggedIn()) ? this.session.firstname : false;
-}
+Authentication.prototype.getFirstname = function () {
+  return this.isLoggedIn() ? this.session.firstname : false;
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getLastname (PUBLIC)
@@ -275,9 +264,9 @@ Authentication.prototype.getFirstname = function() {
 |ASSUMES:    Nothing
 |RETURNS:    <string or false>: string if logged in with last name, else false
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.getLastname = function() {
-  return (this.isLoggedIn()) ? this.session.lastname : false;
-}
+Authentication.prototype.getLastname = function () {
+  return this.isLoggedIn() ? this.session.lastname : false;
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getEmail (PUBLIC)
@@ -287,9 +276,9 @@ Authentication.prototype.getLastname = function() {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: string of an e-mail for the logged in user
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.getEmail = function() {
-  return (this.isLoggedIn()) ? this.session.email : false;
-}
+Authentication.prototype.getEmail = function () {
+  return this.isLoggedIn() ? this.session.email : false;
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      isLoggedIn (PUBLIC)
@@ -299,13 +288,8 @@ Authentication.prototype.getEmail = function() {
 |ASSUMES:    Nothing
 |RETURNS:    <boolean>: true/false if user is logged in
 -----------------------------------------------------------------------------------------*/
-Authentication.prototype.isLoggedIn = function() {
-  return (typeof this.session!=="undefined") ? !!this.session.loggedIn : false;
-}
+Authentication.prototype.isLoggedIn = function () {
+  return typeof this.session !== "undefined" ? !!this.session.loggedIn : false;
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=Authentication;
-}
-//-------------------------------------------------------
+module.exports = Authentication;

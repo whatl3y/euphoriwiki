@@ -1,3 +1,5 @@
+"use strict";
+
 var path = require("path");
 var fs = require("fs");
 var jade = require("jade");
@@ -13,16 +15,16 @@ var mammoth = require("mammoth");
 |REVISION HISTORY:
 |      *LJW 2/19/2016 - created
 -----------------------------------------------------------------------------------------*/
-GetHTML = function(options) {
+var GetHTML = function GetHTML(options) {
   options = options || {};
 
-  this.indent = options.indent || 2;        //how far the HTML indent spacing should be for enclosed tags on new lines.
-  this.path = options.path || "";           //directory path where file resides
+  this.indent = options.indent || 2; //how far the HTML indent spacing should be for enclosed tags on new lines.
+  this.path = options.path || ""; //directory path where file resides
   this.filename = options.file || options.filename || "";
-  this.fullpath = options.fullpath || "";   //full directory+file path where file resides
+  this.fullpath = options.fullpath || ""; //full directory+file path where file resides
 
   this.initialize();
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      initialize (PUBLIC)
@@ -32,14 +34,13 @@ GetHTML = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.initialize = function() {
+GetHTML.prototype.initialize = function () {
   if (this.fullpath) {
-    if (!path.isAbsolute(this.fullpath)) this.fullpath = this.makePath(__dirname+"/"+this.fullpath);
+    if (!path.isAbsolute(this.fullpath)) this.fullpath = this.makePath(__dirname + "/" + this.fullpath);
   } else {
-    if (!path.isAbsolute(this.path)) this.fullpath = this.makePath(__dirname+"/"+this.path+"/"+this.filename);
-    else this.fullpath = this.makePath(this.path+"/"+this.filename);
+    if (!path.isAbsolute(this.path)) this.fullpath = this.makePath(__dirname + "/" + this.path + "/" + this.filename);else this.fullpath = this.makePath(this.path + "/" + this.filename);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      html (PUBLIC)
@@ -50,18 +51,17 @@ GetHTML.prototype.initialize = function() {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.html = function(string,cb) {
-  cb = (typeof string==="function") ? string : cb;
+GetHTML.prototype.html = function (string, cb) {
+  cb = typeof string === "function" ? string : cb;
 
   var self = this;
 
-  if (typeof string==="function") {
-    fs.readFile(this.fullpath,{encoding:"utf8"},function(e,retHtml) {
-      if (e) cb(e);
-      else cb(null,self.prettify(retHtml));
+  if (typeof string === "function") {
+    fs.readFile(this.fullpath, { encoding: "utf8" }, function (e, retHtml) {
+      if (e) cb(e);else cb(null, self.prettify(retHtml));
     });
-  } else cb(null,self.prettify(string || ""));
-}
+  } else cb(null, self.prettify(string || ""));
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      htm (PUBLIC)
@@ -72,9 +72,9 @@ GetHTML.prototype.html = function(string,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.htm = function(string,cb) {
-  this.html(string,cb);
-}
+GetHTML.prototype.htm = function (string, cb) {
+  this.html(string, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      jade (PUBLIC)
@@ -85,18 +85,18 @@ GetHTML.prototype.htm = function(string,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.jade = function(string,cb) {
-  cb = (typeof string==="function") ? string : cb;
-  method = (typeof string==="function") ? "renderFile" : "render";
-  methodParam = (typeof string==="function") ? this.fullpath : (string || "");
+GetHTML.prototype.jade = function (string, cb) {
+  cb = typeof string === "function" ? string : cb;
+  method = typeof string === "function" ? "renderFile" : "render";
+  methodParam = typeof string === "function" ? this.fullpath : string || "";
 
   try {
-    var retHtml = jade[method](methodParam, {basedir:path.join('','views')});
-    cb(null,this.prettify(retHtml));
-  } catch(e) {
+    var retHtml = jade[method](methodParam, { basedir: path.join('', 'views') });
+    cb(null, this.prettify(retHtml));
+  } catch (e) {
     cb(e);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      docx (PUBLIC)
@@ -106,15 +106,15 @@ GetHTML.prototype.jade = function(string,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.docx = function(cb) {
+GetHTML.prototype.docx = function (cb) {
   var self = this;
 
-  mammoth.convertToHtml({path:this.fullpath}).then(function(result) {
-    cb(null,self.prettify(result));
-  }).catch(function(err) {
+  mammoth.convertToHtml({ path: this.fullpath }).then(function (result) {
+    cb(null, self.prettify(result));
+  }).catch(function (err) {
     cb(err);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      doc (PUBLIC)
@@ -124,9 +124,9 @@ GetHTML.prototype.docx = function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.doc = function(cb) {
+GetHTML.prototype.doc = function (cb) {
   this.docx(cb);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      prettify (PUBLIC)
@@ -136,15 +136,15 @@ GetHTML.prototype.doc = function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: new prettified HTML string
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.prettify = function(htmlString) {
+GetHTML.prototype.prettify = function (htmlString) {
   try {
-    var newHtml = html.prettyPrint(htmlString || "",{indent_size:this.indent});
+    var newHtml = html.prettyPrint(htmlString || "", { indent_size: this.indent });
     return newHtml;
-  } catch(e) {
+  } catch (e) {
     console.log(e);
     return false;
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      normalFileToHtml (PUBLIC)
@@ -154,9 +154,9 @@ GetHTML.prototype.prettify = function(htmlString) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: extension as a string
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.normalStringToHtml=function(string) {
-  return string.replace(/(\r\n|\n|\r)/gm,'<br />').replace(/\t/gm,"&nbsp;&nbsp;").replace(/\s\s/gm,"&nbsp;&nbsp;");
-}
+GetHTML.prototype.normalStringToHtml = function (string) {
+  return string.replace(/(\r\n|\n|\r)/gm, '<br />').replace(/\t/gm, "&nbsp;&nbsp;").replace(/\s\s/gm, "&nbsp;&nbsp;");
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      extension (PUBLIC)
@@ -166,9 +166,9 @@ GetHTML.prototype.normalStringToHtml=function(string) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: extension as a string
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.extension=function(file) {
+GetHTML.prototype.extension = function (file) {
   return path.extname(file);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      makePath (PUBLIC)
@@ -179,39 +179,32 @@ GetHTML.prototype.extension=function(file) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: new file path
 -----------------------------------------------------------------------------------------*/
-GetHTML.prototype.makePath=function(p,ary) {
+GetHTML.prototype.makePath = function (p, ary) {
   if (!p && !ary) {
     return false;
   } else if (p && ary) {
-    if (typeof ary[0]==="string") {
-      p = path.join(p,ary[0]);
+    if (typeof ary[0] === "string") {
+      p = path.join(p, ary[0]);
       ary.shift();
 
-      return this.makePath(p,ary);
+      return this.makePath(p, ary);
     } else {
       return p;
     }
-
   } else if (p && !ary) {
 
-    ary = (p instanceof Array) ? p : p.split(/[\\\/,\|\^]{1,2}/g);
+    ary = p instanceof Array ? p : p.split(/[\\\/,\|\^]{1,2}/g);
     p = "";
 
-    if (ary.length <= 1) return path.join(ary[0] || "");
-    else {
+    if (ary.length <= 1) return path.join(ary[0] || "");else {
       p = path.join(ary[0]);
       ary.shift();
 
-      return this.makePath(p,ary);
+      return this.makePath(p, ary);
     }
   }
 
   return p;
-}
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=GetHTML;
-}
-//-------------------------------------------------------
+module.exports = GetHTML;

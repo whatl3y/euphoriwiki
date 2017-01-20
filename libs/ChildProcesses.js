@@ -1,3 +1,7 @@
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var fork = require('child_process').fork;
 //var config = require("../config.js");
 //var log = require("bunyan").createLogger(config.logger.options());
@@ -11,16 +15,16 @@ var fork = require('child_process').fork;
 |REVISION HISTORY:
 |      *LJW 2/19/2016 - created
 -----------------------------------------------------------------------------------------*/
-ChildProcesses = function(options) {
+var ChildProcesses = function ChildProcesses(options) {
   options = options || {};
 
-  this.command = (typeof options==="string") ? options : options.command;
-  this.args = (typeof options==="string") ? [] : this.defineArgs(options.args);
-  this.timeout = (typeof options==="string") ? null : options.timeout;        //optional time limit in seconds to wait for child process to finish before terminating it
+  this.command = typeof options === "string" ? options : options.command;
+  this.args = typeof options === "string" ? [] : this.defineArgs(options.args);
+  this.timeout = typeof options === "string" ? null : options.timeout; //optional time limit in seconds to wait for child process to finish before terminating it
 
   this.child = null;
   this.data = "";
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      run (PUBLIC)
@@ -33,52 +37,52 @@ ChildProcesses = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-ChildProcesses.prototype.run = function(cb) {
+ChildProcesses.prototype.run = function (cb) {
   var self = this;
   var isDone = false;
 
   try {
-    this.child = fork(this.command,this.args);
+    this.child = fork(this.command, this.args);
 
-    this.child.on("message",function(info) {
-      if (typeof info==="object" && info.error) {
+    this.child.on("message", function (info) {
+      if ((typeof info === "undefined" ? "undefined" : _typeof(info)) === "object" && info.error) {
         self.child.kill();
         isDone = true;
         cb(info.error);
       } else {
-        self.data = (typeof info==="string") ? self.data + info : info;
+        self.data = typeof info === "string" ? self.data + info : info;
       }
     });
 
-    this.child.on("error",function(err) {
+    this.child.on("error", function (err) {
       self.child.kill();
       isDone = true;
       cb(err);
     });
 
-    this.child.on("disconnect",function() {
+    this.child.on("disconnect", function () {
       if (!isDone) {
         isDone = true;
-        cb(null,self.data);
+        cb(null, self.data);
       }
     });
 
     //if there's a timeout we want to wait
     //start a timer and terminate the child process
     //if it hasn't completed by the timer.
-    if (typeof this.timeout==="number") {
-      setTimeout(function() {
+    if (typeof this.timeout === "number") {
+      setTimeout(function () {
         if (!isDone) {
           self.child.kill();
           isDone = true;
           cb("The alotted time for the child process to complete, " + self.timeout + " seconds, has passed.");
         }
-      },this.timeout * 1000);
+      }, this.timeout * 1000);
     }
-  } catch(err) {
+  } catch (err) {
     cb(err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      defineArgs (PUBLIC)
@@ -88,19 +92,10 @@ ChildProcesses.prototype.run = function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <array>:
 -----------------------------------------------------------------------------------------*/
-ChildProcesses.prototype.defineArgs = function(args) {
+ChildProcesses.prototype.defineArgs = function (args) {
   if (args) {
-    return (typeof args==="string")
-      ? args.split("|")
-      : ((args instanceof Array)
-        ? args
-        : [])
+    return typeof args === "string" ? args.split("|") : args instanceof Array ? args : [];
   } else return [];
-}
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=ChildProcesses;
-}
-//-------------------------------------------------------
+module.exports = ChildProcesses;

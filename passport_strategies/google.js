@@ -5,7 +5,7 @@ var WikiHandler = require("../libs/WikiHandler.js");
 var Audit = require("../libs/Audit.js");
 var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
-var Object = require("../public/js/Object_prototypes.js");
+var Object = require("../public/js/extras/Object_prototypes.js");
 
 var A = new Authentication();
 

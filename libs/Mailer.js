@@ -1,3 +1,5 @@
+"use strict";
+
 var nodemailer = require('nodemailer');
 var GetHTML = require("./GetHTML.js");
 var config = require("../config.js");
@@ -12,7 +14,7 @@ var log = require("bunyan").createLogger(config.logger.options());
 |REVISION HISTORY:
 |      *LJW 2/19/2016 - created
 -----------------------------------------------------------------------------------------*/
-Mailer = function(options) {
+var Mailer = function Mailer(options) {
   options = options || {};
 
   this.mailoptions = {};
@@ -21,7 +23,7 @@ Mailer = function(options) {
   this.mailoptions.cc = options.cc || [];
   this.mailoptions.bcc = options.bcc || [];
 
-  this.smtpconfig = (options.config) ? options.config : config.smtp.nodemailerconfig();
+  this.smtpconfig = options.config ? options.config : config.smtp.nodemailerconfig();
 
   try {
     this.transporter = nodemailer.createTransport(this.smtpconfig);
@@ -33,13 +35,12 @@ Mailer = function(options) {
     //      options.template.keys: object of keys we'll be replacing their values in the template information
     //      options.template.cb: callback function of what to do upon sending the e-mail
     if (options.template) {
-      if (options.send) this.template(options.template.templateInfo)(this.mailoptions,options.template.keys,options.template.cb);
-      else this.sendTemplate = this.template(options.template.templateInfo);
+      if (options.send) this.template(options.template.templateInfo)(this.mailoptions, options.template.keys, options.template.cb);else this.sendTemplate = this.template(options.template.templateInfo);
     }
-  } catch(err) {
+  } catch (err) {
     log.error(err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      template (PUBLIC)
@@ -49,13 +50,8 @@ Mailer = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    this.transporter.templateSender object
 -----------------------------------------------------------------------------------------*/
-Mailer.prototype.template = function(templateInfo) {
-  return this.transporter.templateSender(templateInfo,{from:config.smtp.core.defaultEmail});
-}
+Mailer.prototype.template = function (templateInfo) {
+  return this.transporter.templateSender(templateInfo, { from: config.smtp.core.defaultEmail });
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=Mailer;
-}
-//-------------------------------------------------------
+module.exports = Mailer;

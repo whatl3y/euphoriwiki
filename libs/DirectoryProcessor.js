@@ -1,8 +1,10 @@
+"use strict";
+
 var fs = require("graceful-fs");
 var path = require("path");
 var async = require("async");
 var Encryption = require("./Encryption.js");
-var Object = require("../public/js/Object_prototypes.js");
+var Object = require("../public/js/extras/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    DirectoryProcessor.js
@@ -14,12 +16,12 @@ var Object = require("../public/js/Object_prototypes.js");
 |REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor=function(options) {
+var DirectoryProcessor = function DirectoryProcessor(options) {
   options = options || {};
 
   this.dirpath = options.dirpath;
-  this.savepath = options.savepath || path.join(__dirname,"..","files","diff");
-}
+  this.savepath = options.savepath || path.join(__dirname, "..", "files", "diff");
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      processDir (PUBLIC)
@@ -37,7 +39,7 @@ DirectoryProcessor=function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
+DirectoryProcessor.prototype.processDir = function (options, cb, cbIndividual) {
   options = options || {};
 
   var dirpath = options.dirpath || this.dirpath;
@@ -48,36 +50,29 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
   var self = this;
   var ret = [];
 
-  var process = function(data,foo) {
+  var process = function process(data, foo) {
     try {
-      if (individual) cbIndividual(data);
-      else {
-        if (foo == "push") ret[foo](data);
-        else ret = ret[foo](data);
+      if (individual) cbIndividual(data);else {
+        if (foo == "push") ret[foo](data);else ret = ret[foo](data);
       }
-    } catch(err) {}
-  }
+    } catch (err) {}
+  };
 
-  fs.readdir(dirpath,function(err,files) {
-    if (err) cb(err);
-    else {
-      async.each(files,function(file,callback) {
-        var fp = self.makePath([dirpath,file]);
+  fs.readdir(dirpath, function (err, files) {
+    if (err) cb(err);else {
+      async.each(files, function (file, callback) {
+        var fp = self.makePath([dirpath, file]);
 
-        fs.stat(fp,function(err,stats) {
+        fs.stat(fp, function (err, stats) {
           if (stats.isDirectory()) {
             if (recurse) {
-              self.processDir(Object.merge(options,{dirpath:fp}),
-                function(_e,r) {
-                  if (_e) callback(_e)
-                  else {
-                    process(r,"concat");
-                    callback();
-                  }
-                },
-              cbIndividual);
-            }
-            else callback();
+              self.processDir(Object.merge(options, { dirpath: fp }), function (_e, r) {
+                if (_e) callback(_e);else {
+                  process(r, "concat");
+                  callback();
+                }
+              }, cbIndividual);
+            } else callback();
           } else {
             var o = {
               parentdir: dirpath,
@@ -87,23 +82,22 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
                 birthtime: stats.birthtime
               }
             };
-            self.processFile(fp,function(e,r) {
-              if (e) callback(e);
-              else {
-                o.info = Object.merge(o.info,r);
+            self.processFile(fp, function (e, r) {
+              if (e) callback(e);else {
+                o.info = Object.merge(o.info, r);
 
-                process(o,"push");
-                callback()
+                process(o, "push");
+                callback();
               }
-            },encoding);
+            }, encoding);
           }
         });
-      },function(e) {
-        cb(e,(ret.length) ? ret : []);
+      }, function (e) {
+        cb(e, ret.length ? ret : []);
       });
     }
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      processFile (PUBLIC)
@@ -116,32 +110,31 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.processFile=function(filepath,cb,encoding) {
-  var self=this;
+DirectoryProcessor.prototype.processFile = function (filepath, cb, encoding) {
+  var self = this;
 
-  if (this.fileOrDirExists(filepath,"file")) {
-    self.fileToHash(filepath,function(e,hash) {
-      if (e) cb(e);
-      else {
+  if (this.fileOrDirExists(filepath, "file")) {
+    self.fileToHash(filepath, function (e, hash) {
+      if (e) cb(e);else {
         var o = {};
         o.hash = hash;
 
         if (encoding) {
-          encoding = (typeof encoding==="string") ? encoding : null;
+          encoding = typeof encoding === "string" ? encoding : null;
 
-          fs.readFile(filepath,encoding,function(_e,data) {
+          fs.readFile(filepath, encoding, function (_e, data) {
             o.data = data || "";
-            cb(_e,o);
+            cb(_e, o);
           });
         } else {
-          cb(null,o);
+          cb(null, o);
         }
       }
     });
   } else {
     cb("Is not a file");
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      stringToHash (PUBLIC)
@@ -151,9 +144,9 @@ DirectoryProcessor.prototype.processFile=function(filepath,cb,encoding) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: a string that is MD5 hashed
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.stringToHash=function(string) {
+DirectoryProcessor.prototype.stringToHash = function (string) {
   return new Encryption().stringToHash(string);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      fileToHash (PUBLIC)
@@ -165,9 +158,9 @@ DirectoryProcessor.prototype.stringToHash=function(string) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.fileToHash=function(filePath,cb) {
-  return new Encryption().fileToHash(filePath,cb);
-}
+DirectoryProcessor.prototype.fileToHash = function (filePath, cb) {
+  return new Encryption().fileToHash(filePath, cb);
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      fileOrDirExists (PUBLIC)
@@ -178,18 +171,17 @@ DirectoryProcessor.prototype.fileToHash=function(filePath,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <true/false>: whether a path is a directory AND it exists
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.fileOrDirExists=function(dir,type) {
+DirectoryProcessor.prototype.fileOrDirExists = function (dir, type) {
   dir = dir || this.dirpath;
   type = type || "directory";
 
   try {
     var stat = fs.statSync(dir);
-    return (type == "file") ? stat.isFile() : stat.isDirectory();
-
-  } catch(e) {
+    return type == "file" ? stat.isFile() : stat.isDirectory();
+  } catch (e) {
     return false;
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      makePath (PUBLIC)
@@ -201,39 +193,32 @@ DirectoryProcessor.prototype.fileOrDirExists=function(dir,type) {
 |RETURNS:    <string>: the new path
 |             false: if no path provided or error
 -----------------------------------------------------------------------------------------*/
-DirectoryProcessor.prototype.makePath=function(p,ary) {
+DirectoryProcessor.prototype.makePath = function (p, ary) {
   if (!p && !ary) {
     return false;
   } else if (p && ary) {
-    if (typeof ary[0]==="string") {
-      p = path.join(p,ary[0]);
+    if (typeof ary[0] === "string") {
+      p = path.join(p, ary[0]);
       ary.shift();
 
-      return this.makePath(p,ary);
+      return this.makePath(p, ary);
     } else {
       return p;
     }
-
   } else if (p && !ary) {
 
-    ary = (p instanceof Array) ? p : p.split(/[\\\/,\|\^]{1,2}/g);
+    ary = p instanceof Array ? p : p.split(/[\\\/,\|\^]{1,2}/g);
     p = "";
 
-    if (ary.length <= 1) return path.join(ary[0] || "");
-    else {
+    if (ary.length <= 1) return path.join(ary[0] || "");else {
       p = path.join(ary[0]);
       ary.shift();
 
-      return this.makePath(p,ary);
+      return this.makePath(p, ary);
     }
   }
 
   return p;
-}
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=DirectoryProcessor;
-}
-//-------------------------------------------------------
+module.exports = DirectoryProcessor;

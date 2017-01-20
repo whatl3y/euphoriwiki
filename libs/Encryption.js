@@ -1,4 +1,6 @@
-var fs = require('fs')
+"use strict";
+
+var fs = require('fs');
 var crypto = require("crypto");
 var config = require("../config.js");
 
@@ -11,12 +13,12 @@ var config = require("../config.js");
 |REVISION HISTORY:
 |      *LJW 3/11/2016 - created
 -----------------------------------------------------------------------------------------*/
-Encryption = function(options) {
+var Encryption = function Encryption(options) {
   options = options || {};
 
   this.algorithm = options.algorithm || config.cryptography.algorithm;
   this.secret = options.secret || config.cryptography.password;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      encrypt (PUBLIC)
@@ -26,12 +28,12 @@ Encryption = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: encrypted text
 -----------------------------------------------------------------------------------------*/
-Encryption.prototype.encrypt = function(text) {
-  var cipher = crypto.createCipher(this.algorithm,this.secret)
-  var crypted = cipher.update(text,'utf8','hex')
+Encryption.prototype.encrypt = function (text) {
+  var cipher = crypto.createCipher(this.algorithm, this.secret);
+  var crypted = cipher.update(text, 'utf8', 'hex');
   crypted += cipher.final('hex');
   return crypted;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      decrypt (PUBLIC)
@@ -41,12 +43,12 @@ Encryption.prototype.encrypt = function(text) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: decrypted text
 -----------------------------------------------------------------------------------------*/
-Encryption.prototype.decrypt = function(text) {
-  var decipher = crypto.createDecipher(this.algorithm,this.secret)
-  var dec = decipher.update(text,'hex','utf8')
+Encryption.prototype.decrypt = function (text) {
+  var decipher = crypto.createDecipher(this.algorithm, this.secret);
+  var dec = decipher.update(text, 'hex', 'utf8');
   dec += decipher.final('utf8');
   return dec;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      stringToHash (PUBLIC)
@@ -56,11 +58,11 @@ Encryption.prototype.decrypt = function(text) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>: a string that is MD5 hashed
 -----------------------------------------------------------------------------------------*/
-Encryption.prototype.stringToHash=function(string) {
+Encryption.prototype.stringToHash = function (string) {
   var md5Sum = crypto.createHash("md5");
   md5Sum.update(string);
   return md5Sum.digest("hex");
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      fileToHash (PUBLIC)
@@ -72,19 +74,18 @@ Encryption.prototype.stringToHash=function(string) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-Encryption.prototype.fileToHash=function(filePath,cb) {
+Encryption.prototype.fileToHash = function (filePath, cb) {
   filePath = filePath || this.dirpath;
 
   var md5Sum = crypto.createHash("md5");
   var s = fs.ReadStream(filePath);
 
-  s.on("data",function(data) {md5Sum.update(data);});
-  s.on("end",function() {cb(null,md5Sum.digest("hex"));});
-}
+  s.on("data", function (data) {
+    md5Sum.update(data);
+  });
+  s.on("end", function () {
+    cb(null, md5Sum.digest("hex"));
+  });
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=Encryption;
-}
-//-------------------------------------------------------
+module.exports = Encryption;

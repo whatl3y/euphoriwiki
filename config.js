@@ -1,7 +1,6 @@
-var path = require("path");
-var async = require("async");
-var MDB = require('./libs/MDB.js');
-var Object = require("./public/js/Object_prototypes.js");
+var path = require("path")
+var async = require("async")
+var MDB = require('./libs/MDB.js')
 
 var self = module.exports = {
   app: {
