@@ -431,7 +431,7 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
           if (e) return cb(e);
           if (!user.email) return cb(null,false);
 
-          usersEmailSuffix = user.email.substring(user.email.lastIndexOf("@") + 1);
+          const usersEmailSuffix = user.email.substring(user.email.lastIndexOf("@") + 1);
           isValid = _.indexOf(emailSuffixes,usersEmailSuffix) > -1;
 
           return cb(null,isValid);
