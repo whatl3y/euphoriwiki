@@ -3,7 +3,7 @@ var SocketGlobal = require("./SocketGlobal.js");
 var SocketWikiChat = require("./SocketWikiChat.js");
 var SocketPages = require("./SocketPages.js");
 var GeoIP = require("./GeoIP.js");
-var DateTime = require("../public/js/extras/Core.DateTime.js");
+var DateTime = require("../src/public/js/extras/Core.DateTime.js");
 var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 

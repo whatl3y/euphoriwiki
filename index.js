@@ -36,7 +36,7 @@ var SQLHandler = require("./libs/SQLHandler.js")
 var DirectoryProcessor = require("./libs/DirectoryProcessor.js")
 var config = require("./config.js")
 var log = require("bunyan").createLogger(config.logger.options())
-var Object = require("./public/js/extras/Object_prototypes.js")
+var Object = require("./src/public/js/extras/Object_prototypes.js")
 
 try {
   //handle clustering if applicable

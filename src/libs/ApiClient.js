@@ -1,6 +1,6 @@
 var http = require("http");
 var https = require("https");
-var Object = require("../public/js/extras/Object_prototypes.js");
+var Object = require("../src/public/js/extras/Object_prototypes.js");
 var config = require("../config.js");
 
 /*-----------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ var async = require('async');
 var CodeRunner = require("./CodeRunner.js");
 var FileHandler = require("./FileHandler.js");
 var config = require("../config.js");
-var Object = require("../public/js/extras/Object_prototypes.js");
+var Object = require("../src/public/js/extras/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    BatchJobs.js

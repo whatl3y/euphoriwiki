@@ -82,10 +82,10 @@ function chatMessage(io, socket, data, SocketHandler) {
   new ChatMessageHandler({ namespace: io.name, room: data.room }).insert(messageData, function (_err, message) {
     if (_err) return log.error(_err);
 
-    var mesID = message[0]._id;
-    var name = message[0].name || message[0].guestname;
-    var cont = message[0].content;
-    var d = message[0].creationdate;
+    var mesID = message.insertedIds[0];
+    var name = messageData.name;
+    var cont = messageData.content;
+    var d = new Date();
 
     var messageToSend = messageInformation({ id: mesID, name: name, content: cont, date: d });
     io.to(data.room).emit('chatCtrl_chatmessage', messageToSend);

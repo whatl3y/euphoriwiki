@@ -104,7 +104,6 @@ function globalCtrl($scope,$http) {
         {
           Name: "globalCtrl_populateclientlist",
           Handler: function(clients) {
-            console.log('clients',clients)
             $scope.$apply(function() {
               $scope.usersOnPage = clients;
               $scope.functions.showUsersOnPage();

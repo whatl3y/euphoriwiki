@@ -1,6 +1,6 @@
 // Finds the least squares regression lines for both
 // linear and quadratic fits
-MathRegression = {
+var MathRegression = {
 
   //xValues = [1,2,3,4,5]
   //yValues = [1,3,3,4,5]

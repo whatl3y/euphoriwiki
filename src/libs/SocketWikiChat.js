@@ -67,9 +67,9 @@ function userTyping(io,socket,data) {
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
 function chatMessage(io,socket,data,SocketHandler) {
-  var wiki = new WikiHandler({path:data.room});
-  var auth = new Authentication({session: socket.request.session});
-  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.");
+  var wiki = new WikiHandler({path:data.room})
+  var auth = new Authentication({session: socket.request.session})
+  if (!auth.isLoggedIn()) return socket.emit("chatCtrl_error","Sorry, you must be logged in to chat on the page.")
 
   var messageData={
     user: auth.username,
@@ -81,14 +81,14 @@ function chatMessage(io,socket,data,SocketHandler) {
     .insert(messageData,function(_err,message) {
       if (_err) return log.error(_err);
 
-      var mesID = message[0]._id;
-      var name = message[0].name || message[0].guestname;
-      var cont = message[0].content;
-      var d = message[0].creationdate;
+      var mesID = message.insertedIds[0]
+      var name = messageData.name
+      var cont = messageData.content
+      var d = new Date()
 
-      var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d});
-      io.to(data.room).emit('chatCtrl_chatmessage',messageToSend);
-      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, room:data.room, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e);});
+      var messageToSend = messageInformation({id:mesID, name:name, content:cont, date:d})
+      io.to(data.room).emit('chatCtrl_chatmessage',messageToSend)
+      wiki.event({type:"addchatmessage", params:{messageId:mesID, date:d, room:data.room, user:auth.username, content:data.msg}},function(e,result) {if (e) log.error(e)})
     }
   );
 }

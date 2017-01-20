@@ -6,7 +6,7 @@ var FileHandler = require("./FileHandler.js");
 var GetHTML = require("./GetHTML.js");
 var CodeRunner = require("./CodeRunner.js");
 var config = require("../config.js");
-var Object = require("../public/js/extras/Object_prototypes.js");
+var Object = require("../src/public/js/extras/Object_prototypes.js");
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    WikiHandler.js

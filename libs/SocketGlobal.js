@@ -42,7 +42,6 @@ function subscribe(io, socket, data, SocketHandler) {
     if (info) {
       socket.join(data.room);
 
-      console.log('room members', data.room);
       var roomMembersSocketIDs = SocketHandler.getRoomMembers(data.room);
       var roomMembers = roomMembersSocketIDs.map(function (id) {
         return self.app.CACHE.sockets[id];
