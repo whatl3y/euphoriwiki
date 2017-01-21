@@ -1,6 +1,7 @@
-var Audit = require("../libs/Audit.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+var Audit = require("../libs/Audit.js")
+var WikiHandler = require("../libs/WikiHandler.js")
+var config = require("../config.js")
+var log = require("bunyan").createLogger(config.logger.options())
 
 module.exports = function(req,res) {
   var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']});

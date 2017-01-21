@@ -1,5 +1,9 @@
-var mysql = require("mysql");
-var mssql = require("mssql");
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _mysql = require("mysql");
+var _mssql = require("mssql");
 var pg = require("pg");
 
 /*-----------------------------------------------------------------------------------------
@@ -11,7 +15,7 @@ var pg = require("pg");
 |REVISION HISTORY:
 |        *LJW 3/1/2016 - created
 -----------------------------------------------------------------------------------------*/
-SQLHandler = function(opts) {
+var SQLHandler = function SQLHandler(opts) {
   opts = opts || {};
 
   this.config = opts.config || {};
@@ -22,10 +26,10 @@ SQLHandler = function(opts) {
       this.connection = this.init().createConnection[this.map.driver[this.driver]](this.config);
       this.init();
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      connect (PUBLIC)
@@ -36,7 +40,7 @@ SQLHandler = function(opts) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.init = function() {
+SQLHandler.prototype.init = function () {
   var self = this;
 
   return this.map = {
@@ -51,74 +55,74 @@ SQLHandler.prototype.init = function() {
     //object as it's input, but do some validation and ensure we're passing
     //the correct key/value pairs or a complete connection string (pg)
     createConnection: {
-      mysql: function(config) {
-        return mysql.createConnection(config);
+      mysql: function mysql(config) {
+        return _mysql.createConnection(config);
       },
-      mssql: function(config) {
-        return new mssql.Connection(config);
+      mssql: function mssql(config) {
+        return new _mssql.Connection(config);
       },
-      postgresql: function(config) {
+      postgresql: function postgresql(config) {
         return new pg.Client(config);
       }
     },
 
     connect: {
-      mysql: function(cb)  {
-        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
+      mysql: function mysql(cb) {
+        self.connection ? self.connection.connect(cb) : self.noop(cb);
       },
-      mssql: function(cb)  {
-        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
+      mssql: function mssql(cb) {
+        self.connection ? self.connection.connect(cb) : self.noop(cb);
       },
-      postgresql: function(cb) {
-        (self.connection) ? self.connection.connect(cb) : self.noop(cb);
+      postgresql: function postgresql(cb) {
+        self.connection ? self.connection.connect(cb) : self.noop(cb);
       }
     },
 
     query: {
-      mysql: function(q,ary,cb) {
-        cb = (typeof ary === 'function') ? ary : cb;
-        ary = (typeof ary === 'function') ? null : ary;
+      mysql: function mysql(q, ary, cb) {
+        cb = typeof ary === 'function' ? ary : cb;
+        ary = typeof ary === 'function' ? null : ary;
 
         if (self.connection) {
           if (ary instanceof Array) {
-            return self.connection.query(q,ary,cb);
+            return self.connection.query(q, ary, cb);
           }
-          return self.connection.query(q,cb)
+          return self.connection.query(q, cb);
         }
-        return self.noop(q,cb);
+        return self.noop(q, cb);
       },
-      mssql: function(q,cb) {
-        var conn = (self.connection) ? self.connection : {};
-        new mssql.Request(conn).query(q,cb);
+      mssql: function mssql(q, cb) {
+        var conn = self.connection ? self.connection : {};
+        new _mssql.Request(conn).query(q, cb);
       },
-      postgresql: function(q,ary,cb) {
+      postgresql: function postgresql(q, ary, cb) {
         // (self.connection) ? self.connection.query(q,cb) : self.noop(q,cb);
-        cb = (typeof ary === 'function') ? ary : cb;
-        ary = (typeof ary === 'function') ? null : ary;
+        cb = typeof ary === 'function' ? ary : cb;
+        ary = typeof ary === 'function' ? null : ary;
 
         if (self.connection) {
           if (ary instanceof Array) {
-            return self.connection.query(q,ary,cb);
+            return self.connection.query(q, ary, cb);
           }
-          return self.connection.query(q,cb)
+          return self.connection.query(q, cb);
         }
-        return self.noop(q,cb);
+        return self.noop(q, cb);
       }
     },
 
     close: {
-      mysql: function() {
-        (self.connection) ? self.connection.destroy() : self.noop();
+      mysql: function mysql() {
+        self.connection ? self.connection.destroy() : self.noop();
       },
-      mssql: function() {
-        (self.connection) ? self.connection.close() : self.noop();
+      mssql: function mssql() {
+        self.connection ? self.connection.close() : self.noop();
       },
-      postgresql: function() {
-        (self.connection) ? self.connection.end() : self.noop();
+      postgresql: function postgresql() {
+        self.connection ? self.connection.end() : self.noop();
       }
     }
   };
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      connect (PUBLIC)
@@ -129,10 +133,10 @@ SQLHandler.prototype.init = function() {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.connect = function(cb) {
+SQLHandler.prototype.connect = function (cb) {
   this.map.connect[this.map.driver[this.driver]](cb);
   return this;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      query (PUBLIC)
@@ -146,10 +150,10 @@ SQLHandler.prototype.connect = function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.query = function(options,dataArray,cb) {
+SQLHandler.prototype.query = function (options, dataArray, cb) {
   options = options || {};
 
-  cb = (typeof dataArray === "function") ? dataArray : cb;
+  cb = typeof dataArray === "function" ? dataArray : cb;
 
   if (typeof dataArray === "function") {
     if (typeof options === "string") {
@@ -159,21 +163,21 @@ SQLHandler.prototype.query = function(options,dataArray,cb) {
     }
   }
 
-  var q = (typeof options==="string") ? options : (options.query || options.q);
+  var q = typeof options === "string" ? options : options.query || options.q;
 
   var self = this;
-  var responseFunction = function(__e,data) {
-    if (typeof options==="object" && options.close) self.close();
-    return cb(__e,data);
+  var responseFunction = function responseFunction(__e, data) {
+    if ((typeof options === "undefined" ? "undefined" : _typeof(options)) === "object" && options.close) self.close();
+    return cb(__e, data);
   };
 
   if (dataArray) {
-    self.map.query[self.map.driver[self.driver]](q,dataArray,responseFunction);
+    self.map.query[self.map.driver[self.driver]](q, dataArray, responseFunction);
   } else {
-    self.map.query[self.map.driver[self.driver]](q,responseFunction);
+    self.map.query[self.map.driver[self.driver]](q, responseFunction);
   }
   return this;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      queriesRecursive (PUBLIC)
@@ -192,27 +196,26 @@ SQLHandler.prototype.query = function(options,dataArray,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.queriesRecursive = function(options,cb) {
+SQLHandler.prototype.queriesRecursive = function (options, cb) {
   options.index = options.index || 0;
   options.object = options.object || {};
 
-  var self=this;
+  var self = this;
 
   if (options.array[options.index]) {
-    self.query({query:options.array[options.index].Query},function(_e,data) {
-      if (_e) cb(_e,options.object);
-      else {
+    self.query({ query: options.array[options.index].Query }, function (_e, data) {
+      if (_e) cb(_e, options.object);else {
         options.object[options.array[options.index].ObjectKey] = data;
         options.index++;
 
-        self.queriesRecursive(options,cb);
+        self.queriesRecursive(options, cb);
       }
-    })
+    });
   } else {
-    cb(null,options.object);
+    cb(null, options.object);
   }
   return this;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      close (PUBLIC)
@@ -222,10 +225,10 @@ SQLHandler.prototype.queriesRecursive = function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.close=function() {
+SQLHandler.prototype.close = function () {
   this.map.close[this.map.driver[this.driver]]();
   return this;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      noop (PUBLIC)
@@ -235,15 +238,9 @@ SQLHandler.prototype.close=function() {
 |ASSUMES:    Nothing
 |RETURNS:    <function>: a blank function
 -----------------------------------------------------------------------------------------*/
-SQLHandler.prototype.noop=function(cb1,cb2) {
-  if (typeof cb1==="function") cb1();
-  else if (typeof cb2==="function") cb2();
+SQLHandler.prototype.noop = function (cb1, cb2) {
+  if (typeof cb1 === "function") cb1();else if (typeof cb2 === "function") cb2();
   return this;
-}
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=SQLHandler;
-}
-//-------------------------------------------------------
+module.exports = SQLHandler;

@@ -1,9 +1,13 @@
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var async = require("async");
 var SocketGlobal = require("./SocketGlobal.js");
 var SocketWikiChat = require("./SocketWikiChat.js");
 var SocketPages = require("./SocketPages.js");
 var GeoIP = require("./GeoIP.js");
-var DateTime = require("../public/js/Core.DateTime.js");
+var DateTime = require("../src/public/js/extras/Core.DateTime.js");
 var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
@@ -13,27 +17,27 @@ var log = require("bunyan").createLogger(config.logger.options());
 |AUTHOR:  Lance Whatley
 |CALLABLE TAGS:
 |ASSUMES:  socket.io
-|REVISION HISTORY:  
+|REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
-SocketHandler = function(opts) {
-  opts=opts || {};
-  
+var SocketHandler = function SocketHandler(opts) {
+  opts = opts || {};
+
   this.app = config.socketio;
   this.app.CACHE = this.app.CACHE || {};
   this.app.CACHE.sockets = this.app.CACHE.sockets || {};
   this.app.CACHE.rooms = this.app.CACHE.rooms || {};
-  
+
   if (typeof opts.io === 'undefined') {
     this.io = opts || require('socket.io')();
   } else {
     this.mainIO = opts.io || require('socket.io')();
     this.io = opts.nsIO || this.mainIO;
     this.namespace = opts.namespace || '/';
-    
+
     this.connectionEvent();
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      connectionEvent (PUBLIC)
@@ -45,61 +49,60 @@ SocketHandler = function(opts) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.connectionEvent = function() {
+SocketHandler.prototype.connectionEvent = function () {
   try {
     var self = this;
-    var socketEvent = function(self,socket,fn) {
-      return function(ret) {
-        fn(self.io,socket,ret,self);
-      }
-    }
-    
+    var socketEvent = function socketEvent(self, socket, fn) {
+      return function (ret) {
+        fn(self.io, socket, ret, self);
+      };
+    };
+
     //connect socket.io and bind events
-    this.io.on('connection',function(socket) {
+    this.io.on('connection', function (socket) {
       var eventHandlers = {
         chat: new SocketWikiChat(self.app, socket),
         pages: new SocketPages(self.app, socket),
         global: new SocketGlobal(self.app, socket)
       };
-      
+
       for (var _category in eventHandlers) {
         var socketEvents = eventHandlers[_category].handler;
-        
+
         for (var _event in socketEvents) {
           if (typeof socketEvents[_event] === 'string') {
-            var h = (socketEvents[_event][0]!="(") ? eval("("+socketEvents[_event]+")") : eval(socketEvents[_event]);
+            var h = socketEvents[_event][0] != "(" ? eval("(" + socketEvents[_event] + ")") : eval(socketEvents[_event]);
           } else {
             var h = socketEvents[_event];
           }
-          socket.on(_event,socketEvent(self,socket,h));
+          socket.on(_event, socketEvent(self, socket, h));
         }
       }
-      
     });
   } catch (_err) {
     log.error(_err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getRoomMembers (PUBLIC)
 |DESCRIPTION:  Will get a list of all room members in a namespace/room combo
 |PARAMETERS:  1. room(REQ): the room we're looking for members in
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    Array of room members
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.getRoomMembers = function(room) {
+SocketHandler.prototype.getRoomMembers = function (room) {
   var roomMembers = [];
-  var nsp = (typeof this.namespace !== 'string') ? '/' : this.namespace;
+  var nsp = typeof this.namespace !== 'string' ? '/' : this.namespace;
 
-  for(var socketID in this.mainIO.nsps[nsp].adapter.rooms[room]) {
+  for (var socketID in this.mainIO.nsps[nsp].adapter.rooms[room]) {
     roomMembers.push(socketID);
   }
 
   return roomMembers;
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      addToRoom (PUBLIC)
@@ -109,27 +112,27 @@ SocketHandler.prototype.getRoomMembers = function(room) {
 |                   options.room: room we're adding socket to
 |                   options.req: request object
 |             1. cb(REQ): callback function with info of socket added
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    <true/false>: success or not
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.addToRoom = function(options,cb) {
+SocketHandler.prototype.addToRoom = function (options, cb) {
   options = options || {};
   var self = this;
-  
+
   var id = options.id;
   var room = options.room;
   var socket = options.socket;
   var req = socket.request;
-  
+
   if (!id || !room) return cb("No socket ID or room to add this socket to.");
-  
-  new GeoIP().go(socket.handshake.address || "",function(err,geoData) {
-    if (err) log.info(err,"Error getting IP information using GeoIP");
-    
+
+  new GeoIP().go(socket.handshake.address || "", function (err, geoData) {
+    if (err) log.info(err, "Error getting IP information using GeoIP");
+
     geoData = geoData || {};
-    
+
     self.app.CACHE.sockets[id] = {
       socketId: id,
       date: new Date(),
@@ -137,7 +140,7 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
       user: req.session.username,
       firstname: req.session.firstname,
       lastname: req.session.lastname,
-      
+
       location: {
         ip: geoData.ip || socket.handshake.address,
         city: geoData.city,
@@ -147,46 +150,40 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
         countryCde: geoData.country_code
       }
     };
-    
+
     self.app.CACHE.rooms[room] = self.app.CACHE.rooms[room] || {};
     self.app.CACHE.rooms[room][id] = true;
-    
-    return cb(null,self.app.CACHE.sockets[id]);
+
+    return cb(null, self.app.CACHE.sockets[id]);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      disconnect (PUBLIC)
 |DESCRIPTION:  Disconnects a socket from the app
 |PARAMETERS:  1. id(REQ): the socket id to add to a room
-|CALLED FROM:  
+|CALLED FROM:
 |SIDE EFFECTS:  Nothing
 |ASSUMES:    Nothing
 |RETURNS:    <true/false>: success or not
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.disconnect = function(id) {
+SocketHandler.prototype.disconnect = function (id) {
   log.debug("Socket just disconnected: " + id);
-  
+
   var self = this;
-  
+
   try {
     var socketCache = this.app.CACHE.sockets[id];
-    var room = (typeof socketCache === "object" && socketCache.room) ? socketCache.room : false;
-    
-    if (room) delete(this.app.CACHE.rooms[room][id]);
-    delete(this.app.CACHE.sockets[id]);
-    
+    var room = (typeof socketCache === "undefined" ? "undefined" : _typeof(socketCache)) === "object" && socketCache.room ? socketCache.room : false;
+
+    if (room) delete this.app.CACHE.rooms[room][id];
+    delete this.app.CACHE.sockets[id];
+
     return room;
-    
-  } catch(err) {
+  } catch (err) {
     log.error(err);
     return false;
   }
-}
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=SocketHandler;
-}
-//-------------------------------------------------------
+module.exports = SocketHandler;

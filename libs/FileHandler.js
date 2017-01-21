@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require("fs");
 var mongo = require("mongodb");
 var Grid = require('gridfs-stream');
@@ -12,12 +14,12 @@ var Grid = require('gridfs-stream');
 |REVISION HISTORY:
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
-FileHandler=function(options) {
+var FileHandler = function FileHandler(options) {
   options = options || {};
 
   this.db = options.db;
   this.gfs = Grid(this.db, mongo);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      findFiles (PUBLIC)
@@ -29,17 +31,16 @@ FileHandler=function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.findFiles=function(options,cb) {
+FileHandler.prototype.findFiles = function (options, cb) {
   var options = options || {};
 
-  var method = (options.one) ? "findOne" : "find";
+  var method = options.one ? "findOne" : "find";
   var fileName = options.filename;
 
-  this.gfs[method]({filename:fileName},function(err,file) {
-    if (err) cb(err);
-    else cb(null,file);
+  this.gfs[method]({ filename: fileName }, function (err, file) {
+    if (err) cb(err);else cb(null, file);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      uploadFile (PUBLIC)
@@ -51,12 +52,12 @@ FileHandler.prototype.findFiles=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.uploadFile=function(options,cb) {
+FileHandler.prototype.uploadFile = function (options, cb) {
   options = options || {};
 
   var filePath = options.path || options.filePath;
-  var fileName = options.filename || filePath.substring((filePath.lastIndexOf('/') > -1) ? filePath.lastIndexOf('/')+1 : 0);
-  var newFileName = (options.exactname) ? fileName : false;
+  var fileName = options.filename || filePath.substring(filePath.lastIndexOf('/') > -1 ? filePath.lastIndexOf('/') + 1 : 0);
+  var newFileName = options.exactname ? fileName : false;
 
   newFileName = newFileName || this.getFileName(fileName);
 
@@ -64,11 +65,15 @@ FileHandler.prototype.uploadFile=function(options,cb) {
   var writeStream = this.writeStream(newFileName);
 
   //setup event handlers for file stream
-  writeStream.on("error",function(err) {cb(err);});
-  writeStream.on("close",function(file) {cb(null,newFileName);});
+  writeStream.on("error", function (err) {
+    cb(err);
+  });
+  writeStream.on("close", function (file) {
+    cb(null, newFileName);
+  });
 
   readStream.pipe(writeStream);
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getFile (PUBLIC)
@@ -82,33 +87,32 @@ FileHandler.prototype.uploadFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.getFile=function(options,cb) {
+FileHandler.prototype.getFile = function (options, cb) {
   options = options || {};
 
   var filename = options.filename || options.file || "";
   var encoding = options.encoding || "";
 
   try {
-    var readStream = this.gfs.createReadStream({filename:filename});
+    var readStream = this.gfs.createReadStream({ filename: filename });
     if (encoding) readStream.setEncoding(encoding);
 
     var data = "";
-    readStream.on("data",function(chunk) {
+    readStream.on("data", function (chunk) {
       data += chunk;
     });
 
-    readStream.on("end",function() {
-      cb(null,data);
+    readStream.on("end", function () {
+      cb(null, data);
     });
 
-    readStream.on("error",function(e) {
+    readStream.on("error", function (e) {
       cb(e);
     });
-
-  } catch(err) {
+  } catch (err) {
     cb(err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      deleteFile (PUBLIC)
@@ -120,15 +124,14 @@ FileHandler.prototype.getFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.deleteFile=function(options,cb) {
+FileHandler.prototype.deleteFile = function (options, cb) {
   try {
     var fileName = options.filename || "";
-    this.gfs.remove({filename:fileName},cb);
-
-  } catch(err) {
+    this.gfs.remove({ filename: fileName }, cb);
+  } catch (err) {
     cb(err);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      writeStream (PUBLIC)
@@ -138,9 +141,9 @@ FileHandler.prototype.deleteFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <stream>
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.writeStream=function(newFileName) {
-  return this.gfs.createWriteStream({filename: newFileName});
-}
+FileHandler.prototype.writeStream = function (newFileName) {
+  return this.gfs.createWriteStream({ filename: newFileName });
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      getFileName (PUBLIC)
@@ -151,16 +154,11 @@ FileHandler.prototype.writeStream=function(newFileName) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.getFileName=function(fileName,extraText) {
+FileHandler.prototype.getFileName = function (fileName, extraText) {
   extraText = extraText || Date.now();
 
   var lastPeriod = fileName.lastIndexOf(".");
-  return fileName.substring(0,lastPeriod) + "_" + extraText + fileName.substring(lastPeriod);
-}
+  return fileName.substring(0, lastPeriod) + "_" + extraText + fileName.substring(lastPeriod);
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=FileHandler;
-}
-//-------------------------------------------------------
+module.exports = FileHandler;

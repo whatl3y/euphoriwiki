@@ -1,8 +1,9 @@
 # ignore
 *.log
 *.DS_Store
+/certs
 /EXTRAS
-/tests
+/_internal_tests
 /logs
 /files
 /documentation
@@ -11,3 +12,13 @@
 /node_modules
 /.env_windows
 /.env_linux
+/libs
+
+# ignore all public files except those in
+# the /images and public/js/dependencies folder
+/public/*
+!/public/images/
+!/public/js/
+/public/js/*
+!/public/js/dependencies/
+!/public/js/extras/

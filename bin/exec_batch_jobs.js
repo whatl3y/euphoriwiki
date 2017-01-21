@@ -2,7 +2,7 @@ var argv = require('minimist')(process.argv.slice(2));
 var async = require('async');
 var BatchJobs = require("../libs/BatchJobs.js");
 var config = require("../config.js");
-var Object = require("../public/js/Object_prototypes.js");
+var Object = require("../src/public/js/extras/Object_prototypes.js");
 
 //node bin/exec_jobs -j my_job
 //node bin/exec_jobs -j my_job -j my_job2

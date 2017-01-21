@@ -1,3 +1,7 @@
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var config = require("../config.js");
 var MongoClient = require('mongodb').MongoClient;
 
@@ -12,7 +16,7 @@ var MongoClient = require('mongodb').MongoClient;
 |REVISION HISTORY:
 |      *LJW 2/10/2015 - created
 -----------------------------------------------------------------------------------------*/
-MDB=function(params,cb) {
+var MDB = function MDB(params, cb) {
   if (typeof params === 'string') {
     this.connectionString = params;
     this.MongoClient = MongoClient;
@@ -20,15 +24,16 @@ MDB=function(params,cb) {
   } else {
     params = params || {};
     var config = params.config || config;
-    this.MongoClient = params.MongoClient || MongoClient;                    //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
-    this.connectionString = params.connectionString || params.url || config.mongodb.connectionString();    //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
+    this.MongoClient = params.MongoClient || MongoClient; //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
+    this.connectionString = params.connectionString || params.url || config.mongodb.connectionString(); //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
     cb = params.callback || cb;
 
-    if (!params.dontopen) {                                  //params.dontopen: if set to true will not automatically open a DB connection
-      this.go(cb);                                           //params.callback: a callback function to be executed in constructor at the time of connecting to DB
+    if (!params.dontopen) {
+      //params.dontopen: if set to true will not automatically open a DB connection
+      this.go(cb); //params.callback: a callback function to be executed in constructor at the time of connecting to DB
     }
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      go (PUBLIC)
@@ -42,27 +47,26 @@ MDB=function(params,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-MDB.prototype.go=function(cb) {
-  var self=this;
+MDB.prototype.go = function (cb) {
+  var self = this;
 
-  var main = function(err,db) {
+  var main = function main(err, db) {
     self.db = db;
 
-    if (typeof cb==='function') {
-      cb(err,{db:db, self:self});
-    } else if (typeof cb==='object') {
+    if (typeof cb === 'function') {
+      cb(err, { db: db, self: self });
+    } else if ((typeof cb === 'undefined' ? 'undefined' : _typeof(cb)) === 'object') {
       for (var _i in cb) {
-        cb[_i](err,{db:db, self:self});
+        cb[_i](err, { db: db, self: self });
       }
     }
-  }
+  };
 
   //make the initial connection
-  this.MongoClient.connect(this.connectionString,function(err,db) {
-    if (err!=null) main(err);
-    else main(null,db);
+  this.MongoClient.connect(this.connectionString, function (err, db) {
+    if (err != null) main(err);else main(null, db);
   });
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      queryRecursive (PUBLIC)
@@ -86,8 +90,8 @@ MDB.prototype.go=function(cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-MDB.prototype.findRecursive=function(options,cb) {
-  var self=this;
+MDB.prototype.findRecursive = function (options, cb) {
+  var self = this;
 
   options.array = options.array || [];
   options.index = options.index || 0;
@@ -96,23 +100,22 @@ MDB.prototype.findRecursive=function(options,cb) {
   if (options.array.length > options.index) {
     var coll = (options.db || config.mongodb.db).collection(options.array[options.index].collection);
     var filter = options.array[options.index].filters || {};
-    var sort = options.array[options.index].sort || {order:1};
+    var sort = options.array[options.index].sort || { order: 1 };
     var limit = options.array[options.index].limit || 999999;
     var fields = options.array[options.index].fields || {};
 
-    coll.find(filter,fields).sort(sort).limit(limit).toArray(function(err,docs) {
-      if (err) cb(err,options.object);
-      else {
+    coll.find(filter, fields).sort(sort).limit(limit).toArray(function (err, docs) {
+      if (err) cb(err, options.object);else {
         options.object[options.array[options.index].key] = docs;
         options.index++;
 
-        self.findRecursive(options,cb);
+        self.findRecursive(options, cb);
       }
     });
   } else {
-    cb(null,options.object);
+    cb(null, options.object);
   }
-}
+};
 
 /*-----------------------------------------------------------------------------------------
 |NAME:      close (PUBLIC)
@@ -123,14 +126,8 @@ MDB.prototype.findRecursive=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-MDB.prototype.close=function(db) {
-  if (db!=null) db.close();
-  else this.db.close();
-}
+MDB.prototype.close = function (db) {
+  if (db != null) db.close();else this.db.close();
+};
 
-//-------------------------------------------------------
-//NodeJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports=MDB;
-}
-//-------------------------------------------------------
+module.exports = MDB;
