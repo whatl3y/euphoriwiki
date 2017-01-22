@@ -11,9 +11,7 @@ describe('Audit', function() {
       })
     })
   })
-})
 
-describe('Audit', function() {
   describe('#find()', function() {
     it (`should return 1 audit record after inserting record from factory`, function(done) {
       AuditFactory.insert1(function(err,db) {
