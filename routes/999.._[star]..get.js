@@ -7,7 +7,7 @@ var config = require("../config.js");
 var log = require("bunyan").createLogger(config.logger.options());
 
 module.exports = function(req,res) {
-  var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : "/"+req.params[0];
+  var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : `/${req.params[0]}`
 
   var wiki = new WikiHandler({path:path});
   var A = new Auth({session:req.session});
@@ -70,10 +70,18 @@ module.exports = function(req,res) {
         oView.pagePieces = wiki.pageTree(req.params[0]);
         oView.canSeeEditButton = (oView.loggedIn && canEditPage);
 
-        if (!canViewPage) return res.redirect("/?auth=" + path);
-        if (page.aliasfor) return res.redirect(page.aliasfor);
-        if (!canEditPage && !pageHtml) return res.redirect("/");
-        if (!passwordValidated) pageHtml = "";
+        // Add session value for redirecting back to the unauthorized
+        // page if the user is not logged in, and then redirect back
+        // assuming the user logs in afterwards
+        if (!username) {
+          req.session.returnTo = req.url
+          req.session.save()
+        }
+
+        if (!canViewPage) return res.redirect(`/?auth=${path}`)
+        if (page.aliasfor) return res.redirect(page.aliasfor)
+        if (!canEditPage && !pageHtml) return res.redirect("/")
+        if (!passwordValidated) pageHtml = ""
 
         return res.render("wikipage",config.view.send(req,{obj:oView, iobj:{pageInfo:{content_html:pageHtml}}, title:path}));
       }
