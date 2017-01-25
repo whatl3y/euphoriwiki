@@ -50,5 +50,6 @@ div.nav-affix
                 - if (typeof data.session !== "undefined" && data.session.isFullAdmin)
                   li.button-main
                     a(href="/admin") Admin Portal
-                li.button-main
-                  a(href="/logout") Logout
+                - if (typeof data.session !== "undefined" && data.session.username)
+                  li.button-main
+                    a(href="/logout") Logout
