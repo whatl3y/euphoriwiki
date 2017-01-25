@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node forever",
     "postinstall": "gulp prep-prod",
-    "test": "mocha --compilers js:babel-core/register tests"
+    "test": "mocha --compilers js:babel-core/register --recursive tests"
   },
   "dependencies": {
     "activedirectory": "^0.7.1",

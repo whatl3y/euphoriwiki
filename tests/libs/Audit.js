@@ -1,6 +1,6 @@
 import * as assert from 'assert'
-import Audit from '../libs/Audit.js'
-import {connect,AuditFactory} from './factories.mongo.js'
+import Audit from '../../libs/Audit.js'
+import {connect,AuditFactory} from '../factories.mongo.js'
 
 describe('Audit', function() {
   describe('#log()', function() {

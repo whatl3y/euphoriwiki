@@ -1,6 +1,6 @@
 import path from 'path'
 import * as assert from 'assert'
-import Encryption from '../libs/Encryption.js'
+import Encryption from '../../libs/Encryption.js'
 
 describe('Encryption', function() {
   const enc = new Encryption()
@@ -32,7 +32,7 @@ describe('Encryption', function() {
 
   describe('#fileToHash()', function() {
     it(`should hash file contents without issue`, function(done) {
-      enc.fileToHash(path.join(__dirname,'_init.js'),done)
+      enc.fileToHash(path.join(__dirname,'Audit.js'),done)
     })
   })
 })
