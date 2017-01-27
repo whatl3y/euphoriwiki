@@ -9,7 +9,7 @@ block main
           ul(class="list-unstyled")
             li(data-ng-repeat="setting in settingsNav")
               a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
-      div.col-xs-12.pull-right
+      div.col-xs-12.col-sm-10.pull-right
         h1 Global Settings
         div.row
           div.col-xs-12(data-ng-repeat="aS in settings")
