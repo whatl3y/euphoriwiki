@@ -3,13 +3,13 @@ extends layout
 block main
   include include_adminnav.jade
   div.container
-    div.row.padding-medium(data-ng-controller="adminSettingsCtrl")
-      div(class="col-xs-2 hidden-xs sidenav-affix",data-spy="affix",data-offset-top="60")
+    div.row(data-ng-controller="adminSettingsCtrl")
+      div.col-xs-2.hidden-xs.sidenav-affix(data-spy="affix",data-offset-top="60")
         small
           ul(class="list-unstyled")
             li(data-ng-repeat="setting in settingsNav")
               a(data-ng-href="#{{ setting.domid }}") {{ setting.name }}
-      div.col-xs-12.col-sm-10.pull-right
+      div.col-xs-12.pull-right
         h1 Global Settings
         div.row
           div.col-xs-12(data-ng-repeat="aS in settings")
@@ -21,7 +21,7 @@ block main
                   div.panel-body
                     div(compile-html="functions.sanitizeHtml(setting.html)")
                   div.row
-                    div.separate-vert-small.text-center.col-xs-12
+                    div.col-xs-12.separate-vert-small.text-center
                       button(class="btn btn-success",data-ng-click="handlers.saveSetting(setting.domid,setting.value)") Save {{ setting.name }}
             div.row(data-ng-hide="(aS.length < settings[0].length) ? true : ($index == aS.length-1)")
               div.col-xs-12.hidden-xs.hidden-sm.divider.thick
