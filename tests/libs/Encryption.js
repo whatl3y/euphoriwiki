@@ -3,7 +3,7 @@ import * as assert from 'assert'
 import Encryption from '../../libs/Encryption.js'
 
 describe('Encryption', function() {
-  const enc = new Encryption()
+  const enc = new Encryption({secret: 'abc123'})
   const originalText = 'test123'
   let cipherText
   let plainText
