@@ -49,7 +49,7 @@ html
     script(src=dir+'app.min.js')
 
     title= pageTitle
-  body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl")
+  body(data-ng-app="Euphoriwiki",data-ng-controller="globalCtrl",data-ng-cloak)
     div.container-fluid
       div.main-header-wrapper(data-ng-hide="hideAllOfHeader")
         include ./header.jade

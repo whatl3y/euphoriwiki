@@ -1,5 +1,5 @@
-- // Needs access to the mainHomeCtrl controller
-div(class="col-xs-12")
+- // Needs access to the MainHomeController controller
+div.col-xs-12
   div(class="row padding-small")
     div(class="col-xs-12",data-ng-show="widgets.length")
       h1 Quick Links
@@ -19,4 +19,4 @@ div(class="col-xs-12")
                       small(class="soft-text text-xsmall") {{ item.pageViews || 0 }} views
                       span(data-ng-show="item.extraText") {{ item.extraText }}
                     div
-                      small(class="soft-text") Updated on {{ functions.formatDateTime(item.updated) }}
+                      small(class="soft-text") Updated on {{ formatDateTime(item.updated) }}

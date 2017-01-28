@@ -11,17 +11,6 @@ function adminDiffCtrl($scope,$http,$sce) {
       });
     },
 
-    formatDateTime: function(date) {        //assumes input date is UTC
-      if (date instanceof Date || (typeof date==="string" && date.length)) {
-        date = date.toString().replace("T"," ").replace("Z"," ");
-
-        var dt=new Core.DateTime({date:date});
-        return dt.convertUTCDateToLocal('uslong');
-      } else {
-        return "";
-      }
-    },
-
     ajax: function(type,data,cb) {
       var loader = new Core.Modals().asyncLoader({message:"Processing your request."});
       $http.post('/admin/diff',Object.merge({type:type},(data || {})))

@@ -3,7 +3,7 @@
 - homeColLength = data.EXTRA.mainColumnLength
 - reverseMap = {right:"left", left:"right"}
 
-div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
+div.separate-vert-medium(data-ng-controller="MainHomeController")
   - if (addons.categories && addons.categories.alignment !== "disabled")
     div.hidden-xs.hidden-sm(class=addons.categories.classes)
       div.padding-small.border-soft.minH300(class="border-"+reverseMap[addons.categories.alignment])
@@ -26,13 +26,13 @@ div.separate-vert-medium(data-ng-controller="mainHomeCtrl")
                 div.panel-heading
                   div Create or Go To Existing Page
                 div.panel-body
-                  form(data-ng-submit="handlers.newPage(newPagePath)")
+                  form(data-ng-submit="newPage(newPagePath)")
                     div(class="form-group text-center")
-                      label(for="newPage",class="control-label col-sm-12")
+                      label(for="new-page",class="control-label col-sm-12")
                         - //div(class="text-large") Create a new or go to an existing page
                         div Enter a page path like, 'yourname' or 'yourname/page1'
                       div(class="separate-vert-small col-xs-12")
-                        input(type="text",placeholder="yourname, yourname/page1",class="form-control input-lg",id="newPage",name="newPage",data-ng-model="newPagePath")
+                        input(type="text",placeholder="yourname, yourname/page1",class="form-control input-lg",id="new-page",name="new-page",data-ng-model="newPagePath")
                       div.col-xs-12
                         input(type="submit",class="btn btn-primary",value="Go To Page")
                       div(class="separate-vert-small col-xs-12",data-ng-show="newPageError")

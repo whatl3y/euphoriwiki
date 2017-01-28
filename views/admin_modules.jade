@@ -31,7 +31,7 @@ block main
                       td
                         a(data-ng-href="/file/{{ module.template }}",target="_blank") {{ module.template }}
                       - //td {{ module.config.join(", ") }}
-                      td {{ functions.formatDateTime(module.updated) }}
+                      td {{ formatDateTime(module.updated) }}
                       td
                         a(href="javascript:void(0)",data-ng-click="handlers.editModule(module)") Edit
                         span  /

@@ -60,31 +60,30 @@ module.exports = function(req,res) {
       var fullDirectory = (path.isAbsolute(directory)) ? directory : path.join(__dirname,'..',directory);
 
       new ChildProcesses({command:"bin/processdir", args:[fullDirectory], timeout:120}).run(function(err,obj) {
-        if (err) res.json({success:false, error:e});
-        else {
-          var now = Date.now();
+        if (err) return res.json({success:false, error:e});
 
-          config.mongodb.db.collection("processed_directory").insert({
-            directory: directory,
-            fulldirectory: fullDirectory,
-            date: new Date(),
-            hostname: os.hostname(),
-            processed: obj
-          },function(e,result) {
-            if (e) return res.json({success:false, error:e});
+        var now = Date.now()
 
-            return res.json({success:true, message:"Successfully processed your directory at: " + directory});
-          });
-          /*var jsonFileName = now + ".json";
-          var jsonFilePath = path.join(__dirname,"..","files","diff",jsonFileName);
+        config.mongodb.db.collection("processed_directory").insert({
+          directory: directory,
+          fulldirectory: fullDirectory,
+          date: new Date(),
+          hostname: os.hostname(),
+          processed: obj || []
+        },function(e,result) {
+          if (e) return res.json({success:false, error:e});
 
-          fs.writeFile(jsonFilePath,JSON.stringify(obj),
-            function(e) {
-              if (e) res.json({success:false, error:e});
-              else res.json({success:true, message:"Your directory was successfully processed. The processed JSON file can be located at: " + jsonFileName});
-            }
-          );*/
-        }
+          return res.json({success:true, message:"Successfully processed your directory at: " + directory});
+        });
+        /*var jsonFileName = now + ".json";
+        var jsonFilePath = path.join(__dirname,"..","files","diff",jsonFileName);
+
+        fs.writeFile(jsonFilePath,JSON.stringify(obj),
+          function(e) {
+            if (e) res.json({success:false, error:e});
+            else res.json({success:true, message:"Your directory was successfully processed. The processed JSON file can be located at: " + jsonFileName});
+          }
+        );*/
       });
 
       break;

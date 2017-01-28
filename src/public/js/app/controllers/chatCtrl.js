@@ -18,19 +18,6 @@ function chatCtrl($scope,$http) {
       $scope.socketHandler.initialize();
     },
 
-    date: {
-      formatDateTime: function(date) {        //assumes input date is UTC
-        if (date instanceof Date || (typeof date==="string" && date.length)) {
-          date = date.toString().replace("T"," ").replace("Z"," ");
-
-          var dt=new Core.DateTime({date:date});
-          return dt.convertUTCDateToLocal('uslong');
-        } else {
-          return "";
-        }
-      }
-    },
-
     chatSocketEvents: function() {
       return [
         {

@@ -25,7 +25,7 @@ block main
                   td {{ $index+1 }}
 
                   - //the date function is located in the globalCtrl
-                  td {{ $parent.$parent.functions.date.formatDateTime(info.date) }}
+                  td {{ formatDateTime(info.date) }}
                   td {{ info.user || "Guest" }} {{ (info.firstname) ? "(" + info.firstname + " " + info.lastname + ")" : "" }}
                   td {{ info.location.city || "N/A" }}
                   td {{ info.location.state || "N/A" }}

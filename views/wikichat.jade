@@ -9,7 +9,7 @@ div(data-ng-controller="chatCtrl")
           li(data-ng-repeat="message in messages")
             div.row.soft-text
               small.col-xs-12
-                i {{ functions.date.formatDateTime(message.date) }}: 
+                i {{ formatDateTime(message.date) }}: 
                 span  {{ message.name }}
             div.row
               div.col-xs-12

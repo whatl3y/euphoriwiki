@@ -29,7 +29,7 @@ block main
                     th Full Directory
                     th Number of Files Processed
                   tr(data-ng-repeat="pro in previousProcesses | orderBy: 'pro.date'")
-                    td {{ functions.formatDateTime(pro.date) }}
+                    td {{ formatDateTime(pro.date) }}
                     td {{ pro.hostname }}
                     td {{ pro.directory }}
                     td {{ pro.fulldirectory }}

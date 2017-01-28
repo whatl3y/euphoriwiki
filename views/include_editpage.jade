@@ -26,7 +26,7 @@ div.wrapper
             alert(type="danger",class="text-large")
               div
                 span You have a saved draft for this page from
-                strong  {{ functions.formatDateTime(content.draft.date) }}
+                strong  {{ formatDateTime(content.draft.date) }}
                 span . Would you like to continue where you left off, or delete the draft?
               div(class="separate-vert-small")
                 button(class="btn btn-success",data-ng-click="handlers.replaceWithDraft()") Finish Draft
@@ -85,7 +85,7 @@ div.wrapper
           div(compile-html="functions.sanitizeHtml(content.html)")
         div.row
           div.col-xs-12
-            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ functions.formatDateTime(content.lastUpdate) }} by {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
+            small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ formatDateTime(content.lastUpdate) }} by {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
 
         - //COMMENTS WIDGET
         div.row(data-ng-if="widgets.comments.enabled")
@@ -194,7 +194,7 @@ div.wrapper
                 td
                   a(data-ng-href="/file/{{ file.filename }}",target="_blank") {{ file.origFilename }}
                 td /file/{{ file.filename }}
-                td {{ functions.formatDateTime(file.uploadedTime) }}
+                td {{ formatDateTime(file.uploadedTime) }}
                 td
                   a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'page')") Delete
           div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!pagefiles.length")
@@ -221,7 +221,7 @@ div.wrapper
                 td
                   a(data-ng-href="/file/{{ file.filename }}",target="_blank") {{ file.origFilename }}
                 td /file/{{ file.filename }}
-                td {{ functions.formatDateTime(file.uploadedTime) }}
+                td {{ formatDateTime(file.uploadedTime) }}
                 td
                   a(href="javascript:void(0)",data-ng-click="handlers.deleteFile(file.filename,'user')") Delete
           div(class="separate-vert-small text-center col-xs-12 col-md-8 col-md-offset-2",data-ng-show="!userfiles.length")
@@ -255,4 +255,4 @@ div.wrapper
         div(class="col-xs-12 col-sm-8 col-sm-offset-2")
           div(class="separate-vert-small")
             alert(class="text-center",data-ng-show="!content.versions.length") There are no older versions of this page to review.
-            select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+functions.formatDateTime(version.updated)+' by user '+version.updatedBy.username for version in content.versions")
+            select(class="form-control",data-ng-show="content.versions.length",data-ng-change="handlers.reviewVersion(version.selection)",data-ng-model="version.selection",data-ng-options="version.updated as 'Updated on '+formatDateTime(version.updated)+' by user '+version.updatedBy.username for version in content.versions")

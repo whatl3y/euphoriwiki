@@ -22,7 +22,7 @@ import adminVisitorsCtrl from './controllers/adminVisitorsCtrl'
 import chatCtrl from './controllers/chatCtrl'
 import globalCtrl from './controllers/globalCtrl'
 import loginCtrl from './controllers/loginCtrl'
-import mainHomeCtrl from './controllers/mainHomeCtrl'
+import MainHomeController from './controllers/mainHomeCtrl'
 import wikiPageCtrl from './controllers/wikiPageCtrl'
 
 // Make sure we put marked on the window scope
@@ -71,6 +71,15 @@ angular.module('Euphoriwiki',[angularAnimate,angularMoment,ngTouch,ui_bootstrap,
   // These functions are used all over the place for hovering between relative and absolute dates.
   $rootScope.exactDate = function(dateString) { return $filter('date')(dateString, 'MMM d, y h:mm a') }
   $rootScope.relativeDate = function(dateString) { return $filter('amTimeAgo')(dateString) }
+  $rootScope.formatDateTime = function(date) {        //assumes input date is UTC
+    if (date instanceof Date || (typeof date === "string" && date.length)) {
+      date = date.toString().replace("T"," ").replace("Z"," ");
+      var dt = new Core.DateTime({date:date})
+      return dt.convertUTCDateToLocal('uslong')
+    } else {
+      return ""
+    }
+  }
   $rootScope.css = {
     classes: {
       hasData: function(string) {
@@ -91,7 +100,7 @@ angular.module('Euphoriwiki',[angularAnimate,angularMoment,ngTouch,ui_bootstrap,
 .directive('comments',commentsDir)
 .directive('subComments',subCommentsDir)
 .controller('globalCtrl',globalCtrl)
-.controller('mainHomeCtrl',mainHomeCtrl)
+.controller('MainHomeController',MainHomeController)
 .controller('loginCtrl',loginCtrl)
 .controller('wikiPageCtrl',wikiPageCtrl)
 .controller('chatCtrl',chatCtrl)
