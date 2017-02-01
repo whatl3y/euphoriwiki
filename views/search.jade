@@ -2,28 +2,27 @@ extends layout
 
 block main  
   - var pages = data.external.EXTRA.pages;
-  
-  div.row.separate-vert-medium
-    div.col-xs-12.col-md-8.col-md-offset-2.col-lg-6.col-lg-offset-3
-      div.row
-        include include_search.jade
-  
-  div(class="separate-vert-small")
-    div(class="col-xs-12 col-md-8 col-md-offset-2")
-      h1
-        u Search Results
-      - if (pages.length)
-        - each page, index in pages
-          div(class="separate-vert-medium")
-            div(class="text-large")
-              span= index+1+". "
-              a(href=page.path)= page.path
-            div(class="margin-left-large")
-              small(class="soft-text")= "Last updated on: " + (page.updated || new Date()) + ". This page has " + (page.pageViews || 0) + " total views."
-              div
-                b Page Description: 
-                span= page.description || "No page description..."
-          div(class="divider")
-      - else
-        h4
-          alert(class="separate-vert-large text-center") We couldn't find any results from the search. Please try again, or go to any page you want to create a new one.
+  div.container
+    div.row.separate-vert-medium
+      div.col-xs-12.col-md-8.col-md-offset-2
+        div.row
+          include include_search.jade
+    div.row
+      div.col-xs-12
+        h1
+          u Search Results
+        - if (pages.length)
+          - each page, index in pages
+            div.separate-vert-medium
+              div.text-large
+                span= index+1+". "
+                a(href=page.path)= page.path
+              div.margin-left-large
+                small.soft-text= "Last updated on: " + (page.updated || new Date()) + ". This page has " + (page.pageViews || 0) + " total views."
+                div
+                  b Page Description: 
+                  span= page.description || "No page description..."
+            div.divider
+        - else
+          h4
+            alert.separate-vert-large.text-center We couldn't find any results from the search. Please try again, or go to any page you want to create a new one.

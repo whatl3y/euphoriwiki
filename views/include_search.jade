@@ -2,6 +2,6 @@
 
 div.separate-vert-small.col-xs-12(data-ng-controller="globalCtrl")
   div.row.text-center
-    div(class="col-xs-12")
+    div.col-xs-12
       form(method="post",data-ng-submit="handlers.search(query)")
         input(type="text",class="input-lg emphasize form-control center",placeholder="Search for what you are looking for...",id="query",name="query",data-ng-model="query",popover="If you want to search the entire contents of all pages, wrap your search query in quotes, \"This is what I'm searching for\", otherwise it will only search within the page's path, description, and tags.",popover-trigger="mouseenter",popover-placement="bottom")
