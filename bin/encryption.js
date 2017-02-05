@@ -6,9 +6,11 @@ var Encryption = require('../libs/Encryption.js')
 //    EXAMPLE CALL: >node encryption [-d][-e] string
 const encryptText = argv.e || argv.encrypt
 const decryptText = argv.d || argv.decrypt
+const inputFilePath = argv.i || argv.input
 const outputFilePath = argv.o || argv.output
-const which = (encryptText) ? 'e' : 'd'
-var text = encryptText || decryptText
+const which = (encryptText || inputFilePath) ? 'e' : 'd'
+
+const text = read(encryptText || decryptText, inputFilePath)
 
 switch (which) {
   case 'e':
@@ -21,6 +23,13 @@ switch (which) {
 
   default:
     console.log('Please enter an argument, -e to encrypt, -d to decrypt.')
+}
+
+function read(rawText, filePath=null) {
+  if (filePath) {
+    return fs.readFileSync(filePath, 'utf8')
+  }
+  return rawText
 }
 
 function write(text, filePath=null) {
