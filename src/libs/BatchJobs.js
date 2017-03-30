@@ -86,13 +86,16 @@ BatchJobs.prototype.execute = function(jobsArray,cb) {
     return function(callback) {
       async.waterfall([
         function(_callback) {
-          fh.getFile({file:j.file, encoding:'utf8'},function(e,jobCode) {
-            _callback(e,jobCode);
-          });
+          fh.getFile({file:j.file, encoding:'utf8'}, _callback)
         },
         function(jobCode,_callback) {
-          var codeResult = new CodeRunner(jobCode).eval();
-          _callback(null,codeResult);
+          if (j.async)
+            return new CodeRunner(jobCode).evalAsync(_callback)
+
+          var codeResult = new CodeRunner(jobCode).eval()
+          if (codeResult instanceof Error)
+            return _callback(codeResult)
+          return _callback(null, codeResult)
         },
         function(result,_callback) {
           self.db.collection('batch_jobs').update({job_name:j.job_name},{

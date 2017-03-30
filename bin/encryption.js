@@ -8,7 +8,7 @@ const encryptText = argv.e || argv.encrypt
 const decryptText = argv.d || argv.decrypt
 const inputFilePath = argv.i || argv.input
 const outputFilePath = argv.o || argv.output
-const which = (encryptText || inputFilePath) ? 'e' : 'd'
+const which = (decryptText || decryptText === '') ? 'd' : 'e'
 
 const text = read(encryptText || decryptText, inputFilePath)
 

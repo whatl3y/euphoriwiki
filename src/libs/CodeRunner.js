@@ -34,7 +34,7 @@ var CodeRunner = function(options) {
 |RETURNS:    <result or undefined (if nothing returned)/Error>: true if executed successfully, Error with error otherwise
 -----------------------------------------------------------------------------------------*/
 CodeRunner.prototype.eval = function() {
-  if (typeof this.params==="object") {
+  if (typeof this.params === "object") {
     var PARAMS = {};
 
     for (var _k in this.params) {
@@ -47,6 +47,40 @@ CodeRunner.prototype.eval = function() {
     return result;
   } catch(err) {
     return err;
+  }
+}
+
+/*-----------------------------------------------------------------------------------------
+|NAME:      evalAsync (PUBLIC)
+|DESCRIPTION:  Executes a string of JavaScript and returns the results. PARAMS will be an optional object
+|            that the eval'ed code can access.
+|PARAMETERS:  None
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    <result or undefined (if nothing returned)/Error>: true if executed successfully, Error with error otherwise
+-----------------------------------------------------------------------------------------*/
+CodeRunner.prototype.evalAsync = function(callback) {
+  if (typeof this.params === "object") {
+    var PARAMS = {};
+
+    for (var _k in this.params) {
+      PARAMS[_k] = this.params[_k];
+    }
+  }
+
+  try {
+    var FINAL_CALLBACK = callback
+    eval(this.codestring)
+
+    // After 30 seconds, call finalCallback in case
+    // it wasn't called in eval()
+    setTimeout(() => {
+      try {
+        FINAL_CALLBACK()
+      } catch (e) {}
+    }, 30000)
+  } catch(err) {
+    FINAL_CALLBACK(err)
   }
 }
 
