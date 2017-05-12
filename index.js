@@ -129,11 +129,23 @@ function main(notClustering) {
       app.use(passport.session());
 
       io.use(function(socket, next) {
-        sessionMiddleware(socket.request,socket.request.res,next);
+        sessionMiddleware(socket.request,socket.request.res,next)
       });
 
       //static files
-      app.use("/public",express.static(path.join(__dirname,"/public")));
+      app.use("/public",express.static(path.join(__dirname,"/public")))
+
+      // HEROKU DEPLOYMENT ONLY HTTPS REDIRECT
+      // In production redirect to https endpoint
+      // http://stackoverflow.com/questions/29810607/how-to-force-https-redirect-on-heroku-with-express-4-0
+      app.use(function(req, res, next) {
+        if (config.server.NODE_ENV === 'production') {
+          if (config.server.host.indexOf('https://') === 0 && req.headers['x-forwarded-proto'] != 'https') {
+            return res.redirect('https://' + req.headers.host + req.url)
+          }
+        }
+        return next()
+      })
 
       //if any of the queries stored in the DB have extra code we need to eval(), do that here
       _.each(queries,function(queryInfo) {
