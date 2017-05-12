@@ -139,7 +139,7 @@ function main(notClustering) {
       // In production redirect to https endpoint
       // http://stackoverflow.com/questions/29810607/how-to-force-https-redirect-on-heroku-with-express-4-0
       app.use(function(req, res, next) {
-        if (config.server.NODE_ENV === 'production') {
+        if (process.env.NODE_ENV === 'production') {
           if (config.server.HOST.indexOf('https://') === 0 && req.headers['x-forwarded-proto'] != 'https') {
             return res.redirect('https://' + req.headers.host + req.url)
           }
