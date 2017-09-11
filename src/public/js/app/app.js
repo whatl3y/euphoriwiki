@@ -1,3 +1,4 @@
+import moment from 'moment'
 import async from 'async'
 import marked from 'marked'
 import * as FastClick from 'fastclick'
@@ -36,6 +37,7 @@ angular.module('Euphoriwiki',[angularAnimate,angularMoment,ngTouch,ui_bootstrap,
     FastClick.attach(document.body)
   })
 
+  window.moment = moment;
   $rootScope._async = async;
 
   $rootScope.unserialize = function(string) {
