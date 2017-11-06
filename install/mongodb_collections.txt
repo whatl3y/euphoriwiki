@@ -1,0 +1,163 @@
+Collections:
+  - accounts: A new account record will be created whenever someone logs in. The fields will vary based on auth type, but some consistent fields will be as follows
+    type: the type of account, examples include: basic, activedirectory, facebook, twitter, etc.
+    username: the username for this account record
+    email: e-mail address of user
+    created: date the wiki account was first logged in
+    lastlogin: date this user last logged in
+    files: an array of files (file names and other metadata) that a user has uploaded (files[<i>].filename)
+      accounts.files[<i>].filename
+      accounts.files[<i>].origFilename
+      accounts.files[<i>].uploadedTime
+    drafts: an array of objects defining a wiki page path and the content that has been saved as a draft for the page.
+      accounts.drafts[<i>].path
+      accounts.drafts[<i>].date
+      accounts.drafts[<i>].html
+  - audit
+    type: the type of audit entry this is
+    user: username of the user who is responsible for this audit entry
+    date
+    ip: IP address of person responsible for this entry
+    hostname: host this user/machine was accessing the site on
+    userAgent: user-agent of machine of user visiting
+    additional: optional other information about the audit entry
+  - routes
+    path
+    verb
+    callback
+    order
+    active
+  - initializequeries
+    collection
+    key
+    extracode
+  - wikicontent
+    path: path of the page
+    aliasfor: optional field to tell a target path that this page is an alias for. NOTE: no other fields need to be populated other than path and updated if this is set
+    template: Information about the template we're using for this page
+      templateId: the MongoDB ObjectID for the template this page uses
+      config: configuration object to define data input by a user for a isEasyConfig == 'Yes' template of options
+    content_html: HTML content of the page
+    content_markdown: markdown language of content on page
+    description: description of the page to be used in searching and showing about pages
+    pageViews: a number that is incremented each time the page is viewed
+    updated: the date at which this page was last updated
+    updatedBy: an object specifying the username, firstname, and lastname of the user who updated the document last
+      updatedBy.username
+      updatedBy.firstname
+      updatedBy.lastname
+    tags: an array of tags that can be linked to a given wiki page
+    files: an array of files (file names and other metadata) that a user has uploaded (files[<i>].filename) to GridFS
+    subscribers: an array of e-mail addresses for subscribers to this page who will get updates whenever the page is updated.
+      username: optional username if logged in user
+      email: e-mail address for this subscriber
+    events: an array of custom events we'll execute specific to this page when this event fires (i.e. updating a page).
+      events[<i>].name
+      events[<i>].description
+      events[<i>].type
+      events[<i>].file
+      events[<i>].code
+      events[<i>].params: optional object of parameters to be available in the PARAMS object of the code
+      events[<i>].disable: if populated, will be the _id of a defaultevents that is disabled.
+    likes: a document of page likes
+      likes.number: number of page likes this page has
+      likes.info: an array of documents describing when a page like liked and who liked it
+    settings: an object of administrative settings about this page that will apply to this page and possibly any "lower" pages as well
+      settings.admins: an array of administrators (usernames) that are allowed to make global changes at this level and below
+      settings.requiresReview: (20160226: NOT BEING USED RIGHT NOW) <integer> indicating whether a page requires review and how many reviews it needs for an update to be published. If 0, false, or not exists it does not require review
+        NOTE: this setting must be paired with settings.admins in order to function. If there are no page admins then this setting does nothing (maybe require wiki admins to review)
+      settings.viewscope: an array of objects containing information that describes who is able to view the content on this and any child pages
+        settings.viewscope[<i>].type: string indicating the type of object we're checking users to be a part of (ex. loggedin, groupmembership, username, upnsuffix, emailsuffix)
+        settings.viewscope[<i>].data: <varies> the data type for this varies based on what the type is. for example, for type=loggedin, this won't exist; type=groupmembership, an array of group names; type=username, array of usernames; etc
+    search_content: for isEasyConfig template pages, this will be populated as a long string to be searched for content of the page
+  - wikicontent_archive: THIS HAS THE SAME FIELDS AS WIKICONTENT, BUT IS USED FOR HISTORICAL/ARCHIVED PAGE INFORMATION
+  - defaultevents: Populated with documents that contain default event handlers that will be ran when a specific event-type fires.
+    name
+    description
+    type: the type of event this is for
+    file: a JavaScript file we'll require and run
+    code: a string of JavaScript that will be run for this event
+    params: optional object of parameters to be available in the PARAMS object of the code
+  - template_types
+    key
+    name
+    active
+  - template_config_types
+    name
+    key
+  - wikitemplates
+    name: the name of the template
+    type: the type of template (i.e. page vs component)
+    file: the .html or .jade file that contains the contents of our template. As of 20160201 this lives in root/views/wikitemplates.
+    updated: the date this template was updated
+    isEasyConfig: 'Yes' or 'No' depending on if this template is an easy configuration template
+    config: if isEasyConfig = 'Yes', this is the configuration object to define the config
+  - homewidgets: a list of widgets we're going to add to the home page after a user has logged in
+    name: name/title of the widget
+    collection: collection of items we're pulling from
+    active: true/false as to whether this widget is active DEFAULT: true
+    limit: the limit of items we're pulling from
+    filter: an object specifying a filter we're going to enforce on what data is pulled back for the widget
+    orderField: the field we're going to be ordering returned documents by
+    orderDirection: 1 or -1 specifying the order at which we're returning documents from the orderField
+    fields: an object to determine what fields in collection we want to return (eg {path:1,pageViews:1}
+    extraText: if specified, will be extra text/nodes we want to include in the widget
+  - adminsettings
+    name
+    include: the jade template to include with this setting
+    order: order that it shows on the page
+    active: boolean, where we only DON'T get this setting if active==false
+    value: the value for the administrative setting. type will vary based on what setting it is
+  - emailtemplates
+    name: unique name to find the template
+    subject: string of the subject for this template
+    file: an optional file location for the template. This is just the file name, where the directory location will be in /views/emailtemplates. EITHER THIS OR HTML SHOULD BE SPECIFIED
+    html: an optional string of html for this e-mail. EITHER THIS OR FILE SHOULD BE SPECIFIED
+  - processed_directory: collection used for /admin/diff to process directories and files
+    directory
+    fulldirectory
+    date
+    hostname
+    processed: object containing all processed information of directory
+  - wiki_modules: configured modules that users can select from to add to their pages
+    key: unique key for this module
+    name
+    description
+    updated
+    template: filename stored in GridFS that defines either an HTML or Jade template we will replace the module with on a page
+    config: an array of keys corresponding to configuration options we need for this module
+  - wiki_modules_instances: instances of module implementations from wiki_modules to be used on wiki pages
+    uid: GUID of what will be plugged in by user on a form to pull module
+    modulekey: the key to map to wiki_modules to pull the module code, view template, etc.
+    config: configuration object of config user filled in for module instance
+    createdBy: username of user who created this instance
+    createdOn: date this instance was created on
+    path: path of page this instance was created on
+  - chat_messages
+    user
+    name
+    content
+    creationdate
+    namespace
+    room
+  - themes
+    type: either "global" or "page" to indicate the type of theme this is for
+    path: if type="page", this will be the page path to update the theme
+    header_logo: filename in GridFS of filename for header logo
+    header_logo_link: link that the logo should navigate to
+    home_page: html or jade file of home page information that will display in the middle of the home page
+  - batch_jobs
+    job_name: name to be used as a key when running jobs to filter on
+    file: The .js file stored in GridFS to be executed for the job
+    active: if false, this job will never be fired by our batch job engine
+    frequency_minutes: number of minutes describing how often it should run. 60 means this should run every 60 minutes
+    number_of_occurrences: number of times this should run in total
+    occurrences_ran: how many times this job has ran
+    last_execution_time: the datetime this job ran last
+    execution_data: array of execution metadata each time this is ran
+  - oauth_scopes
+    type: type of oauth scope (i.e. google or facebook)
+    scope: the scope definition (string) we want to add to the default scopes
+  - custom_routes: Routes that have been configured by the wiki administrator and will be contained and seen within the /api/{path} path
+    path
+    file

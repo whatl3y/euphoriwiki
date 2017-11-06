@@ -125,9 +125,9 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
 
   if (!id || !room) return cb("No socket ID or room to add this socket to.");
 
-  var realClientIpAddress = (req.headers['x-forwarded-for'] || req.ip).split(',')
+  var realClientIpAddress = (req.headers['x-forwarded-for'] || req.ip || socket.handshake.address || "").split(',')
   realClientIpAddress = realClientIpAddress[realClientIpAddress.length - 1]
-  new GeoIP().go(realClientIpAddress || socket.handshake.address || "", function(err,geoData) {
+  new GeoIP().go(realClientIpAddress, function(err,geoData) {
     if (err) log.info(err,"Error getting IP information using GeoIP");
 
     geoData = geoData || {};
