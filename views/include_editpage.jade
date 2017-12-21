@@ -83,7 +83,7 @@ div.wrapper
           div.server-page-html(data-ng-if="!initializedEditInSession")!= data.EXTRA.pageInfo.content_html
         div.client-page-html(data-ng-if="initializedEditInSession && content.html")
           div(compile-html="functions.sanitizeHtml(content.html)")
-        div.row
+        div.row.last-updated-wrapper
           div.col-xs-12
             small(class="soft-text",data-ng-if="content.lastUpdate") Last updated on {{ formatDateTime(content.lastUpdate) }} by {{ (content.person.firstname) ? content.person.firstname + " " + content.person.lastname : content.person.username }}
 
