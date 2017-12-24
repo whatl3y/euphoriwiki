@@ -51,13 +51,9 @@ WikiHandler.prototype.initQueries=function(cb) {
     }
   ],
     function(err,queries,oData) {
-      if (err) return cb(err);
+      if (err) return cb(err)
 
-      try {
-        cb(null,{queries:queries, oData:oData});
-      } catch(err) {
-        cb(err);
-      }
+      cb(null, { queries: queries, oData: oData })
     }
   );
 }

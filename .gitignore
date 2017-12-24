@@ -13,6 +13,7 @@
 /.env_windows
 /.env_linux
 /libs
+/routes
 
 # ignore all public files except those in
 # the /images and public/js/dependencies folder

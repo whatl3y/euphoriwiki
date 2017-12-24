@@ -27,6 +27,13 @@ gulp.task('libs-prod', function () {
     .pipe(gulp.dest("./libs"))
 })
 
+gulp.task('routes', function () {
+  return gulp.src("./src/routes/*.js")
+    .pipe(babel())
+    // .pipe(uglify().on('error', console.log))
+    .pipe(gulp.dest("./routes"))
+})
+
 gulp.task('app-extras', function () {
   return gulp.src("./src/public/js/extras/*.js")
     .pipe(sourcemaps.init())
@@ -70,5 +77,5 @@ gulp.task('fonts', function() {
 
 gulp.task('prep-always', ['app-extras', 'app', 'styles', 'fonts'], function() {})
 
-gulp.task('prep-dev', ['libs-dev', 'prep-always'], function() {})
-gulp.task('prep-prod', ['libs-prod', 'prep-always'], function() {})
+gulp.task('prep-dev', [ 'libs-dev', 'routes', 'prep-always' ], function() {})
+gulp.task('prep-prod', [ 'libs-prod', 'routes', 'prep-always' ], function() {})
