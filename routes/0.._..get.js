@@ -1,17 +1,24 @@
-var async = require("async")
-var FileHandler = require("../libs/FileHandler.js")
-var GetHTML = require("../libs/GetHTML.js")
-var Auth = require("../libs/Authentication.js")
-var Audit = require("../libs/Audit.js")
-var WikiHandler = require("../libs/WikiHandler.js")
-var config = require("../config.js")
-var log = require("bunyan").createLogger(config.logger.options())
+import async from "async"
+import bunyan from "bunyan"
+import FileHandler from "../libs/FileHandler.js"
+import GetHTML from "../libs/GetHTML.js"
+import Auth from "../libs/Authentication.js"
+import Audit from "../libs/Audit.js"
+import GeoIP from "../libs/GeoIP"
+import WikiHandler from "../libs/WikiHandler.js"
+import config from "../config.js"
 
-module.exports = function(req,res) {
+const log = bunyan.createLogger(config.logger.options())
+
+module.exports = async function(req, res) {
   var A = new Auth({ session: req.session })
   var fh = new FileHandler({ db: config.mongodb.filedb })
   var wiki = new WikiHandler({ path: '/' })
   var gH = new GetHTML()
+
+  let realClientIpAddress = (req.headers['x-forwarded-for'] || req.remote_ip || req.ip).split(',')
+  realClientIpAddress = realClientIpAddress[realClientIpAddress.length - 1]
+  const location = await GeoIP.location(realClientIpAddress)
 
   var username = A.username
 
@@ -74,7 +81,7 @@ module.exports = function(req,res) {
 
       var audit = new Audit({ ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent'] })
       audit.log({ type:"Visit Home Page" })
-      wiki.event("visitpage", function(e,result) {if (e) log.error(e);});
+      wiki.event({ type: "visitpage", params: { location: location }}, function(e,result) {if (e) log.error(e);});
     }
   )
 }

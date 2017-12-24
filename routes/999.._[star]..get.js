@@ -1,10 +1,12 @@
-var async = require("async");
-var Auth = require("../libs/Authentication.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var Audit = require("../libs/Audit.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import async from "async"
+import bunyan from "bunyan"
+import Auth from "../libs/Authentication.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import Audit from "../libs/Audit.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 module.exports = function(req,res) {
   var path = (req.params[0].indexOf("favicon.ico") == 0) ? null : `/${req.params[0]}`
