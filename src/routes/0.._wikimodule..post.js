@@ -64,11 +64,11 @@ module.exports = function(req,res) {
               },Number(module.timeout || 30)*1000);
 
               //execute module code
-              var queryParams = req.headers.referer.split('?')[1];
-              oQueryParams = (typeof queryParams === 'string') ? Object.unserialize(queryParams) : {};
+              const queryParams = req.headers.referer.split('?')[1];
+              const oQueryParams = (typeof queryParams === 'string') ? Object.unserialize(queryParams) : {};
 
-              var params = Object.merge(instance.config || {},{callback:callback, path:path, queryParams:oQueryParams});
-              var codeResult = new CodeRunner({code:module.code || "return ''", params:params}).eval();
+              var params = Object.merge(instance.config || {}, { callback: callback, path: path, queryParams: oQueryParams })
+              var codeResult = new CodeRunner({ code: module.code || "return ''", params: params }).eval();
 
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
               //go ahead and assume we need to call the callback with that result here.
