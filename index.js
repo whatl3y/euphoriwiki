@@ -1,3 +1,5 @@
+require("babel-polyfill");
+
 var newrelic = require("newrelic")
 var mongodb = require('mongodb')
 var os = require("os")

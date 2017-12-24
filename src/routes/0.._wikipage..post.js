@@ -97,8 +97,7 @@ module.exports = function(req,res) {
             },
             function(aPages,_callback) {
               Access.onlyViewablePaths({username:username, paths:aPages, session:req.session},function(_err,filteredPages) {
-                filteredPagesOnlyPaths = filteredPages.map(function(p) {return p.path});
-                _callback(_err,filteredPagesOnlyPaths);
+                _callback(_err, filteredPages.map(p => p.path))
               });
             },
             function(filteredPages,_callback) {
