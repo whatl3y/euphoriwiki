@@ -37,8 +37,6 @@ div.wrapper
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('view')") Preview Page
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.editHtml)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('editHtml')") Edit (HTML)
-            li(role="presentation",data-ng-class="functions.style.tabState(pageState.editMarkup)")
-              a(href="javascript:void(0)",data-ng-click="functions.changePageState('editMarkup')") Edit (Markdown)
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadDocx)")
               a(href="javascript:void(0)",data-ng-click="functions.changePageState('uploadDocx')") MS Word Doc > HTML
             li(role="presentation",data-ng-class="functions.style.tabState(pageState.uploadFile)")
@@ -126,15 +124,6 @@ div.wrapper
               a(class="btn btn-default active",title="Review Raw HTML",data-ng-click="rawHTML=!rawHTML")
                 i(class="fa fa-code")
             textarea(id="rte-raw-html",rows="25",class="form-control",data-ng-model="content.html",data-ng-blur="functions.rteInit()")
-          //textarea(ckeditor="config.ckOptions",data-ng-model="content.html",data-ng-change="functions.htmlToMarkdown(content.html)")
-      div(data-ng-show="pageState.editMarkup")
-        div(data-ng-if="template.isEasyConfig == 'Yes'")
-          include include_easyconfig.jade
-        div(data-ng-show="template.isEasyConfig != 'Yes'")
-          div(class="separate-vert-small panel panel-danger")
-            div(class="panel-body")
-              b NOTE: Markdown is very different than HTML, so if you are updating the markdown version of the page and there were previous versions with complex HTML or other components, some things will most likely be lost. Continue at your own risk!
-          textarea(class="form-control",rows="20",data-ng-model="content.markdown",data-ng-blur="functions.markdownToHtml(content.markdown)")
       div(data-ng-show="pageState.uploadDocx")
         h1 Add Microsoft Word Documents
         div(class="separate-vert-small")

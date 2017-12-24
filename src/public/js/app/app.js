@@ -1,6 +1,6 @@
 import moment from 'moment'
 import async from 'async'
-import marked from 'marked'
+// import marked from 'marked'
 import * as FastClick from 'fastclick'
 import angularAnimate from 'angular-animate'
 import angularMoment from 'angular-moment'
@@ -27,7 +27,7 @@ import MainHomeController from './controllers/mainHomeCtrl'
 import wikiPageCtrl from './controllers/wikiPageCtrl'
 
 // Make sure we put marked on the window scope
-window.marked = marked
+// window.marked = marked
 
 angular.module('Euphoriwiki',[angularAnimate,angularMoment,ngTouch,ui_bootstrap,'ngFileUpload'])
 .run(function($rootScope,$filter) {

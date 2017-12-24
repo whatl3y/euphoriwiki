@@ -1,53 +1,29 @@
-var httpClient = require("./ApiClient.js");
+import request from 'request'
 
-/*-----------------------------------------------------------------------------------------
-|TITLE:    GeoIP.js
-|PURPOSE:  Uses freegeoip.net API to take an IP address or hostname and finds it's physical
-|      location. Find out more information at freegeoip.net.
-|AUTHOR:  Lance Whatley
-|CALLABLE METHODS:
-|      go: makes a request to the endpoint
-|REVISION HISTORY:
-|      *LJW 1/7/2016 - created
------------------------------------------------------------------------------------------*/
-function GeoIP(dataType) {
-  this.dataType = dataType || "json";    //json, csv, xml, jsonp
-  this.client = new httpClient();
-  this.client.endpoint = "freegeoip.net";
+export default {
+  request: request.defaults({ baseUrl: 'http://freegeoip.net' }),
+
+  // example response: {
+  //   ip: '50.248.240.73',
+  //   country_code: 'US',
+  //   country_name: 'United States',
+  //   region_code: 'GA',
+  //   region_name: 'Georgia',
+  //   city: 'Decatur',
+  //   zip_code: '30034',
+  //   time_zone: 'America/New_York',
+  //   latitude: 33.6878,
+  //   longitude: -84.2507,
+  //   metro_code: 524
+  // }
+  location(ipAddress) {
+    return new Promise((resolve, reject) => {
+      this.request.get(`/json/${ipAddress}`, (err, httpResponse, body) => {
+        if (err) return reject(err)
+        if (httpResponse.statusCode >= 400) return reject(body)
+
+        resolve(JSON.parse(body))
+      })
+    })
+  }
 }
-
-/*-----------------------------------------------------------------------------------------
-|NAME:      setPath (PUBLIC)
-|DESCRIPTION:  Sets the path of the geofinder to make the http request
-|PARAMETERS:  1. ip(OPT): IP address
-|        2. cb(OPT): callback
-|SIDE EFFECTS:  Nothing
-|ASSUMES:    Nothing
-|RETURNS:    <string>: the new path
------------------------------------------------------------------------------------------*/
-GeoIP.prototype.setPath = function(ip) {
-  return this.client.path = "/" + this.dataType + "/" + ip;
-}
-
-/*-----------------------------------------------------------------------------------------
-|NAME:      go (PUBLIC)
-|DESCRIPTION:  Executes an http request to the endpoint
-|PARAMETERS:  1. ip(OPT): IP address
-|        2. cb(OPT): callback function to take data and do something with it
-|SIDE EFFECTS:  Nothing
-|ASSUMES:    Nothing
-|RETURNS:    Nothing
------------------------------------------------------------------------------------------*/
-GeoIP.prototype.go = function(ip,cb) {
-  var self = this;
-
-  this.setPath(ip);
-  this.client.request(null,function(err,data) {
-    if (err) return cb(err);
-    if (!data) return cb("No location information for IP address: " + ip)
-
-    return cb(null,(self.dataType=="json") ? JSON.parse(data) : data);
-  });
-}
-
-module.exports = GeoIP

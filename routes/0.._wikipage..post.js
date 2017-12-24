@@ -148,7 +148,7 @@ module.exports = function(req,res) {
 
           var oRet;
           if (!pageInfo.length) {
-            oRet = {success:true, exists:false, updateable:canUpdate, html:"", markdown:""};
+            oRet = {success:true, exists:false, updateable:canUpdate, html:""};
           } else {
             oRet = {
               success: true,
@@ -157,7 +157,6 @@ module.exports = function(req,res) {
               template: oTemplate,
               masterTemplateConfig: oPageContent.config,
               html: oPageContent.html,
-              markdown: pageInfo[0].content_markdown,
               description: pageInfo[0].description,
               widgets: pageInfo[0].widgets,
               lastUpdate: pageInfo[0].updated,
@@ -402,7 +401,6 @@ module.exports = function(req,res) {
             "$set": {
               path: wiki.path,
               content_html: info.html,
-              content_markdown: info.markdown,
               updated: new Date(),
               updatedBy: {username:username, firstname:A.getFirstname(), lastname:A.getLastname()}
             }
@@ -412,7 +410,6 @@ module.exports = function(req,res) {
           var oTemplate = JSON.parse(info.template || "");
           if (oTemplate && oTemplate.isEasyConfig == "Yes") {
             saveData["$set"].content_html = '';
-            saveData["$set"].content_markdown = '';
             saveData["$set"].template = {
               templateId: oTemplate.templateId,
               config: oTemplate.config || {}

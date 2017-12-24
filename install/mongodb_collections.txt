@@ -38,7 +38,7 @@ Collections:
       templateId: the MongoDB ObjectID for the template this page uses
       config: configuration object to define data input by a user for a isEasyConfig == 'Yes' template of options
     content_html: HTML content of the page
-    content_markdown: markdown language of content on page
+    content_markdown: markdown language of content on page. DEPRECATED (no longer used): 2017-12-24
     description: description of the page to be used in searching and showing about pages
     pageViews: a number that is incremented each time the page is viewed
     updated: the date at which this page was last updated

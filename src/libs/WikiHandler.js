@@ -732,19 +732,19 @@ WikiHandler.prototype.event=function(options,cb) {
       var aggregatedEvents = [].concat(pageEvents,defaultEvents);
 
       if (aggregatedEvents.length) {
-        var asyncParallel = aggregatedEvents.map(function(event) {
+        var parallelEventFunctions = aggregatedEvents.map(function(event) {
           event = event || {};
           var parameters = Object.merge(params,event.params || {});
 
           return function(callback) {
-            var result = new CodeRunner({code:event.code, params:Object.merge({pagepath:self.path},parameters)}).eval();
+            var result = new CodeRunner({ code: event.code, params: Object.merge({ pagepath: self.path }, parameters) }).eval();
 
             if (!(result instanceof Error)) callback(null,true);
             else callback(result);
           }
         });
 
-        async.parallel(asyncParallel,function(err,results) {
+        async.parallel(parallelEventFunctions, function(err,results) {
           if (err) cb(err);
           else cb(null,true);
         });

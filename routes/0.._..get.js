@@ -3,21 +3,21 @@ var FileHandler = require("../libs/FileHandler.js")
 var GetHTML = require("../libs/GetHTML.js")
 var Auth = require("../libs/Authentication.js")
 var Audit = require("../libs/Audit.js")
+var WikiHandler = require("../libs/WikiHandler.js")
 var config = require("../config.js")
 var log = require("bunyan").createLogger(config.logger.options())
 
 module.exports = function(req,res) {
-  var A = new Auth({session:req.session})
-  var fh = new FileHandler({db:config.mongodb.filedb})
+  var A = new Auth({ session: req.session })
+  var fh = new FileHandler({ db: config.mongodb.filedb })
+  var wiki = new WikiHandler({ path: '/' })
   var gH = new GetHTML()
 
   var username = A.username
 
   async.waterfall([
     function(callback) {
-      config.mongodb.db.collection("themes").find({type:"global"}).toArray(function(e,themeInfo) {
-        return callback(e,themeInfo)
-      })
+      config.mongodb.db.collection("themes").find({ type:"global" }).toArray(callback)
     },
     function(theme,callback) {
       if (theme instanceof Array && theme.length) {
@@ -70,10 +70,11 @@ module.exports = function(req,res) {
         mainColumnLength = 6;
       }
 
-      res.render("index",config.view.send(req,{iobj:{homeBody:bodyHtml, theme:theme, mainColumnLength:mainColumnLength}}))
+      res.render("index", config.view.send(req, { iobj: { homeBody: bodyHtml, theme: theme, mainColumnLength: mainColumnLength }}))
 
-      var audit = new Audit({ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent']})
-      audit.log({type:"Visit Home Page"})
+      var audit = new Audit({ ip:req.ip, hostname:req.hostname, ua:req.headers['user-agent'] })
+      audit.log({ type:"Visit Home Page" })
+      wiki.event("visitpage", function(e,result) {if (e) log.error(e);});
     }
   )
 }

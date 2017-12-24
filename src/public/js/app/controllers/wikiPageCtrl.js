@@ -24,7 +24,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
     pageModules: false,
     wikiEvents: false,
     editHtml: false,
-    editMarkup: false,
     uploadDocx: false,
     uploadFile: false,
     olderVersions: false
@@ -97,7 +96,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
 
               $scope.content = $scope.content || {};
               $scope.content.html = ret.html || "";
-              $scope.content.markdown = ret.markdown || "";
               $scope.content.description = ret.description || "";
               $scope.content.person = ret.person || {};
               $scope.content.lastUpdate = ret.lastUpdate || null;
@@ -253,7 +251,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       if (bind) {
         $('#rte-editor').wysiwyg({},function($editor,saveRange) {
           $scope.content.html = ((($editor.html() || "").length && ($editor.html() || "")[0] != "<") ? "<div>" + $editor.html() + "</div>" : $editor.html()) || "";
-          $scope.functions.htmlToMarkdown( $scope.content.html );
           $scope.COPYPASTE = {
             editor: $editor,
             range: saveRange
@@ -361,27 +358,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
         default:
           return false;
       };
-    },
-
-    htmlToMarkdown: function(html) {
-      var und = new upndown();
-      und.convert(html || "",function(e,markdown) {
-        if (e) {
-          console.log(e);
-          return;
-        }
-
-        $scope.content = $scope.content || {};
-        $scope.$apply(function() {
-          $scope.content.markdown = markdown || "";
-        });
-      });
-    },
-
-    markdownToHtml: function(markdown) {
-      $scope.content = $scope.content || {};
-      $scope.content.html = marked(markdown || "");
-      $scope.functions.rteInit();
     },
 
     sanitizeHtml: function(html) {
@@ -501,8 +477,7 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           templateFiles: $scope.templateFiles,
           template: Upload.json($scope.template),
           page: $scope.pathname,
-          html: $scope.content.html,
-          markdown: $scope.content.markdown
+          html: $scope.content.html
         }
       })
       .success(function(ret) {
@@ -543,7 +518,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       .success(function(ret) {
         if (ret.success) {
           $scope.content.html = ret.html || "";
-          $scope.functions.htmlToMarkdown( $scope.content.html );
         } else {
           alert("ERROR: " + ret.error || "There was an issue. Please try again.");
         }
@@ -745,7 +719,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       $scope.content.html = draft;
       $scope.template = $scope.content.draft.template || {};
 
-      $scope.functions.htmlToMarkdown();
       $scope.functions.rteInit();
       delete($scope.content.draft);
     },
@@ -805,7 +778,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope[whichAry].push(data.fileInfo);
         } else if (data.wordsuccess) {
           $scope.content.html = ($scope.content.html || "") + data.html;
-          $scope.functions.htmlToMarkdown($scope.content.html);
           $scope.functions.rteInit();
 
           $scope.functions.changePageState("view");
@@ -904,7 +876,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
           $scope.template.masterConfig = ret.templateInfo.config || [];
 
           $scope.content.html = (append && $scope.template.isEasyConfig != "Yes") ? (($scope.content.html || "")+ret.html) : ret.html;
-          $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
 
           $scope.functions.rteInit();
           $scope.handlers.initializeEdit(true);
@@ -926,7 +897,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       $scope.templateFiles = {};
 
       $scope.content.html = "";
-      $scope.content.markdown = $scope.functions.htmlToMarkdown($scope.content.html);
 
       $scope.functions.rteInit();
       $scope.handlers.initializeEdit(true);
@@ -982,7 +952,6 @@ function wikiPageCtrl($scope,$http,$sce,$modal,Upload) {
       })[0];
 
       $scope.content.html = version.content_html;
-      $scope.content.markdown = version.content_markdown;
       $scope.functions.rteInit();
     }
   };

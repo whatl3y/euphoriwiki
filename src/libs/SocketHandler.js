@@ -1,11 +1,13 @@
-var async = require("async");
-var SocketGlobal = require("./SocketGlobal.js");
-var SocketWikiChat = require("./SocketWikiChat.js");
-var SocketPages = require("./SocketPages.js");
-var GeoIP = require("./GeoIP.js");
-var DateTime = require("../src/public/js/extras/Core.DateTime.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import async from "async"
+import bunyan from "bunyan"
+import SocketGlobal from "./SocketGlobal.js"
+import SocketWikiChat from "./SocketWikiChat.js"
+import SocketPages from "./SocketPages.js"
+import GeoIP from "./GeoIP.js"
+import DateTime from "../src/public/js/extras/Core.DateTime.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketHandler.js
@@ -127,9 +129,8 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
 
   var realClientIpAddress = (req.headers['x-forwarded-for'] || req.ip || socket.handshake.address || "").split(',')
   realClientIpAddress = realClientIpAddress[realClientIpAddress.length - 1]
-  new GeoIP().go(realClientIpAddress, function(err,geoData) {
-    if (err) log.info(err,"Error getting IP information using GeoIP");
-
+  GeoIP.location(realClientIpAddress)
+  .then(function(geoData) {
     geoData = geoData || {};
 
     self.app.CACHE.sockets[id] = {
@@ -154,7 +155,8 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
     self.app.CACHE.rooms[room][id] = true;
 
     return cb(null,self.app.CACHE.sockets[id]);
-  });
+  })
+  .catch(err => log.info(err,"Error getting IP information using GeoIP"))
 }
 
 /*-----------------------------------------------------------------------------------------
