@@ -10,21 +10,20 @@ var uglify = require('gulp-uglify')
 var webpack = require('webpack-stream')
 var webpack_config = require('./webpack.config.js')
 
-gulp.task('libs-dev', function () {
-  return gulp.src("./src/libs/*.js")
+gulp.task('src-dev', function () {
+  return gulp.src("./src/+(libs|passport_strategies|routes)/**/*.js")
     .pipe(babel())
-    // .pipe(uglify().on('error', console.log))
-    .pipe(gulp.dest("./libs"))
+    .pipe(gulp.dest("./"))
 })
 
-gulp.task('libs-prod', function () {
-  return gulp.src("./src/libs/*.js")
+gulp.task('src-prod', function () {
+  return gulp.src("./src/+(libs|passport_strategies|routes)/**/*.js")
     .pipe(sourcemaps.init())
     .pipe(plumber())
     .pipe(babel())
     .pipe(uglify().on('error', console.log))
     .pipe(sourcemaps.write('./maps'))
-    .pipe(gulp.dest("./libs"))
+    .pipe(gulp.dest("./"))
 })
 
 gulp.task('routes', function () {
@@ -77,5 +76,5 @@ gulp.task('fonts', function() {
 
 gulp.task('prep-always', ['app-extras', 'app', 'styles', 'fonts'], function() {})
 
-gulp.task('prep-dev', [ 'libs-dev', 'routes', 'prep-always' ], function() {})
-gulp.task('prep-prod', [ 'libs-prod', 'routes', 'prep-always' ], function() {})
+gulp.task('prep-dev', [ 'src-dev', 'routes', 'prep-always' ], function() {})
+gulp.task('prep-prod', [ 'src-prod', 'routes', 'prep-always' ], function() {})

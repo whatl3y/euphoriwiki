@@ -4,7 +4,7 @@
   "description": "Easy to use web platform to build blogs, wikis, or any kind of website.",
   "main": "index.js",
   "engines": {
-    "node": "6.12.2"
+    "node": "8.9.3"
   },
   "repository": {
     "type": "git",
