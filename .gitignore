@@ -14,6 +14,7 @@
 /.env_linux
 /libs
 /routes
+/passport_strategies
 
 # ignore all public files except those in
 # the /images and public/js/dependencies folder
