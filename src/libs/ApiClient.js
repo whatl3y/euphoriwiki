@@ -1,7 +1,7 @@
-var http = require("http");
-var https = require("https");
-var Object = require("../src/public/js/extras/Object_prototypes.js");
-var config = require("../config.js");
+import http from "http"
+import https from "https"
+import Object from "../src/public/js/extras/Object_prototypes.js"
+import config from "../config.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    ApiClient.js

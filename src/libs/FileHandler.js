@@ -1,6 +1,6 @@
-var fs = require("fs");
-var mongo = require("mongodb");
-var Grid = require('gridfs-stream');
+import fs from "fs"
+import mongo from "mongodb"
+import Grid from 'gridfs-stream'
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    FileHandler.js

@@ -1,5 +1,7 @@
-var config = require("../config.js");
-var MongoClient = require('mongodb').MongoClient;
+import mongodb from "mongodb"
+import config from "../config.js"
+
+const MongoClient = mongodb.MongoClient
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    MDB.js

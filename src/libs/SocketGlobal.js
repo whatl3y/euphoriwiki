@@ -1,5 +1,7 @@
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketGlobal.js
@@ -10,9 +12,9 @@ var log = require("bunyan").createLogger(config.logger.options());
 |REVISION HISTORY:
 |      *LJW 2/28/2015 - created
 -----------------------------------------------------------------------------------------*/
-var SocketGlobal = function(app,socket) {
-  this.app = app;
-  this.socket = socket;
+var SocketGlobal = function(app, socket) {
+  this.app = app
+  this.socket = socket
 
   this.handler = {
     subscribe: subscribe.bind(this),
@@ -32,25 +34,25 @@ var SocketGlobal = function(app,socket) {
 |ASSUMES:      Nothing
 |RETURNS:      Nothing
 -----------------------------------------------------------------------------------------*/
-function subscribe(io,socket,data,SocketHandler) {
-  var self = this;
+function subscribe(io, socket, data, SocketHandler) {
+  var self = this
 
-  SocketHandler.addToRoom({id:socket.id, room:data.room, socket:socket},function(err,info) {
-    if (err) return log.error(err);
+  SocketHandler.addToRoom({ id: socket.id, room: data.room, socket: socket }, function(err, info) {
+    if (err)
+      return log.error(err)
+
     if (info) {
-      socket.join(data.room);
+      socket.join(data.room)
 
-      var roomMembersSocketIDs = SocketHandler.getRoomMembers(data.room);
-      var roomMembers = roomMembersSocketIDs.map(function(id) {
-        return self.app.CACHE.sockets[id];
-      });
+      var roomMembersSocketIDs = SocketHandler.getRoomMembers(data.room)
+      var roomMembers = roomMembersSocketIDs.map(id => self.app.CACHE.sockets[id])
 
-      socket.broadcast.to(data.room).emit("globalCtrl_subscribe",info);
-      socket.emit("globalCtrl_populateclientlist",roomMembers);
+      socket.broadcast.to(data.room).emit("globalCtrl_subscribe", info)
+      socket.emit("globalCtrl_populateclientlist", roomMembers)
 
-      io.to("/admin/visitors").emit("adminVisitorsCtrl_update",self.app.CACHE.sockets);
+      io.to("/admin/visitors").emit("adminVisitorsCtrl_update", self.app.CACHE.sockets)
     }
-  });
+  })
 }
 
 /*-----------------------------------------------------------------------------------------

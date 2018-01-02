@@ -1,6 +1,6 @@
-var Auth = require("../libs/Authentication.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var config = require("../config.js");
+import Auth from "../libs/Authentication.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import config from "../config.js"
 
 module.exports = function(req,res) {
   var A = new Auth({session:req.session});

@@ -1,8 +1,8 @@
-var fs = require("graceful-fs");
-var path = require("path");
-var async = require("async");
-var Encryption = require("./Encryption.js");
-var Object = require("../src/public/js/extras/Object_prototypes.js");
+import fs from "graceful-fs"
+import path from "path"
+import async from "async"
+import Encryption from "./Encryption.js"
+import Object from "../src/public/js/extras/Object_prototypes.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    DirectoryProcessor.js

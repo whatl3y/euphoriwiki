@@ -1,6 +1,6 @@
-var mysql = require("mysql");
-var mssql = require("mssql");
-var pg = require("pg");
+import mysql from "mysql"
+import mssql from "mssql"
+import pg from "pg"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:      SQLHandler.js

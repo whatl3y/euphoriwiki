@@ -1,5 +1,7 @@
-var ObjectId = require('mongodb').ObjectID;
-var config = require("../config.js");
+import mongodb from 'mongodb'
+import config from "../config.js"
+
+const ObjectID = mongodb.ObjectID
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    ChatMessageHandler.js

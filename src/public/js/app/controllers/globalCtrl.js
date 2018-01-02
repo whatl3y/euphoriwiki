@@ -1,8 +1,6 @@
 export { globalCtrl as default }
 
 function globalCtrl($scope,$http) {
-  window.EuphoriwikiSocket=window.EuphoriwikiSocket || io(LOCAL_DATA.wshost);    //io(LOCAL_DATA.wshost+":"+LOCAL_DATA.port+LOCAL_DATA.namespace);
-
   //setup event listener for hiding the header
   $scope.$on("hideAllOfHeader",function(_event,hide) {
     $scope.hideAllOfHeader = hide;
@@ -87,17 +85,15 @@ function globalCtrl($scope,$http) {
         {
           Name: "globalCtrl_subscribe",
           Handler: function(userData) {
-            //console.log(userData);
-            var name = "<strong>" + ((userData.firstname) ? userData.firstname + " " + userData.lastname : "A guest") + "</strong>";
-            var loader = new Core.Modals().asyncLoader({message: name + " just joined the page!"});
-            setTimeout(function() {
-              loader.remove();
-            }, 3000);
+            console.log("userData", userData);
+            var name = `<strong>${((userData.firstname) ? userData.firstname + " " + userData.lastname : "A guest")}</strong>`;
+            var loader = new Core.Modals().asyncLoader({message: `${name} just joined the page!`})
+            setTimeout(() => loader.remove(), 3000)
 
             $scope.$apply(function() {
-              $scope.usersOnPage = $scope.usersOnPage || [];
-              $scope.usersOnPage.push(userData);
-              $scope.functions.showUsersOnPage();
+              $scope.usersOnPage = $scope.usersOnPage || []
+              $scope.usersOnPage.push(userData)
+              $scope.functions.showUsersOnPage()
             });
           }
         },
@@ -105,8 +101,8 @@ function globalCtrl($scope,$http) {
           Name: "globalCtrl_populateclientlist",
           Handler: function(clients) {
             $scope.$apply(function() {
-              $scope.usersOnPage = clients;
-              $scope.functions.showUsersOnPage();
+              $scope.usersOnPage = clients
+              $scope.functions.showUsersOnPage()
             });
           }
         },
@@ -114,12 +110,10 @@ function globalCtrl($scope,$http) {
           Name: "globalCtrl_disconnect",
           Handler: function(socketId) {
             $scope.$apply(function() {
-              $scope.usersOnPage = $scope.usersOnPage || [];
-              $scope.usersOnPage = $scope.usersOnPage.filter(function(user) {
-                return user.socketId != socketId;
-              });
+              $scope.usersOnPage = $scope.usersOnPage || []
+              $scope.usersOnPage = $scope.usersOnPage.filter(user => user.socketId != socketId)
 
-              $scope.functions.showUsersOnPage();
+              $scope.functions.showUsersOnPage()
             });
 
           }
@@ -129,12 +123,10 @@ function globalCtrl($scope,$http) {
 
     showUsersOnPage: function() {
       $scope.usersOnPageSanitized = $scope.usersOnPage.map(function(u) {
-        if (u.socketId == EuphoriwikiSocket.id) return Object.merge(u,{
-          firstname: "You",
-          lastname: ""
-        });
+        if (u && u.socketId == EuphoriwikiSocket.id)
+          return Object.assign(u, { firstname: "You", lastname: "" })
 
-        return u;
+        return u
       });
     },
 

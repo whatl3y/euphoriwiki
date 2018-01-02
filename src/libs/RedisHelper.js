@@ -1,5 +1,5 @@
-var async = require('async');
-var redis = require('redis');
+import async from 'async'
+import redis from 'redis'
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    RedisHelper.js

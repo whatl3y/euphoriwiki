@@ -19,10 +19,10 @@ Core.SocketHandler = function(opts) {
   this.listeners = opts.events;
 
   var self=this;
-  this.socket.on('connect_error',function() {
+  this.socket.on('connect_error', function(err) {
+    console.log("Socket disconnected...", err)
     self.$scope.$apply(function() {
-      console.log("Socket disconnected...");
-      self.$scope.error='You got disconnected!';
+      self.$scope.error='You got disconnected!'
     });
   });
 }

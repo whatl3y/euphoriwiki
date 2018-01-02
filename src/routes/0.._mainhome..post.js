@@ -1,9 +1,11 @@
-var _ = require("underscore");
-var async = require("async");
-var Auth = require("../libs/Authentication.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import _ from "underscore"
+import async from "async"
+import Auth from "../libs/Authentication.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 module.exports = function(req,res) {
   var info = req.body;

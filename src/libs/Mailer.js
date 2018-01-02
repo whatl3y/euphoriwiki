@@ -1,7 +1,9 @@
-var nodemailer = require('nodemailer');
-var GetHTML = require("./GetHTML.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import nodemailer from 'nodemailer'
+import GetHTML from "./GetHTML.js"
+import config from "../config.js"
+import bunyan from "bunyan"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Mailer.js

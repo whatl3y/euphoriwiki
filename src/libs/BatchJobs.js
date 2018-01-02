@@ -1,8 +1,8 @@
-var async = require('async');
-var CodeRunner = require("./CodeRunner.js");
-var FileHandler = require("./FileHandler.js");
-var config = require("../config.js");
-var Object = require("../src/public/js/extras/Object_prototypes.js");
+import async from 'async'
+import CodeRunner from "./CodeRunner.js"
+import FileHandler from "./FileHandler.js"
+import config from "../config.js"
+import Object from "../src/public/js/extras/Object_prototypes.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    BatchJobs.js

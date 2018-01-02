@@ -1,6 +1,6 @@
-var fork = require('child_process').fork;
-//var config = require("../config.js");
-//var log = require("bunyan").createLogger(config.logger.options());
+import child_process from 'child_process'
+
+const fork = child_process.fork
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:   ChildProcesses.js

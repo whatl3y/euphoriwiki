@@ -1,4 +1,4 @@
-var WikiHandler = require("../libs/WikiHandler.js");
+import WikiHandler from "../libs/WikiHandler.js"
 
 module.exports = function(req,res) {
   var query = req.body.query;

@@ -1,5 +1,6 @@
 import async from "async"
 import bunyan from "bunyan"
+import socketIo from "socket.io"
 import SocketGlobal from "./SocketGlobal.js"
 import SocketWikiChat from "./SocketWikiChat.js"
 import SocketPages from "./SocketPages.js"
@@ -27,9 +28,9 @@ var SocketHandler = function(opts) {
   this.app.CACHE.rooms = this.app.CACHE.rooms || {};
 
   if (typeof opts.io === 'undefined') {
-    this.io = opts || require('socket.io')();
+    this.io = opts || socketIo();
   } else {
-    this.mainIO = opts.io || require('socket.io')();
+    this.mainIO = opts.io || socketIo();
     this.io = opts.nsIO || this.mainIO;
     this.namespace = opts.namespace || '/';
 
@@ -57,27 +58,23 @@ SocketHandler.prototype.connectionEvent = function() {
     }
 
     //connect socket.io and bind events
-    this.io.on('connection',function(socket) {
+    this.io.on('connection', function(socket) {
       var eventHandlers = {
         chat: new SocketWikiChat(self.app, socket),
         pages: new SocketPages(self.app, socket),
         global: new SocketGlobal(self.app, socket)
-      };
+      }
 
       for (var _category in eventHandlers) {
-        var socketEvents = eventHandlers[_category].handler;
+        var socketEvents = eventHandlers[_category].handler
 
         for (var _event in socketEvents) {
-          if (typeof socketEvents[_event] === 'string') {
-            var h = (socketEvents[_event][0]!="(") ? eval("("+socketEvents[_event]+")") : eval(socketEvents[_event]);
-          } else {
-            var h = socketEvents[_event];
-          }
-          socket.on(_event,socketEvent(self,socket,h));
+          const h = socketEvents[_event]
+          socket.on(_event, socketEvent(self, socket, h))
         }
       }
 
-    });
+    })
   } catch (_err) {
     log.error(_err);
   }
@@ -93,14 +90,12 @@ SocketHandler.prototype.connectionEvent = function() {
 |RETURNS:    Array of room members
 -----------------------------------------------------------------------------------------*/
 SocketHandler.prototype.getRoomMembers = function(room) {
-  var roomMembers = [];
-  var nsp = (typeof this.namespace !== 'string') ? '/' : this.namespace;
-
-  for(var socketID in this.mainIO.nsps[nsp].adapter.rooms[room]) {
-    roomMembers.push(socketID);
+  let roomMembers = []
+  for (let socketId in this.app.CACHE.rooms[room]) {
+    roomMembers.push(socketId)
   }
 
-  return roomMembers;
+  return roomMembers
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -116,22 +111,22 @@ SocketHandler.prototype.getRoomMembers = function(room) {
 |ASSUMES:    Nothing
 |RETURNS:    <true/false>: success or not
 -----------------------------------------------------------------------------------------*/
-SocketHandler.prototype.addToRoom = function(options,cb) {
-  options = options || {};
-  var self = this;
+SocketHandler.prototype.addToRoom = function(options, cb) {
+  options = options || {}
+  var self = this
 
-  var id = options.id;
-  var room = options.room;
-  var socket = options.socket;
-  var req = socket.request;
+  var id      = options.id
+  var room    = options.room
+  var socket  = options.socket
+  var req     = socket.request
 
-  if (!id || !room) return cb("No socket ID or room to add this socket to.");
+  if (!id || !room) return cb("No socket ID or room to add this socket to.")
 
   var realClientIpAddress = (req.headers['x-forwarded-for'] || req.ip || socket.handshake.address || "").split(',')
   realClientIpAddress = realClientIpAddress[realClientIpAddress.length - 1]
   GeoIP.location(realClientIpAddress)
   .then(function(geoData) {
-    geoData = geoData || {};
+    geoData = geoData || {}
 
     self.app.CACHE.sockets[id] = {
       socketId: id,
@@ -149,14 +144,14 @@ SocketHandler.prototype.addToRoom = function(options,cb) {
         country: geoData.country_name,
         countryCde: geoData.country_code
       }
-    };
+    }
 
-    self.app.CACHE.rooms[room] = self.app.CACHE.rooms[room] || {};
-    self.app.CACHE.rooms[room][id] = true;
+    self.app.CACHE.rooms[room] = self.app.CACHE.rooms[room] || {}
+    self.app.CACHE.rooms[room][id] = true
 
-    return cb(null,self.app.CACHE.sockets[id]);
+    return cb(null, self.app.CACHE.sockets[id])
   })
-  .catch(err => log.info(err,"Error getting IP information using GeoIP"))
+  .catch(cb)
 }
 
 /*-----------------------------------------------------------------------------------------
