@@ -41,7 +41,7 @@ import Object from "./src/public/js/extras/Object_prototypes.js"
 // TODO: Need to figure out how to use import for config. Reason we
 // currently need require is because of the `eval()` below for
 // initialization queries
-// 
+//
 // import config from "./config.js"
 const config = require("./config.js")
 
@@ -49,7 +49,7 @@ const log         = bunyan.createLogger(config.logger.options())
 const app         = express()
 const httpServer  = http.Server(app)
 const mongoStore  = connectMongo(session)
-const io          = socketIo(http, { pingInterval: 4000, pingTimeout: 10000 })
+const io          = socketIo(httpServer, { pingInterval: 4000, pingTimeout: 10000 })
 
 try {
   //handle clustering if applicable

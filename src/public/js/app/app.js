@@ -1,3 +1,4 @@
+import io from "socket.io-client"
 import moment from 'moment'
 import async from 'async'
 // import marked from 'marked'
@@ -31,6 +32,8 @@ import wikiPageCtrl from './controllers/wikiPageCtrl'
 
 angular.module('Euphoriwiki',[angularAnimate,angularMoment,ngTouch,ui_bootstrap,'ngFileUpload'])
 .run(function($rootScope,$filter) {
+  window.EuphoriwikiSocket = window.EuphoriwikiSocket || io(LOCAL_DATA.wshost)    //io(LOCAL_DATA.wshost+":"+LOCAL_DATA.port+LOCAL_DATA.namespace);
+
   // Initiate FastClick for mobile devices to remove the built-in 300ms
   // delay. Read more in https://github.com/ftlabs/fastclick
   angular.element(document).ready(function() {
