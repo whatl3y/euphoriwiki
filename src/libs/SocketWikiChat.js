@@ -1,8 +1,10 @@
-var Authentication = require("./Authentication.js");
-var ChatMessageHandler = require("./ChatMessageHandler.js");
-var WikiHandler = require("./WikiHandler.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import Authentication from "./Authentication.js"
+import ChatMessageHandler from "./ChatMessageHandler.js"
+import WikiHandler from "./WikiHandler.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketWikiChat.js

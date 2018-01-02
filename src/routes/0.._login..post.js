@@ -1,13 +1,15 @@
-var fs = require("fs");
-var path = require("path");
-var _ = require("underscore");
-var async = require("async");
-var passport = require("passport");
-var Auth = require("../libs/Authentication.js");
-var Audit = require("../libs/Audit.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import fs from "fs"
+import bunyan from "bunyan"
+import path from "path"
+import _ from "underscore"
+import async from "async"
+import passport from "passport"
+import Auth from "../libs/Authentication.js"
+import Audit from "../libs/Audit.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 var oStrats = {};
 var strats = fs.readdirSync(path.join(".","passport_strategies")) || [];

@@ -1,4 +1,4 @@
-var _ = require("underscore");
+import _ from "underscore"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketPages.js

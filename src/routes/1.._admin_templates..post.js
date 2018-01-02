@@ -1,15 +1,18 @@
-var _ = require("underscore");
-var async = require("async");
-var Auth = require("../libs/Authentication.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var Audit = require("../libs/Audit.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var FileHandler = require("../libs/FileHandler.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import mongodb from "mongodb"
+import _ from "underscore"
+import async from "async"
+import Auth from "../libs/Authentication.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import Audit from "../libs/Audit.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import FileHandler from "../libs/FileHandler.js"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 module.exports = function(req,res) {
-  var ObjectId = require('mongodb').ObjectID;
+  const ObjectId = mongodb.ObjectID;
 
   var info = req.body;
   if (info.file) {

@@ -1,14 +1,16 @@
-var async = require("async");
-var Auth = require("../libs/Authentication.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var Audit = require("../libs/Audit.js");
-var GetHTML = require("../libs/GetHTML.js");
-var FileHandler = require("../libs/FileHandler.js");
-var CodeRunner = require("../libs/CodeRunner.js");
-var config = require("../config.js");
-var Object = require('../src/public/js/extras/Object_prototypes.js')
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import async from "async"
+import Auth from "../libs/Authentication.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import Audit from "../libs/Audit.js"
+import GetHTML from "../libs/GetHTML.js"
+import FileHandler from "../libs/FileHandler.js"
+import CodeRunner from "../libs/CodeRunner.js"
+import config from "../config.js"
+import Object from '../src/public/js/extras/Object_prototypes.js'
+
+const log = bunyan.createLogger(config.logger.options())
 
 module.exports = function(req,res) {
   var info = req.body;

@@ -1,5 +1,6 @@
 import async from "async"
 import bunyan from "bunyan"
+import socketIo from "socket.io"
 import SocketGlobal from "./SocketGlobal.js"
 import SocketWikiChat from "./SocketWikiChat.js"
 import SocketPages from "./SocketPages.js"
@@ -27,9 +28,9 @@ var SocketHandler = function(opts) {
   this.app.CACHE.rooms = this.app.CACHE.rooms || {};
 
   if (typeof opts.io === 'undefined') {
-    this.io = opts || require('socket.io')();
+    this.io = opts || socketIo();
   } else {
-    this.mainIO = opts.io || require('socket.io')();
+    this.mainIO = opts.io || socketIo();
     this.io = opts.nsIO || this.mainIO;
     this.namespace = opts.namespace || '/';
 

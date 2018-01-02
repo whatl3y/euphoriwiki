@@ -1,7 +1,9 @@
-var fs = require("fs");
-var async = require("async");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import fs from "fs"
+import bunyan from "bunyan"
+import async from "async"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    RouteHandler.js

@@ -1,8 +1,8 @@
-var Auth = require("../libs/Authentication.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var AccessManagement = require("../libs/AccessManagement.js");
-var Audit = require("../libs/Audit.js");
-var config = require("../config.js");
+import Auth from "../libs/Authentication.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import AccessManagement from "../libs/AccessManagement.js"
+import Audit from "../libs/Audit.js"
+import config from "../config.js"
 
 module.exports = function(req,res) {
   var query = req.params.query;

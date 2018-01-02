@@ -1,11 +1,14 @@
-var fs = require("fs");
-var _ = require("underscore");
-var async = require("async");
-var GetHTML = require("../libs/GetHTML.js");
-var Authentication = require("../libs/Authentication.js");
-var WikiHandler = require("../libs/WikiHandler.js");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import fs from "fs"
+import bunyan from "bunyan"
+import _ from "underscore"
+import async from "async"
+import GetHTML from "../libs/GetHTML.js"
+import Authentication from "../libs/Authentication.js"
+import WikiHandler from "../libs/WikiHandler.js"
+import config from "../config.js"
+
+
+const log = bunyan.createLogger(config.logger.options());
 
 module.exports = function(req,res) {
   var info = req.body;

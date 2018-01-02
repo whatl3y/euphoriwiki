@@ -1,6 +1,7 @@
-var config = require("../config.js");
-var _ = require("underscore");
-var async = require("async");
+import config from "../config.js"
+import _ from "underscore"
+import async from "async"
+import Auth from "./Authentication.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    AccessManagement.js
@@ -314,8 +315,6 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
     loggedin: {
       name: "User is Logged In",
       eval: function(username,path,session,cb) {
-        var Auth = require("./Authentication.js");
-
         try {
           var isLoggedIn = new Auth({session:session}).isLoggedIn();
           cb(null,isLoggedIn);
@@ -336,7 +335,6 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
         aGroupDNs = aGroupDNs || [];
 
         if (aGroupDNs.length) {
-          var Auth = require("./Authentication.js");
           var asyncParallelFunctions = [];
           _.each(aGroupDNs,function(dn) {
             asyncParallelFunctions.push(function(callback) {
@@ -420,8 +418,6 @@ AccessManagement.prototype.memberScopeTypeFunctionMap = function() {
       name: "Email Suffix (e.x. @email.com)",
       eval: function(username,path,emailSuffixes,cb) {
         if (!(emailSuffixes instanceof Array) || !emailSuffixes) return cb(null,true);
-
-        var Auth = require("./Authentication.js");
 
         emailSuffixes = emailSuffixes.map(function(s) {
           return (s.lastIndexOf("@") > -1) ? s.substring(s.lastIndexOf("@") + 1) : s;

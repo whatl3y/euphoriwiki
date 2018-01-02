@@ -1,6 +1,8 @@
-var passport = require("passport");
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import passport from "passport"
+import bunyan from "bunyan"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 var additionalScopes = [];
 if (config.oauth_scopes instanceof Array) {

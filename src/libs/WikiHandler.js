@@ -1,12 +1,14 @@
-var _ = require("underscore");
-var async = require("async");
-var ObjectId = require('mongodb').ObjectID;
-var SQLHandler = require("./SQLHandler.js");
-var FileHandler = require("./FileHandler.js");
-var GetHTML = require("./GetHTML.js");
-var CodeRunner = require("./CodeRunner.js");
-var config = require("../config.js");
-var Object = require("../src/public/js/extras/Object_prototypes.js");
+import _ from "underscore"
+import async from "async"
+import mongodb from "mongodb"
+import SQLHandler from "./SQLHandler.js"
+import FileHandler from "./FileHandler.js"
+import GetHTML from "./GetHTML.js"
+import CodeRunner from "./CodeRunner.js"
+import config from "../config.js"
+import Object from "../src/public/js/extras/Object_prototypes.js"
+
+const ObjectId = mongodb.ObjectID
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    WikiHandler.js

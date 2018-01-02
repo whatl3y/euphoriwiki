@@ -1,8 +1,8 @@
-var async = require("async");
-var Encryption = require("./Encryption.js");
-var Access = require("./AccessManagement.js");
-var LDAPHandler = require("./LDAPHandler.js");
-var config = require("../config.js");
+import async from "async"
+import Encryption from "./Encryption.js"
+import Access from "./AccessManagement.js"
+import LDAPHandler from "./LDAPHandler.js"
+import config from "../config.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    Authentication.js

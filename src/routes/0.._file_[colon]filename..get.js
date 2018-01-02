@@ -1,5 +1,5 @@
-var FileHandler = require("../libs/FileHandler.js");
-var config = require("../config.js");
+import FileHandler from "../libs/FileHandler.js"
+import config from "../config.js"
 
 module.exports = function(req,res) {
   var filename = req.params.filename;

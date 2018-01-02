@@ -1,5 +1,7 @@
-var config = require("../config.js");
-var log = require("bunyan").createLogger(config.logger.options());
+import bunyan from "bunyan"
+import config from "../config.js"
+
+const log = bunyan.createLogger(config.logger.options())
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    SocketGlobal.js

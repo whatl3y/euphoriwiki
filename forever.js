@@ -1,7 +1,7 @@
 var forever = require('forever-monitor');
 
 var times = 10
-var child = new (forever.Monitor)('index.js', {
+var child = new (forever.Monitor)('server.js', {
   max: times,
   silent: false,
   args: []

@@ -1,8 +1,8 @@
-var path = require("path");
-var fs = require("fs");
-var jade = require("jade");
-var html = require("html");
-var mammoth = require("mammoth");
+import path from "path"
+import fs from "fs"
+import jade from "jade"
+import html from "html"
+import mammoth from "mammoth"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    GetHTML.js

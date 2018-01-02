@@ -10,11 +10,15 @@
 /views/wikitemplates
 /views/emailtemplates
 /node_modules
+/maps
+/.env
 /.env_windows
 /.env_linux
 /libs
 /routes
 /passport_strategies
+/config.js
+/server.js
 
 # ignore all public files except those in
 # the /images and public/js/dependencies folder

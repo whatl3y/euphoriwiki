@@ -1,50 +1,61 @@
-require("babel-polyfill");
+import "babel-polyfill"
 
-var newrelic = require("newrelic")
-var mongodb = require('mongodb')
-var os = require("os")
-var fs = require("fs")
-var express = require("express")
-var app = express()
-var cluster = require("cluster")
-var sticky = require("sticky-session")
-var session = require("express-session")
-var formidable = require('express-formidable')
-var bodyParser = require("body-parser")
-var cookieParser = require("cookie-parser")
-var mongoStore = require("connect-mongo")(session)
-var redis = require("redis")
-var path = require("path")
-var http = require("http").Server(app)
-var io = require("socket.io")(http,{pingInterval:4000, pingTimeout:10000})
-var passport = require("passport")
-var uuid = require('node-uuid')
-var _ = require("underscore")
-var async = require("async")
-var jade = require("jade")
-var html = require("html")
-var mammoth = require("mammoth")
-var Encryption = require("./libs/Encryption.js")
-var SocketHandler = require("./libs/SocketHandler.js")
-var Auth = require("./libs/Authentication.js")
-var GetHTML = require("./libs/GetHTML.js")
-var Audit = require("./libs/Audit.js")
-var AccessManagement = require("./libs/AccessManagement.js")
-var ChildProcesses = require("./libs/ChildProcesses.js")
-var RouteHandler = require("./libs/RouteHandler.js")
-var WikiHandler = require("./libs/WikiHandler.js")
-var FileHandler = require("./libs/FileHandler.js")
-var SQLHandler = require("./libs/SQLHandler.js")
-var DirectoryProcessor = require("./libs/DirectoryProcessor.js")
-var config = require("./config.js")
-var log = require("bunyan").createLogger(config.logger.options())
-var Object = require("./src/public/js/extras/Object_prototypes.js")
+// import newrelic from "newrelic"
+import mongodb from 'mongodb'
+import os from "os"
+import fs from "fs"
+import bunyan from "bunyan"
+import express from "express"
+import cluster from "cluster"
+import sticky from "sticky-session"
+import session from "express-session"
+import formidable from 'express-formidable'
+import bodyParser from "body-parser"
+import cookieParser from "cookie-parser"
+import connectMongo from "connect-mongo"
+import redis from "redis"
+import path from "path"
+import http from "http"
+import socketIo from "socket.io"
+import passport from "passport"
+import uuid from 'node-uuid'
+import _ from "underscore"
+import async from "async"
+import jade from "jade"
+import html from "html"
+import mammoth from "mammoth"
+import Encryption from "./libs/Encryption.js"
+import SocketHandler from "./libs/SocketHandler.js"
+import Auth from "./libs/Authentication.js"
+import GetHTML from "./libs/GetHTML.js"
+import Audit from "./libs/Audit.js"
+import AccessManagement from "./libs/AccessManagement.js"
+import ChildProcesses from "./libs/ChildProcesses.js"
+import RouteHandler from "./libs/RouteHandler.js"
+import WikiHandler from "./libs/WikiHandler.js"
+import FileHandler from "./libs/FileHandler.js"
+import SQLHandler from "./libs/SQLHandler.js"
+import DirectoryProcessor from "./libs/DirectoryProcessor.js"
+import Object from "./src/public/js/extras/Object_prototypes.js"
+
+// TODO: Need to figure out how to use import for config. Reason we
+// currently need require is because of the `eval()` below for
+// initialization queries
+// 
+// import config from "./config.js"
+const config = require("./config.js")
+
+const log         = bunyan.createLogger(config.logger.options())
+const app         = express()
+const httpServer  = http.Server(app)
+const mongoStore  = connectMongo(session)
+const io          = socketIo(http, { pingInterval: 4000, pingTimeout: 10000 })
 
 try {
   //handle clustering if applicable
   if (config.server.CLUSTERING) {
-    if (!sticky.listen(http,config.server.PORT)) {    //if (cluster.isMaster) {}
-      http.once("listening",function() {log.info("listening on *:"+config.server.PORT)})
+    if (!sticky.listen(httpServer, config.server.PORT)) {    //if (cluster.isMaster) {}
+      httpServer.once("listening",function() {log.info("listening on *:"+config.server.PORT)})
 
       // Count CPUs, max CLUSTER_MAX_CPUS forks
       var cpuCount = os.cpus().length;
@@ -101,12 +112,13 @@ function main(notClustering) {
       });
     }
   ],
-    function(err,results) {
-      if (err) return log.error(err);
+    function(err, results) {
+      if (err)
+        return log.error(err)
 
       //var options = results[0];
-      var queries = results.queries;
-      var oData = results.oData;
+      var queries = results.queries
+      var oData = results.oData
 
       //view engine setup
       app.set("views", path.join(__dirname, "views"));
@@ -130,12 +142,10 @@ function main(notClustering) {
       app.use(passport.initialize());
       app.use(passport.session());
 
-      io.use(function(socket, next) {
-        sessionMiddleware(socket.request,socket.request.res,next)
-      });
+      io.use((socket, next) => sessionMiddleware(socket.request, socket.request.res, next))
 
       //static files
-      app.use("/public",express.static(path.join(__dirname,"/public")))
+      app.use("/public", express.static(path.join(__dirname, "/public")))
 
       // HEROKU DEPLOYMENT ONLY HTTPS REDIRECT
       // In production redirect to https endpoint
@@ -150,16 +160,16 @@ function main(notClustering) {
       })
 
       //if any of the queries stored in the DB have extra code we need to eval(), do that here
-      _.each(queries,function(queryInfo) {
+      queries.forEach(queryInfo => {
         if (queryInfo.extracode) {
           try {
-            eval(queryInfo.extracode);
-            log.debug('Successfully ran extra code for initializequeries - collection: ' + queryInfo.collection + ' info: ' + JSON.stringify(queryInfo));
+            eval(queryInfo.extracode)
+            log.debug(`Successfully ran extra code for initializequeries - collection: ${queryInfo.collection} info: ${JSON.stringify(queryInfo)}`)
           } catch(err) {
-            log.error(err,'Error running extra code for initializequeries - collection: ' + queryInfo.collection + ' info: ' + JSON.stringify(queryInfo));
+            log.error(err, `Error running extra code for initializequeries - collection: ${queryInfo.collection} info: ${JSON.stringify(queryInfo)}`)
           }
         }
-      });
+      })
 
       // initialize routes object to be used to bind express routes
       var aRoutes = fs.readdirSync("routes");
@@ -180,7 +190,7 @@ function main(notClustering) {
       //passport setup
       _.each(fs.readdirSync("./passport_strategies") || [],function(stratFile) {
         try {
-          var oStrat = require("./passport_strategies/" + stratFile);
+          const oStrat = require("./passport_strategies/" + stratFile)
           if ((typeof oStrat.condition === "undefined") || oStrat.condition) {
             var stratName = path.basename(stratFile,".js");
 
@@ -202,9 +212,7 @@ function main(notClustering) {
       //starts the web server listening on specified port
       //if we're not clustered
       if (notClustering) {
-        http.listen(config.server.PORT, function(){
-          log.info("listening on *:"+config.server.PORT);
-        });
+        httpServer.listen(config.server.PORT, () => log.info(`listening on *: ${config.server.PORT}`))
       }
 
       //handle if the process suddenly stops
