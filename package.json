@@ -16,7 +16,7 @@
     "test": "mocha --compilers js:babel-core/register --recursive tests"
   },
   "dependencies": {
-    "@slack/client": "^3.13.0",
+    "@slack/client": "^4.2.2",
     "activedirectory": "^0.7.1",
     "angular": "1.5.9",
     "angular-animate": "1.5.9",

@@ -10,7 +10,7 @@ var uglify = require('gulp-uglify')
 var webpack = require('webpack-stream')
 var webpack_config = require('./webpack.config.js')
 
-const srcList = [ "src/+(libs|passport_strategies|routes)/**/*.js", "src/*.js" ]
+const srcList = [ "src/+(bin|libs|passport_strategies|routes)/**/*.js", "src/*.js" ]
 
 gulp.task('src-dev', function () {
   return gulp.src(srcList)

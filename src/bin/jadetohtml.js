@@ -1,6 +1,6 @@
-var fs = require("fs");
-var path = require("path");
-var GetHTML = require("../libs/GetHTML.js");
+import fs from "fs"
+import path from "path"
+import GetHTML from "../libs/GetHTML.js"
 
 //filepath should be in 3rd param
 //    EXAMPLE CALL: >node wordtohtml pathToFile
@@ -24,7 +24,7 @@ if (filePath) {
       }
     }
   });
-  
+
 } else {
   (isChildProcess) ? process.send({error: "No file to process"}) : console.log(err);
 }

@@ -1,8 +1,10 @@
-var argv = require('minimist')(process.argv.slice(2));
-var async = require('async');
-var BatchJobs = require("../libs/BatchJobs.js");
-var config = require("../config.js");
-var Object = require("../src/public/js/extras/Object_prototypes.js");
+import minimist from 'minimist'
+import async from 'async'
+import BatchJobs from "../libs/BatchJobs.js"
+import config from "../config.js"
+import Object from "../src/public/js/extras/Object_prototypes.js"
+
+const argv = minimist(process.argv.slice(2))
 
 //node bin/exec_jobs -j my_job
 //node bin/exec_jobs -j my_job -j my_job2

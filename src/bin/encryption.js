@@ -1,6 +1,8 @@
-var argv = require('minimist')(process.argv.slice(2))
-var fs = require('fs')
-var Encryption = require('../libs/Encryption.js')
+import fs from 'fs'
+import minimist from 'minimist'
+import Encryption from '../libs/Encryption.js'
+
+const argv = minimist(process.argv.slice(2))
 
 //filepath should be in 3rd param
 //    EXAMPLE CALL: >node encryption [-d][-e] string

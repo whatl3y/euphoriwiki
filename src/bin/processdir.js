@@ -1,4 +1,4 @@
-var DirectoryProcessor = require("../libs/DirectoryProcessor");
+import DirectoryProcessor from "../libs/DirectoryProcessor"
 
 var D = new DirectoryProcessor();
 

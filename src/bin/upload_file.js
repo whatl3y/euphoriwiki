@@ -1,11 +1,13 @@
-var argv = require('minimist')(process.argv.slice(2));
-var async = require('async');
-var FileHandler = require("../libs/FileHandler.js");
-var config = require("../config.js");
+import minimist from 'minimist'
+import async from 'async'
+import FileHandler from "../libs/FileHandler.js"
+import config from "../config.js"
+
+const argv = minimist(process.argv.slice(2))
 
 //node bin/upload_file -p path_to_my_file
 //node bin/upload_file -p path_to_my_file1 -p path_to_my_file2
-var fileNames = argv.p || argv.path || argv.file || argv.f || null;
+var fileNames = argv.p || argv.path || null;
 fileNames = (typeof fileNames === "string") ? [fileNames] : fileNames;
 
 async.waterfall([
@@ -20,19 +22,19 @@ async.waterfall([
 
     var parallelFunctions = fileNames.map(function(f) {
       return function(_callback) {
-        fh.deleteFile({filename:f},function(e) {
-          _callback(e);
+        fh.uploadFile({path:f},function(e,newFileName) {
+          _callback(e,newFileName);
         });
       }
     });
-    async.parallel(parallelFunctions,function(err) {
-      callback(err);
+    async.parallel(parallelFunctions,function(err,newFileNames) {
+      callback(err,newFileNames);
     });
   }
 ],
-  function(err) {
+  function(err,file_names) {
     config.mongodb.MDB.close();
     config.mongodb.fileMDB.close();
-    console.log(err);
+    console.log(err,file_names);
   }
 );
