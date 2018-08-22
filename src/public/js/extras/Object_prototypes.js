@@ -180,6 +180,6 @@ Object.removeDollarKeys = function(obj) {
 //-------------------------------------------------------
 //NodeJS
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Object;
+  module.exports.default = Object;
 }
 //-------------------------------------------------------
