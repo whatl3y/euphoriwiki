@@ -36,7 +36,6 @@ import WikiHandler from "./libs/WikiHandler.js"
 import FileHandler from "./libs/FileHandler.js"
 import SQLHandler from "./libs/SQLHandler.js"
 import DirectoryProcessor from "./libs/DirectoryProcessor.js"
-import Object from "./src/public/js/extras/Object_prototypes.js"
 
 // TODO: Need to figure out how to use import for config. Reason we
 // currently need require is because of the `eval()` below for

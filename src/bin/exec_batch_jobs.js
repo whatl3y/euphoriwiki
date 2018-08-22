@@ -2,7 +2,6 @@ import minimist from 'minimist'
 import async from 'async'
 import BatchJobs from "../libs/BatchJobs.js"
 import config from "../config.js"
-import Object from "../src/public/js/extras/Object_prototypes.js"
 
 const argv = minimist(process.argv.slice(2))
 

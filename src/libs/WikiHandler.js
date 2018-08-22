@@ -6,7 +6,6 @@ import FileHandler from "./FileHandler.js"
 import GetHTML from "./GetHTML.js"
 import CodeRunner from "./CodeRunner.js"
 import config from "../config.js"
-import Object from "../src/public/js/extras/Object_prototypes.js"
 
 const ObjectId = mongodb.ObjectID
 
@@ -88,7 +87,7 @@ WikiHandler.prototype.getSubPages=function(cb,returnAry) {
       pagesSplit = pages[_i].path.split("/").slice(1);
       //if (pagesSplit.length <= thisPathPagesSplit.length) continue;
 
-      oPages = Object.merge(oPages,self.aryToNestedObj(pagesSplit));
+      oPages = Object.assign(oPages,self.aryToNestedObj(pagesSplit));
     }
 
     return cb(null,oPages);
@@ -429,7 +428,7 @@ WikiHandler.prototype.getTemplateInfo=function(templateId,cb) {
                   return _.values(r)[0];
                 });
 
-                queryResults[conf.name] = Object.merge(conf,{datasourceValues:results});
+                queryResults[conf.name] = Object.assign(conf,{datasourceValues:results});
                 __callback(e);
               });
             });
@@ -609,7 +608,7 @@ WikiHandler.prototype.validatePassword=function(options,cb) {
     if (typeof session[self.path]==="object" && session[self.path].auth) {
       cb(null,true);
     } else if (pw == actualPW) {
-      session[self.path] = (typeof session[self.path]==="object") ? Object.merge(session[self.path],{auth:true}) : {auth:true};
+      session[self.path] = (typeof session[self.path]==="object") ? Object.assign(session[self.path],{auth:true}) : {auth:true};
       session.save();
       cb(null,true);
     } else {
@@ -732,10 +731,10 @@ WikiHandler.prototype.event=function(options,cb) {
       if (aggregatedEvents.length) {
         var parallelEventFunctions = aggregatedEvents.map(function(event) {
           event = event || {};
-          var parameters = Object.merge(params,event.params || {});
+          var parameters = Object.assign(params,event.params || {});
 
           return function(callback) {
-            var result = new CodeRunner({ code: event.code, params: Object.merge({ pagepath: self.path }, parameters) }).eval();
+            var result = new CodeRunner({ code: event.code, params: Object.assign({ pagepath: self.path }, parameters) }).eval();
 
             if (!(result instanceof Error)) callback(null,true);
             else callback(result);

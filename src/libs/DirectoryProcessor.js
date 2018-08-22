@@ -2,7 +2,6 @@ import fs from "graceful-fs"
 import path from "path"
 import async from "async"
 import Encryption from "./Encryption.js"
-import Object from "../src/public/js/extras/Object_prototypes.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    DirectoryProcessor.js
@@ -67,7 +66,7 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
         fs.stat(fp,function(err,stats) {
           if (stats.isDirectory()) {
             if (recurse) {
-              self.processDir(Object.merge(options,{dirpath:fp}),
+              self.processDir(Object.assign(options,{dirpath:fp}),
                 function(_e,r) {
                   if (_e) callback(_e)
                   else {
@@ -90,7 +89,7 @@ DirectoryProcessor.prototype.processDir=function(options,cb,cbIndividual) {
             self.processFile(fp,function(e,r) {
               if (e) callback(e);
               else {
-                o.info = Object.merge(o.info,r);
+                o.info = Object.assign(o.info,r);
 
                 process(o,"push");
                 callback()

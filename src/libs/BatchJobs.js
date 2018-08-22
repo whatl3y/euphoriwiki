@@ -2,7 +2,6 @@ import async from 'async'
 import CodeRunner from "./CodeRunner.js"
 import FileHandler from "./FileHandler.js"
 import config from "../config.js"
-import Object from "../src/public/js/extras/Object_prototypes.js"
 
 /*-----------------------------------------------------------------------------------------
 |TITLE:    BatchJobs.js
@@ -43,7 +42,7 @@ BatchJobs.prototype.find = function(jobName,cb) {
     }
   }
 
-  filter = Object.merge(filter,{active:{$ne:false}});
+  filter = Object.assign(filter,{active:{$ne:false}});
   this.db.collection('batch_jobs').find(filter).toArray(function(e,jobs) {
     cb(e,jobs);
   });
