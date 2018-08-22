@@ -85,3 +85,4 @@ CodeRunner.prototype.evalAsync = function(callback) {
 }
 
 module.exports = CodeRunner
+export { CodeRunner as default }

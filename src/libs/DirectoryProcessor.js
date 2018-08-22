@@ -232,3 +232,4 @@ DirectoryProcessor.prototype.makePath=function(p,ary) {
 }
 
 module.exports = DirectoryProcessor
+export { DirectoryProcessor as default }

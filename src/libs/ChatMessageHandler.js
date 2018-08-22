@@ -132,3 +132,4 @@ ChatMessageHandler.prototype.insertSubmessage = function(data,cb) {
 }
 
 module.exports = ChatMessageHandler
+export { ChatMessageHandler as default }

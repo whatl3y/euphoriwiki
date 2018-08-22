@@ -125,3 +125,4 @@ BatchJobs.prototype.execute = function(jobsArray,cb) {
 }
 
 module.exports = BatchJobs
+export { BatchJobs as default }

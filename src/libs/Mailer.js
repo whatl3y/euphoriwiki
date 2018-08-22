@@ -56,3 +56,4 @@ Mailer.prototype.template = function(templateInfo) {
 }
 
 module.exports = Mailer
+export { Mailer as default }

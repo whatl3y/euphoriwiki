@@ -242,3 +242,4 @@ SQLHandler.prototype.noop=function(cb1,cb2) {
 }
 
 module.exports = SQLHandler
+export { SQLHandler as default }

@@ -103,3 +103,4 @@ ApiClient.prototype.params = function(obj,type) {
 }
 
 module.exports = ApiClient
+export { ApiClient as default }

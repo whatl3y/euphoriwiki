@@ -980,3 +980,4 @@ WikiHandler.prototype.escapePath=function(path) {
 }
 
 module.exports = WikiHandler
+export { WikiHandler as default }

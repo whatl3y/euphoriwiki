@@ -201,3 +201,4 @@ function messageInformation(opts) {
 }
 
 module.exports = SocketWikiChat
+export { SocketWikiChat as default }
