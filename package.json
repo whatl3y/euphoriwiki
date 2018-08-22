@@ -4,7 +4,7 @@
   "description": "Easy to use web platform to build blogs, wikis, or any kind of website.",
   "main": "index.js",
   "engines": {
-    "node": "8.9.3"
+    "node": "8.11.2"
   },
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
     "gulp-sourcemaps": "^1.7.3",
     "gulp-uglify": "^1.2.0",
     "html": "^0.0.10",
+    "ioredis": "^4.0.0",
     "jade": "^1.9.2",
     "mammoth": "^0.3.30",
     "minimist": "latest",
