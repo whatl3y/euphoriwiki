@@ -8,7 +8,6 @@ import GetHTML from "../libs/GetHTML.js"
 import FileHandler from "../libs/FileHandler.js"
 import CodeRunner from "../libs/CodeRunner.js"
 import config from "../config.js"
-import Object from '../src/public/js/extras/Object_prototypes.js'
 
 const log = bunyan.createLogger(config.logger.options())
 
@@ -67,9 +66,9 @@ module.exports = function(req,res) {
 
               //execute module code
               const queryParams = req.headers.referer.split('?')[1];
-              const oQueryParams = (typeof queryParams === 'string') ? Object.unserialize(queryParams) : {};
+              const oQueryParams = (typeof queryParams === 'string') ? unserialize(queryParams) : {};
 
-              var params = Object.merge(instance.config || {}, { callback: callback, path: path, queryParams: oQueryParams })
+              var params = Object.assign(instance.config || {}, { callback: callback, path: path, queryParams: oQueryParams })
               var codeResult = new CodeRunner({ code: module.code || "return ''", params: params }).eval();
 
               //if codeResult has a value other than undefined (i.e. the eval'ed code returned something)
@@ -126,4 +125,18 @@ module.exports = function(req,res) {
     default:
       res.json({success:false, error:"We couldn't figure out what you are doing. Please try again."});
   }
+}
+
+
+function unserialize(string) {
+  string=(/^\?/.test(string)) ? string.substring(1) : string;    //if first char is a question mark, remove it from the string
+
+  var a=string.split("&");
+  var obj={};
+  for (var _i=0;_i<a.length;_i++) {
+    var _a = a[_i].split("=");
+    obj[ decodeURIComponent(_a[0]) ] = decodeURIComponent(_a[1]);
+  }
+
+  return obj;
 }

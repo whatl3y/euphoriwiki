@@ -99,3 +99,4 @@ ChildProcesses.prototype.defineArgs = function(args) {
 }
 
 module.exports = ChildProcesses
+export { ChildProcesses as default }

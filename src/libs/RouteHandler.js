@@ -78,3 +78,4 @@ RouteHandler.prototype.update=function(db,cb) {
 }
 
 module.exports = RouteHandler
+export { RouteHandler as default }

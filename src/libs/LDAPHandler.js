@@ -136,3 +136,4 @@ LDAPHandler.prototype.isUserMemberOf = function(options,cb) {
 }
 
 module.exports = LDAPHandler
+export { LDAPHandler as default }

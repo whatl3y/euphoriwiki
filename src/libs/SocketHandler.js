@@ -184,3 +184,4 @@ SocketHandler.prototype.disconnect = function(id) {
 }
 
 module.exports = SocketHandler
+export { SocketHandler as default }

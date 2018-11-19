@@ -159,3 +159,4 @@ FileHandler.prototype.getFileName=function(fileName,extraText) {
 }
 
 module.exports = FileHandler
+export { FileHandler as default }

@@ -18,12 +18,13 @@ export default {
   // }
   location(ipAddress) {
     return new Promise((resolve, reject) => {
-      this.request.get(`/json/${ipAddress}`, (err, httpResponse, body) => {
-        if (err) return reject(err)
-        if (httpResponse.statusCode >= 400) return reject(body)
-
-        resolve(JSON.parse(body))
-      })
+      resolve({})
+      // this.request.get(`/json/${ipAddress}`, (err, httpResponse, body) => {
+      //   if (err) return reject(err)
+      //   if (httpResponse.statusCode >= 400) return reject(body)
+      //
+      //   resolve(JSON.parse(body))
+      // })
     })
   }
 }

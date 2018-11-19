@@ -131,3 +131,4 @@ MDB.prototype.close=function(db) {
 }
 
 module.exports=MDB
+export { MDB as default }

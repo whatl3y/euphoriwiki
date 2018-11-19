@@ -109,3 +109,4 @@ function disconnect(io,socket,data,SocketHandler) {
 }
 
 module.exports = SocketPages
+export { SocketPages as default }

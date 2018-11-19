@@ -519,3 +519,4 @@ AccessManagement.prototype.noop=function() {
 }
 
 module.exports = AccessManagement
+export { AccessManagement as default }

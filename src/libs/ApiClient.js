@@ -1,6 +1,5 @@
 import http from "http"
 import https from "https"
-import Object from "../src/public/js/extras/Object_prototypes.js"
 import config from "../config.js"
 
 /*-----------------------------------------------------------------------------------------
@@ -53,7 +52,7 @@ ApiClient.prototype.request = function(reqData,cb) {
     }
   };
   if (this.verb==="POST") options.headers["Content-Length"] = reqData.length;
-  options.headers = Object.merge(options.headers,this.headers);
+  options.headers = Object.assign(options.headers,this.headers);
 
   var req = this.dummyObject[this.clientType].request(options,
     function(res) {
@@ -88,7 +87,7 @@ ApiClient.prototype.params = function(obj,type) {
   type= (typeof type==='string') ? type.toLowerCase() : 'get';
 
   // 20160805 LW just serialize if object
-  return (typeof obj === "string") ? obj : Object.serialize(obj);
+  return (typeof obj === "string") ? obj : this.serialize(obj);
   // switch(type) {
   //   case 'get':
   //     if (typeof obj === "string") return obj;
@@ -102,4 +101,21 @@ ApiClient.prototype.params = function(obj,type) {
   return '';
 }
 
+ApiClient.prototype.serialize = function(obj) {
+  var a=[];
+  for (var _key in obj) {
+    // a.push( encodeURIComponent(_key)+'='+encodeURIComponent(obj[_key]) );
+    if (obj[_key] instanceof Array) {
+      for (var _i=0;_i<obj[_key].length;_i++) {
+        a.push(encodeURIComponent(_key) + '=' + encodeURIComponent(obj[_key][_i]));
+      }
+    } else {
+      a.push(encodeURIComponent(_key) + '=' + encodeURIComponent(obj[_key]));
+    }
+  }
+
+  return a.join("&");
+}
+
 module.exports = ApiClient
+export { ApiClient as default }

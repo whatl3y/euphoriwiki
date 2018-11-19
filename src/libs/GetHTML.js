@@ -210,3 +210,4 @@ GetHTML.prototype.makePath=function(p,ary) {
 }
 
 module.exports = GetHTML
+export { GetHTML as default }

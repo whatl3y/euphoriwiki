@@ -304,3 +304,4 @@ Authentication.prototype.isLoggedIn = function() {
 }
 
 module.exports = Authentication
+export { Authentication as default }

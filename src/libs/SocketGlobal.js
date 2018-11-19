@@ -76,3 +76,4 @@ function disconnect(io,socket,data,SocketHandler) {
 }
 
 module.exports = SocketGlobal
+export { SocketGlobal as default }
