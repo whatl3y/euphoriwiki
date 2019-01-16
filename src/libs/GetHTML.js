@@ -99,6 +99,19 @@ GetHTML.prototype.jade = function(string,cb) {
 }
 
 /*-----------------------------------------------------------------------------------------
+|NAME:      pug (PUBLIC)
+|DESCRIPTION:  Alias for this.jade
+|PARAMETERS:  1. string(OPT): an optional string of pug to parse
+|             2. cb(REQ): the callback that will return an error or converted HTML string.
+|SIDE EFFECTS:  Nothing
+|ASSUMES:    Nothing
+|RETURNS:    Nothing
+-----------------------------------------------------------------------------------------*/
+GetHTML.prototype.pug = function(string,cb) {
+  this.jade(string,cb)
+}
+
+/*-----------------------------------------------------------------------------------------
 |NAME:      docx (PUBLIC)
 |DESCRIPTION:  Converts a Microsoft Word document to HTML.
 |PARAMETERS:  1. cb(REQ): the callback that will return an error or converted HTML string.
