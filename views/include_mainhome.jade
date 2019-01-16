@@ -1,5 +1,5 @@
 - homeBody = data.EXTRA.homeBody
-- addons = data.EXTRA.theme.home_page_addons || {pagesearch:{}, categories:{alignment:"left", classes:"col-md-3"}, widgets:{alignment:"right", classes:"col-md-3 pull-right"}}
+- addons = (data.EXTRA.theme || {}).home_page_addons || {pagesearch:{}, categories:{alignment:"left", classes:"col-md-3"}, widgets:{alignment:"right", classes:"col-md-3 pull-right"}}
 - homeColLength = data.EXTRA.mainColumnLength
 - reverseMap = {right:"left", left:"right"}
 
