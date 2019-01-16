@@ -11,9 +11,6 @@ import config from "../config.js"
 const log = bunyan.createLogger(config.logger.options())
 
 module.exports = async function(req, res) {
-  if (!req.secure)
-    return res.redirect(301, `https://wiki.useriq.com/${req.originalUrl}`)
-
   var A = new Auth({ session: req.session })
   var fh = new FileHandler({ db: config.mongodb.filedb })
   var wiki = new WikiHandler({ path: '/' })
