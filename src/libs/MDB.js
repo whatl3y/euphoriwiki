@@ -1,3 +1,4 @@
+import path from "path"
 import mongodb from "mongodb"
 import config from "../config.js"
 
@@ -60,9 +61,10 @@ MDB.prototype.go=function(cb) {
   }
 
   //make the initial connection
+  const urlObj = url.parse(this.connectionString)
   this.MongoClient.connect(this.connectionString,function(err,client) {
     if (err!=null) main(err);
-    else main(null,client.db);
+    else main(null,client.db(urlObj.pathname.slice(1)));
   });
 }
 
