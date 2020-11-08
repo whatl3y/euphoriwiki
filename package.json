@@ -54,7 +54,7 @@
     "mammoth": "^0.3.30",
     "minimist": "latest",
     "moment": "^2.18.1",
-    "mongodb": "~2.1.18",
+    "mongodb": "^3.6.3",
     "mssql": "3.1.1",
     "mysql": "2.9.0",
     "newrelic": "latest",
