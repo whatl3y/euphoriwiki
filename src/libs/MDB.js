@@ -18,13 +18,13 @@ const MongoClient = mongodb.MongoClient
 var MDB = function(params,cb) {
   if (typeof params === 'string') {
     this.connectionString = params;
-    this.MongoClient = MongoClient;
+    this.MongoClient = new MongoClient(this.connectionString, { useNewUrlParser: true });
     this.go(cb);
   } else {
     params = params || {};
     var config = params.config || config;
-    this.MongoClient = params.MongoClient || MongoClient;                    //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
     this.connectionString = params.connectionString || params.url || config.mongodb.connectionString();    //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
+    this.MongoClient = new (params.MongoClient || MongoClient)(this.connectionString, { useNewUrlParser: true });
     cb = params.callback || cb;
 
     if (!params.dontopen) {                                  //params.dontopen: if set to true will not automatically open a DB connection
@@ -62,7 +62,7 @@ MDB.prototype.go=function(cb) {
 
   //make the initial connection
   const urlObj = url.parse(this.connectionString)
-  this.MongoClient.connect(this.connectionString,function(err,client) {
+  this.MongoClient.connect(function(err,client) {
     if (err!=null) main(err);
     else main(null,client.db(urlObj.pathname.slice(1)));
   });
