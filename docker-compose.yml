@@ -1,0 +1,27 @@
+version: '3'
+services:
+  mongo:
+    image: 'mongo'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=
+      - MONGO_INITDB_ROOT_PASSWORD=
+  web:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - 'mongo'
+    ports:
+      - '8000:8000'
+    working_dir: /usr/euphoriwiki
+    volumes:
+      - .:/usr/euphoriwiki:cached
+      - /usr/euphoriwiki/node_modules
+    env_file:
+      - ./.env
+    environment:
+      - MONGODB_HOST=mongo
+      - MONGODB_FILE_HOST=mongo
+      - PORT=8000
+      - WAIT_HOSTS=mongo:27017

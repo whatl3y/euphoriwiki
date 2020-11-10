@@ -60,9 +60,9 @@ MDB.prototype.go=function(cb) {
   }
 
   //make the initial connection
-  this.MongoClient.connect(this.connectionString,function(err,db) {
+  this.MongoClient.connect(this.connectionString,function(err, client) {
     if (err!=null) main(err);
-    else main(null,db);
+    else main(null, client.db('wiki'));
   });
 }
 
