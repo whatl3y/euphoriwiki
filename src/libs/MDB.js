@@ -1,4 +1,3 @@
-import url from 'url'
 import mongodb from 'mongodb'
 import config from '../config.js'
 
@@ -63,13 +62,12 @@ MDB.prototype.go = function(cb) {
   }
 
   //make the initial connection
-  var connStr = url.parse(this.connectionString)
   this.MongoClient.connect(
     this.connectionString,
     { useNewUrlParser: true, useUnifiedTopology: true },
     function(err, client) {
       if (err != null) main(err)
-      else main(null, client.db(connStr.pathname.slice(1)))
+      else main(null, client.db(config.mongodb.dbInfo().db))
     }
   )
 }
