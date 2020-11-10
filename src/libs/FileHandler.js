@@ -1,5 +1,5 @@
-import fs from "fs"
-import mongo from "mongodb"
+import fs from 'fs'
+import mongo from 'mongodb'
 import Grid from 'gridfs-stream'
 
 /*-----------------------------------------------------------------------------------------
@@ -13,10 +13,10 @@ import Grid from 'gridfs-stream'
 |      *LJW 1/28/2016 - created
 -----------------------------------------------------------------------------------------*/
 var FileHandler = function(options) {
-  options = options || {};
+  options = options || {}
 
-  this.db = options.db;
-  this.gfs = Grid(this.db, mongo);
+  this.db = options.db
+  this.gfs = Grid(this.db, mongo)
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -29,16 +29,16 @@ var FileHandler = function(options) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.findFiles=function(options,cb) {
-  var options = options || {};
+FileHandler.prototype.findFiles = function(options, cb) {
+  var options = options || {}
 
-  var method = (options.one) ? "findOne" : "find";
-  var fileName = options.filename;
+  var method = options.one ? 'findOne' : 'find'
+  var fileName = options.filename
 
-  this.gfs[method]({filename:fileName},function(err,file) {
-    if (err) cb(err);
-    else cb(null,file);
-  });
+  this.gfs[method]({ filename: fileName }, function(err, file) {
+    if (err) cb(err)
+    else cb(null, file)
+  })
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -51,23 +51,31 @@ FileHandler.prototype.findFiles=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.uploadFile=function(options,cb) {
-  options = options || {};
+FileHandler.prototype.uploadFile = function(options, cb) {
+  options = options || {}
 
-  var filePath = options.path || options.filePath;
-  var fileName = options.filename || filePath.substring((filePath.lastIndexOf('/') > -1) ? filePath.lastIndexOf('/')+1 : 0);
-  var newFileName = (options.exactname) ? fileName : false;
+  var filePath = options.path || options.filePath
+  var fileName =
+    options.filename ||
+    filePath.substring(
+      filePath.lastIndexOf('/') > -1 ? filePath.lastIndexOf('/') + 1 : 0
+    )
+  var newFileName = options.exactname ? fileName : false
 
-  newFileName = newFileName || this.getFileName(fileName);
+  newFileName = newFileName || this.getFileName(fileName)
 
-  var readStream = options.readStream || fs.createReadStream(filePath);
-  var writeStream = this.writeStream(newFileName);
+  var readStream = options.readStream || fs.createReadStream(filePath)
+  var writeStream = this.writeStream(newFileName)
 
   //setup event handlers for file stream
-  writeStream.on("error",function(err) {cb(err);});
-  writeStream.on("close",function(file) {cb(null,newFileName);});
+  writeStream.on('error', function(err) {
+    cb(err)
+  })
+  writeStream.on('close', function(file) {
+    cb(null, newFileName)
+  })
 
-  readStream.pipe(writeStream);
+  readStream.pipe(writeStream)
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -82,31 +90,30 @@ FileHandler.prototype.uploadFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.getFile=function(options,cb) {
-  options = options || {};
+FileHandler.prototype.getFile = function(options, cb) {
+  options = options || {}
 
-  var filename = options.filename || options.file || "";
-  var encoding = options.encoding || "";
+  var filename = options.filename || options.file || ''
+  var encoding = options.encoding || ''
 
   try {
-    var readStream = this.gfs.createReadStream({filename:filename});
-    if (encoding) readStream.setEncoding(encoding);
+    var readStream = this.gfs.createReadStream({ filename: filename })
+    if (encoding) readStream.setEncoding(encoding)
 
-    var data = "";
-    readStream.on("data",function(chunk) {
-      data += chunk;
-    });
+    var data = ''
+    readStream.on('data', function(chunk) {
+      data += chunk
+    })
 
-    readStream.on("end",function() {
-      cb(null,data);
-    });
+    readStream.on('end', function() {
+      cb(null, data)
+    })
 
-    readStream.on("error",function(e) {
-      cb(e);
-    });
-
-  } catch(err) {
-    cb(err);
+    readStream.on('error', function(e) {
+      cb(e)
+    })
+  } catch (err) {
+    cb(err)
   }
 }
 
@@ -120,13 +127,12 @@ FileHandler.prototype.getFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    Nothing
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.deleteFile=function(options,cb) {
+FileHandler.prototype.deleteFile = function(options, cb) {
   try {
-    var fileName = options.filename || "";
-    this.gfs.remove({filename:fileName},cb);
-
-  } catch(err) {
-    cb(err);
+    var fileName = options.filename || ''
+    this.gfs.remove({ filename: fileName }, cb)
+  } catch (err) {
+    cb(err)
   }
 }
 
@@ -138,8 +144,8 @@ FileHandler.prototype.deleteFile=function(options,cb) {
 |ASSUMES:    Nothing
 |RETURNS:    <stream>
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.writeStream=function(newFileName) {
-  return this.gfs.createWriteStream({filename: newFileName});
+FileHandler.prototype.writeStream = function(newFileName) {
+  return this.gfs.createWriteStream({ filename: newFileName })
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -151,11 +157,16 @@ FileHandler.prototype.writeStream=function(newFileName) {
 |ASSUMES:    Nothing
 |RETURNS:    <string>
 -----------------------------------------------------------------------------------------*/
-FileHandler.prototype.getFileName=function(fileName,extraText) {
-  extraText = extraText || Date.now();
+FileHandler.prototype.getFileName = function(fileName, extraText) {
+  extraText = extraText || Date.now()
 
-  var lastPeriod = fileName.lastIndexOf(".");
-  return fileName.substring(0,lastPeriod) + "_" + extraText + fileName.substring(lastPeriod);
+  var lastPeriod = fileName.lastIndexOf('.')
+  return (
+    fileName.substring(0, lastPeriod) +
+    '_' +
+    extraText +
+    fileName.substring(lastPeriod)
+  )
 }
 
 module.exports = FileHandler
