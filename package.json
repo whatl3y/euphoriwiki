@@ -24,7 +24,7 @@
     "@babel/preset-env": "^7.12.1",
     "@slack/client": "^4.2.2",
     "activedirectory": "^0.7.1",
-    "angular": "1.5.9",
+    "angular": "1.8.0",
     "angular-animate": "1.5.9",
     "angular-moment": "^1.0.0",
     "angular-touch": "1.5.9",
