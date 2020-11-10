@@ -21,7 +21,6 @@ services:
     env_file:
       - ./.env
     environment:
-      - MONGODB_HOST=mongo
-      - MONGODB_FILE_HOST=mongo
+      - MONGODB_URI=mongodb://mongo:27017/wiki
       - PORT=8000
       - WAIT_HOSTS=mongo:27017

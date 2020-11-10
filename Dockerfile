@@ -1,5 +1,5 @@
 # Base image
-FROM node:8
+FROM node:14
 
 LABEL AUTHOR="Lance Whatley"
 
@@ -13,7 +13,7 @@ RUN npm install
 
 # Copy the remainder of the source code and build everything
 COPY . .
-RUN npm run postinstall
+RUN npm run build
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
 RUN chmod +x /wait
