@@ -1,5 +1,4 @@
 import mongodb from 'mongodb'
-import config from '../config.js'
 
 const MongoClient = mongodb.MongoClient
 
@@ -21,7 +20,7 @@ var MDB = function(params, cb) {
     this.go(cb)
   } else {
     params = params || {}
-    var config = params.config || config
+    var config = params.config || require('../config.js')
     this.MongoClient = params.MongoClient || MongoClient //the instance of the MongoClient i.e. MongoClient = require('mongodb').MongoClient
     this.connectionString =
       params.connectionString || params.url || config.mongodb.connectionString() //the URL to the instance of the DB -- NOTE: params.url overrides the other parameters above
@@ -67,7 +66,7 @@ MDB.prototype.go = function(cb) {
     { useNewUrlParser: true, useUnifiedTopology: true },
     function(err, client) {
       if (err != null) main(err)
-      else main(null, client.db(config.mongodb.dbInfo().db))
+      else main(null, client.db(require('../config.js').mongodb.dbInfo().db))
     }
   )
 }
@@ -102,7 +101,7 @@ MDB.prototype.findRecursive = function(options, cb) {
   options.object = options.object || {}
 
   if (options.array.length > options.index) {
-    var coll = (options.db || config.mongodb.db).collection(
+    var coll = (options.db || require('../config.js').mongodb.db).collection(
       options.array[options.index].collection
     )
     var filter = options.array[options.index].filters || {}

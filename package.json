@@ -11,9 +11,8 @@
     "url": "https://github.com/whatl3y/euphoriwiki.git"
   },
   "scripts": {
-    "build": "npm run postinstall",
+    "build": "gulp prep-prod",
     "start": "node forever",
-    "postinstall": "gulp prep-prod",
     "test": "mocha --compilers js:babel-core/register --recursive tests"
   },
   "dependencies": {
