@@ -61,14 +61,14 @@ MDB.prototype.go = function(cb) {
   }
 
   //make the initial connection
-  this.MongoClient.connect(
-    this.connectionString,
-    { useNewUrlParser: true, useUnifiedTopology: true },
-    function(err, client) {
-      if (err != null) main(err)
-      else main(null, client.db(require('../config.js').mongodb.dbInfo().db))
-    }
-  )
+  const client = new this.MongoClient(this.connectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  client.connect(function(err) {
+    if (err != null) main(err)
+    else main(null, client.db(require('../config.js').mongodb.dbInfo().db))
+  })
 }
 
 /*-----------------------------------------------------------------------------------------
