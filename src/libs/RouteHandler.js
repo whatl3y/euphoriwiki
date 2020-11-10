@@ -34,8 +34,6 @@ var RouteHandler = function(options) {
 -----------------------------------------------------------------------------------------*/
 RouteHandler.prototype.update=function(db,cb) {
   var self=this;
-  console.log("DBBBB", db)
-
   async.waterfall([
     function(callback) {
       fs.readdir(self.path,function(err,files) {

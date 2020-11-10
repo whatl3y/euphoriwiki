@@ -64,7 +64,7 @@ MDB.prototype.go=function(cb) {
   var connStr = url.parse(this.connectionString)
   this.MongoClient.connect(this.connectionString, function(err, client) {
     if (err!=null) main(err);
-    else main(null, client.db(connStr.pathname));
+    else main(null, client.db(connStr.pathname.slice(1)));
   });
 }
 
