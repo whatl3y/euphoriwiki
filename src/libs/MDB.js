@@ -1,3 +1,4 @@
+import url from 'url'
 import mongodb from "mongodb"
 import config from "../config.js"
 
@@ -60,9 +61,10 @@ MDB.prototype.go=function(cb) {
   }
 
   //make the initial connection
-  this.MongoClient.connect(this.connectionString,function(err, client) {
+  var connStr = url.parse(this.connectionString)
+  this.MongoClient.connect(this.connectionString, function(err, client) {
     if (err!=null) main(err);
-    else main(null, client.db('wiki'));
+    else main(null, client.db(connStr.pathname));
   });
 }
 
