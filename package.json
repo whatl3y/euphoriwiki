@@ -56,7 +56,7 @@
     "jade": "^1.9.2",
     "mammoth": "^0.3.30",
     "minimist": "latest",
-    "moment": "^2.18.1",
+    "moment": "^2.29.2",
     "mongodb": "^3.6.3",
     "mssql": "3.1.1",
     "mysql": "2.9.0",
