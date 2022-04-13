@@ -29,7 +29,7 @@
     "angular-moment": "^1.0.0",
     "angular-touch": "1.5.9",
     "angular-ui-bootstrap": "^0.13.3",
-    "async": "^2.1.1",
+    "async": "^3.2.2",
     "babel-loader": "^8.2.0",
     "body-parser": "^1.12.0",
     "bunyan": "1.5.1",
