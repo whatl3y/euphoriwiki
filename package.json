@@ -54,7 +54,7 @@
     "html": "^0.0.10",
     "ioredis": "^4.0.0",
     "jade": "^1.9.2",
-    "mammoth": "^0.3.30",
+    "mammoth": "^1.5.1",
     "minimist": "latest",
     "moment": "^2.18.1",
     "mongodb": "^3.6.3",
