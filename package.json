@@ -51,7 +51,7 @@
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^1.7.3",
     "gulp-uglify": "^1.2.0",
-    "html": "^0.0.10",
+    "html": "^1.0.0",
     "ioredis": "^4.0.0",
     "jade": "^1.9.2",
     "mammoth": "^0.3.30",
