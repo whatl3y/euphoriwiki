@@ -75,7 +75,7 @@
     "socket.io-client": "^2.0.4",
     "sticky-session": "^1.0.2",
     "underscore": "^1.8.3",
-    "webpack-stream": "^4.0.0"
+    "webpack-stream": "^7.0.0"
   },
   "author": "Lance Whatley",
   "license": "MIT"
